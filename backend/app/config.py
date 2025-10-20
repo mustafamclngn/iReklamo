@@ -8,12 +8,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
     FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
 
-    # Database Configuration
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///app.db'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-    }
+
 
     # JWT Configuration
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key'
@@ -33,13 +28,11 @@ class DevelopmentConfig(Config):
     """Development configuration"""
 
     DEBUG = True
-    SQLALCHEMY_ECHO = True
 
 class ProductionConfig(Config):
     """Production configuration"""
 
     DEBUG = False
-    SQLALCHEMY_ECHO = False
 
     # Use environment variables for production
     SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -49,7 +42,6 @@ class TestingConfig(Config):
     """Testing configuration"""
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
 
 # Configuration mapping

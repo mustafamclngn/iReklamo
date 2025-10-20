@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from app.config import config
-from app.extensions import init_extensions, db
+from app.extensions import init_extensions
 from app.routes.main import main_bp
 from app.routes.auth import auth_bp
 from app.routes.complaints import complaints_bp
@@ -29,8 +29,7 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(complaints_bp)
 
-    # Create database tables (for development)
-    with app.app_context():
-        db.create_all()
+    # TODO: Run schema.sql manually to create tables for raw SQL implementation
+    # Database tables should be created using the schema.sql file
 
     return app

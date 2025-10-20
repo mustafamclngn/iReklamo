@@ -6,12 +6,17 @@ A Flask-based REST API for the iReklamo complaint management system.
 
 - User authentication and registration
 - Complaint creation and management
-- Database models for users and complaints
+- Raw SQL database operations (transitioned from SQLAlchemy ORM)
+- MVC architectural pattern
 - CORS support for frontend integration
 - Environment-based configuration
-- Database migrations support
+- Placeholder structure for forms and input validation
+
+**Note**: This backend has been refactored to use raw SQL instead of SQLAlchemy ORM. The current routes contain SQLAlchemy-specific operations with TODO comments indicating where raw SQL functions should be integrated. Database operations use a new `schema.sql` file instead of migrations.
 
 ## Project Structure
+
+**MVC Architecture** - The backend follows a Model-View-Controller pattern:
 
 ```
 backend/
@@ -19,13 +24,18 @@ backend/
 │   ├── __init__.py          # Application factory
 │   ├── config.py            # Configuration settings
 │   ├── extensions.py        # Flask extensions initialization
-│   ├── models.py            # Database models
-│   └── routes/
+│   ├── controllers/         # Business logic (controller layer)
+│   │   └── __init__.py      # Controller package
+│   ├── models/              # Raw SQL database operations (model layer)
+│   │   └── __init__.py      # Model package - contains SQL functions
+│   ├── forms/               # Input validation and forms
+│   │   └── __init__.py      # Forms package
+│   └── routes/              # HTTP endpoints (view layer)
 │       ├── __init__.py      # Routes package
 │       ├── main.py          # Main routes (health, info)
 │       ├── auth.py          # Authentication routes
 │       └── complaints.py    # Complaint management routes
-├── migrations/              # Database migrations
+├── schema.sql               # Database schema for raw SQL
 ├── uploads/                 # File uploads directory
 ├── .env                     # Environment variables
 ├── .env.example             # Environment template
@@ -56,9 +66,13 @@ backend/
 
 3. **Initialize the database:**
    ```bash
-   flask db init
-   flask db migrate -m "Initial migration"
-   flask db upgrade
+   # Run the schema.sql file to create tables
+   sqlite3 app.db < schema.sql
+   ```
+
+   Or for MySQL/PostgreSQL:
+   ```bash
+   mysql -u username -p database_name < schema.sql
    ```
 
 ## Running the Application
@@ -132,9 +146,9 @@ The application supports multiple configuration environments:
 3. Add routes with proper URL prefixes
 
 **Database changes:**
-1. Update models in `app/models.py`
-2. Create migration: `flask db migrate -m "description"`
-3. Apply migration: `flask db upgrade`
+1. Update schema.sql with new table structures or indexes
+2. Implement raw SQL functions in `app/models/__init__.py`
+3. Run updated schema against your database manually
 
 ## Security Notes
 
