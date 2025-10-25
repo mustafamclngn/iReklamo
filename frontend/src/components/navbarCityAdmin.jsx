@@ -6,7 +6,7 @@ const CityAdminNavBar = () => {
   const links = ["Dashboard", "Complaints", "Barangays", "Reports", "Officials"];
 
   return (
-    <nav className="bg-white py-6 font-[Inter] font-bold">
+    <nav className="bg-white py-6 font-[Inter] font-black">
       <div className="max-w-[1591px] mx-auto px-8 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <img

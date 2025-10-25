@@ -1,9 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-// BarangayCapNavBar Component
-const BarangayCapNavBar = () => {
-  const links = ["Dashboard", "Complaints", "Officials", "Reports", "Account"];
+// ComplainantNavBar Component
+const ComplainantNavBar = () => {
+  const links = ["Know Iligan", "For Residents", "For Businesses", "For Visitors", "Transparency", "News", "Events"];
 
   return (
     <nav className="bg-white py-6 font-[Inter] font-black">
@@ -21,11 +21,11 @@ const BarangayCapNavBar = () => {
           />
         </div>
 
-        <ul className="flex items-center gap-5">
+        <ul className="flex items-center gap-8">
           {links.map((label) => (
             <li key={label}>
-              <NavLink 
-                to={`/brgycap/${label.toLowerCase()}`}
+              <NavLink
+                to={`/${label.toLowerCase()}`}
                 className={({ isActive }) =>
                   `text-base uppercase tracking-wide transition-all duration-200 pb-2 ${
                     isActive
@@ -44,4 +44,4 @@ const BarangayCapNavBar = () => {
   );
 };
 
-export default BarangayCapNavBar;
+export default ComplainantNavBar;

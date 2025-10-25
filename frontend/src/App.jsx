@@ -4,6 +4,8 @@ import SuperAdminLayout from "./layouts/superAdminLayout.jsx";
 import CityAdminLayout from "./layouts/cityAdminLayout.jsx";
 import BarangayCapLayout from "./layouts/brgyCapLayout.jsx";
 import BarangayOffLayout from "./layouts/brgyOffLayout.jsx";
+import ComplainantHomeLayout from "./layouts/complainantHomeLayout.jsx";
+import ComplainantLayout from "./layouts/complainantLayout.jsx";
 
 // Import superadmin pages
 import DashboardPage from "./pages/superAdmin/dashboardpage.jsx";
@@ -32,11 +34,26 @@ import BO_AssignedComplaintsPage from "./pages/brgyOff/assignedcomplaintspage.js
 import BO_BarangaysPage from "./pages/brgyOff/barangayspage.jsx";
 import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
+//Import complainant pages
+import CU_HomePage from "./pages/complainant/homepage.jsx";
+import CU_FileComplaintPage from "./pages/complainant/filecomplaintpage.jsx";
+import CU_TrackComplaintPage from "./pages/complainant/trackcomplaintpage.jsx";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/superadmin/dashboard" replace />} />
+        {/* Home route (Default) */}
+        <Route path="/" element={<ComplainantHomeLayout />}>
+          <Route index element={<Navigate to="home" replace />} />
+          <Route path="home" element={<CU_HomePage />} />
+        </Route>
+
+        {/* Complainant Route */}
+        <Route element={<ComplainantLayout />}>
+          <Route path="/file-complaint" element={<CU_FileComplaintPage />} />
+          <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
+        </Route>
         
         {/* SuperAdmin Routes */}
         <Route path="/superadmin" element={<SuperAdminLayout />}>

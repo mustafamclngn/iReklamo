@@ -2,12 +2,20 @@ import React from "react";
 import TopHeader from "../components/topHeader";
 import HeroBanner from "../components/heroBanner";
 
-const BaseLayout = ({ NavBar, children }) => {
+const BaseLayout = ({ NavBar, CustomHeroBanner, children }) => {
   return (
     <>
       <TopHeader />                 {/* top header - shared by all */}
       {NavBar && <NavBar />}        {/* navigation bar - role-specific */}
-      <HeroBanner />                {/* hero banner - role and page specific */}
+      
+                                    {/* custom hero banner for home */}
+                                    {/* hero banner for admin users */}
+      {CustomHeroBanner ? (         
+        <CustomHeroBanner />
+      ) : (
+        <HeroBanner />
+      )}
+      
       <main>{children}</main>
     </>
   );
