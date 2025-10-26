@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const HeroBannerHome = () => {
@@ -14,14 +14,14 @@ const HeroBannerHome = () => {
     },
     {
       id: 2,
-      title: "PREPAREDENESS",
+      title: "Preparedness",
       subtitle: "WE REDUCE DISASTER RISKS THROUGH",
       text: "Iligan City Disaster Risk Reduction and Management Office tasked to develop, promote and implement a comprehensive Local Disaster Risk Reduction and Management plan (LDRRMP).",
       image: "/images/ndrrmc.jpg",
     },
     {
       id: 3,
-      title: "CULTURE",
+      title: "Culture",
       subtitle: "Discover what the city can offer",
       text: "Immerse yourself in the rich culture and vibrant traditions of Iligan City, a place where history, faith, and community intertwine to foster unity, resilience, and continuous progress for every Iliganon.",
       image: "/images/culture.jpg",
@@ -29,6 +29,15 @@ const HeroBannerHome = () => {
   ];
 
   const [activeSlide, setActiveSlide] = useState(0);
+
+  // slide timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [slides.length]);
 
   const handleActionChange = (e) => {
     const value = e.target.value;
@@ -46,9 +55,9 @@ const HeroBannerHome = () => {
             backgroundImage: `url('${slides[activeSlide].image}')`,
           }}
         >
-          <div className="absolute inset-0 flex items-center bg-black/30 transition-all duration-700">
+          <div className="absolute inset-0 flex items-center bg-black/20 transition-all duration-700">
             <div className="px-16 max-w-3xl">
-              <p className="text-white text-2xl uppercase font-bold">
+              <p className="text-white text-3xl uppercase font-bold">
                 {slides[activeSlide].subtitle}
               </p>
               <h1 className="text-white text-7xl font-black mb-4 leading-tight">
@@ -59,21 +68,21 @@ const HeroBannerHome = () => {
               </p>
 
               <div className="flex gap-4 mb-8">
-                <button className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-3 rounded-2xl font-bold transition-colors">
-                  Explore Iligan City
+                <button className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-13 py-3 rounded-2xl font-bold transition-colors w-64">
+                  EXPLORE ILIGAN CITY
                 </button>
-                <button className="border-2 border-white text-white px-8 py-3 rounded-2xl font-bold transition-colors hover:bg-white hover:text-black">
-                  Doing Business
+                <button className="border-2 border-white text-white px-13 py-3 rounded-2xl font-bold transition-colors hover:bg-white hover:text-black w-64">
+                  CONTACT US
                 </button>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 {slides.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveSlide(index)}
-                    className={`w-16 h-1 rounded transition-all duration-300 ${
+                    className={`w-20 h-1 transition-all duration-300 ${
                       activeSlide === index
-                        ? "bg-[#FFA500] w-20"
+                        ? "bg-[#FFFF00] w-24"
                         : "bg-white/60 hover:bg-white/90"
                     }`}
                   ></button>
