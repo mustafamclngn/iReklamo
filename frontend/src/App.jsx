@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SuperAdminLayout from "./layouts/superAdminLayout.jsx";
 import CityAdminLayout from "./layouts/cityAdminLayout.jsx";
@@ -40,6 +40,19 @@ import CU_FileComplaintPage from "./pages/complainant/filecomplaintpage.jsx";
 import CU_TrackComplaintPage from "./pages/complainant/trackcomplaintpage.jsx";
 
 function App() {
+  // usertypes: null, 'superadmin', 'cityadmin', 'brgycap', 'brgyoff'
+  const [userRole, setUserRole] = useState(null); // <-- change rani
+
+  // if loggedin
+  const isLoggedIn = () => userRole !== null;
+
+  // redirect based on user role if logged or not
+  const RedirectPage = () => {
+    return isLoggedIn() 
+      ? <Navigate to={`/${userRole}/dashboard`} replace />
+      : <Navigate to="/home" replace />;
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -63,6 +76,12 @@ function App() {
           <Route path="barangays" element={<BarangaysPage />} />
           <Route path="officials" element={<OfficialsPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          {/* invalid routes */}
+          <Route path="*" element={
+            userRole === 'superadmin' 
+              ? <Navigate to="/superadmin/dashboard" replace />
+              : <Navigate to="/home" replace />
+          } />
         </Route>
 
         {/* CityAdmin Routes */}
@@ -73,6 +92,12 @@ function App() {
           <Route path="barangays" element={<CA_BarangaysPage />} />
           <Route path="officials" element={<CA_OfficialsPage />} />
           <Route path="reports" element={<CA_ReportsPage />} />
+          {/* invalid routes */}
+          <Route path="*" element={
+            userRole === 'cityadmin'
+              ? <Navigate to="/cityadmin/dashboard" replace />
+              : <Navigate to="/home" replace />
+          } />
         </Route>
 
         {/* Barangay Captain Routes */}
@@ -83,6 +108,12 @@ function App() {
           <Route path="officials" element={<BC_OfficialsPage />} />
           <Route path="reports" element={<BC_ReportsPage />} />
           <Route path="account" element={<BC_AccountPage />} />
+          {/* invalid routes */}
+          <Route path="*" element={
+            userRole === 'brgycap'
+              ? <Navigate to="/brgycap/dashboard" replace />
+              : <Navigate to="/home" replace />
+          } />
         </Route>
 
         {/* Barangay Official Routes */}
@@ -92,7 +123,16 @@ function App() {
           <Route path="assigned-complaints" element={<BO_AssignedComplaintsPage />} />
           <Route path="barangays" element={<BO_BarangaysPage />} />
           <Route path="account" element={<BO_AccountPage />} />
+          {/* invalid routes */}
+          <Route path="*" element={
+            userRole === 'brgyoff'
+              ? <Navigate to="/brgyoff/dashboard" replace />
+              : <Navigate to="/home" replace />
+          } />
         </Route>
+
+        {/* other invalid routes*/}
+        <Route path="*" element={<RedirectPage />} />
       </Routes>
     </BrowserRouter>
   );
