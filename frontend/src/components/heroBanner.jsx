@@ -3,63 +3,40 @@ import { useLocation } from 'react-router-dom';
 
 const HeroBanner = () => {
   const location = useLocation();
+  const path = location.pathname;
+  const segments = path.split('/').filter(Boolean);
   
-  // images subject to change based on user type and page
+  const userType = segments[0] || 'superadmin';
+  const page = segments[segments.length - 1] || 'dashboard';
+  const isDashboard = page === 'dashboard';
+  
+  // background images for hero banners for each user type
   const pageImages = {
-    'superadmin': {
-      'dashboard': '/images/superadmin.jpg',
-      'complaints': '/images/superadmin.jpg',
-      'barangays': '/images/superadmin.jpg',
-      'officials': '/images/superadmin.jpg',
-      'reports': '/images/superadmin.jpg',
-    },
-    'cityadmin': {
-      'dashboard': '/images/cityadmin.jpg',
-      'complaints': '/images/cityadmin.jpg',
-      'barangays': '/images/cityadmin.jpg',
-      'officials': '/images/cityadmin.jpg',
-      'reports': '/images/cityadmin.jpg',
-    },
-    'brgycap': {
-      'dashboard': '/images/brgycap.jpg',
-      'complaints': '/images/brgycap.jpg',
-      'officials': '/images/brgycap.jpg',
-      'reports': '/images/brgycap.jpg',
-      'account': '/images/brgycap.jpg',
-    },
-    'brgyoff': {
-      'dashboard': '/images/brgyoff.jpg',
-      'assigned-complaints': '/images/brgyoff.jpg',
-      'barangays': '/images/brgyoff.jpg',
-      'account': '/images/brgyoff.jpg',
-    },
+    'superadmin': '/images/superadmin.jpg',
+    'cityadmin': '/images/cityadmin.jpg',
+    'brgycap': '/images/brgycap.jpg',
+    'brgyoff': '/images/brgyoff.jpg',
   };
   
-  // default image if no image
-  const defaultImage = '/images/default-hero.jpg';
-  
-  const getPageInfo = () => {
-    const path = location.pathname;
-    const segments = path.split('/').filter(Boolean);
-    
-    if (segments.length === 0) return { title: 'Dashboard', userType: 'superadmin', page: 'dashboard' };
-    
-    const userType = segments[0];
-    const page = segments[segments.length - 1];
-    
-    const title = page
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    
-    return { title, userType, page };
+  // hero banner text in dashboard for each user type
+  const getDashboardTitle = () => {
+    const titles = {
+      'superadmin': 'Maayong Adlaw Admin!',
+      'cityadmin': 'Maayong Adlaw Admin!',
+      'brgycap': 'Maayong Adlaw Cap!',
+      'brgyoff': 'Maayong Adlaw Opisyal!'
+    };
+    return titles[userType] || 'Dashboard';
   };
-
-  const { title, userType, page } = getPageInfo();
   
-  // image for user type and filtered image
-  const backgroundImage = pageImages[userType]?.[page] || defaultImage;
+  const title = isDashboard 
+    ? getDashboardTitle()
+    : page.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
+  // default image if no image found
+  const backgroundImage = pageImages[userType] || '/images/default-hero.jpg';
+
+  // hero banner and title
   return (
     <div 
       className="relative w-full max-w-[1591px] bg-cover bg-center flex items-center justify-start px-8 mx-auto overflow-hidden"
@@ -72,10 +49,17 @@ const HeroBanner = () => {
       }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-      
-      <h1 className="relative z-10 text-white text-6xl font-bold font-[Inter] pl-32">
-        {title}
-      </h1>
+
+      <div className="relative z-10 pl-32">
+        <h1 className="text-[#DFDFDF] text-6xl font-bold font-[Inter]">
+          {title}
+        </h1>
+        {isDashboard && (
+          <p className="text-[#DFDFDF] text-lg font-[Inter] mt-2">
+            Himoon nato karong adlawa nga usa ka produktibo nga adlaw
+          </p>
+        )}
+      </div>
     </div>
   );
 };
