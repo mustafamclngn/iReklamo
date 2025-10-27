@@ -5,7 +5,7 @@ const AuthBanner = ({ children }) => {
     <div
       className="relative w-[90%] max-w-[1591px] bg-cover bg-center flex items-center justify-center px-8 mx-[5%] overflow-hidden"
       style={{
-        height: '90vh',
+        minHeight: '90vh',
         flexShrink: 0,
         borderRadius: '30px',
         backgroundImage:
