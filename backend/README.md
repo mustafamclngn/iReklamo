@@ -18,7 +18,7 @@ A Flask-based REST API for the iReklamo complaint management system.
 
 **MVC Architecture** - The backend follows a Model-View-Controller pattern:
 
-```
+```bash
 backend/
 ├── app/
 │   ├── __init__.py          # Application factory
@@ -48,16 +48,19 @@ backend/
 ## Installation
 
 1. **Install dependencies:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
    Or using Pipenv:
+
    ```bash
    pipenv install
    ```
 
 2. **Set up environment variables:**
+
    ```bash
    cp .env.example .env
    ```
@@ -65,12 +68,14 @@ backend/
    Edit `.env` file with your configuration.
 
 3. **Initialize the database:**
+
    ```bash
    # Run the schema.sql file to create tables
    sqlite3 app.db < schema.sql
    ```
 
    Or for MySQL/PostgreSQL:
+
    ```bash
    mysql -u username -p database_name < schema.sql
    ```
@@ -78,11 +83,13 @@ backend/
 ## Running the Application
 
 **Development mode:**
+
 ```bash
 python run.py
 ```
 
 **Or using Flask CLI:**
+
 ```bash
 export FLASK_APP=run.py
 export FLASK_ENV=development
@@ -90,6 +97,7 @@ flask run
 ```
 
 **Production mode:**
+
 ```bash
 export FLASK_ENV=production
 python run.py
@@ -98,16 +106,19 @@ python run.py
 ## API Endpoints
 
 ### Main Routes
+
 - `GET /` - Welcome message
 - `GET /health` - Health check
 - `GET /api` - API information
 
 ### Authentication Routes
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/profile` - Get user profile
 
 ### Complaint Routes
+
 - `GET /api/complaints` - Get all complaints
 - `POST /api/complaints` - Create new complaint
 - `GET /api/complaints/<id>` - Get specific complaint
@@ -126,6 +137,7 @@ The application supports multiple configuration environments:
 ## Database Models
 
 ### User Model
+
 - id, username, email, password_hash
 - first_name, last_name
 - is_active, is_admin
@@ -133,6 +145,7 @@ The application supports multiple configuration environments:
 - Relationship with complaints
 
 ### Complaint Model
+
 - id, title, description, category
 - status, priority, location
 - image_url, user_id
@@ -141,11 +154,13 @@ The application supports multiple configuration environments:
 ## Development
 
 **Adding new routes:**
+
 1. Create new blueprint in `app/routes/`
 2. Register blueprint in `app/__init__.py`
 3. Add routes with proper URL prefixes
 
 **Database changes:**
+
 1. Update schema.sql with new table structures or indexes
 2. Implement raw SQL functions in `app/models/__init__.py`
 3. Run updated schema against your database manually

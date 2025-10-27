@@ -6,6 +6,11 @@ import BarangayCapLayout from "./layouts/brgyCapLayout.jsx";
 import BarangayOffLayout from "./layouts/brgyOffLayout.jsx";
 import ComplainantHomeLayout from "./layouts/complainantHomeLayout.jsx";
 import ComplainantLayout from "./layouts/complainantLayout.jsx";
+import AuthLayout from "./layouts/authLayout.jsx";
+
+// Import Authentication Pages
+import LoginPage from "./pages/auth/logInPage.jsx";
+import RegisterPage from "./pages/auth/registerPage.jsx";
 
 // Import superadmin pages
 import DashboardPage from "./pages/superAdmin/dashboardpage.jsx";
@@ -129,6 +134,12 @@ function App() {
               ? <Navigate to="/brgyoff/dashboard" replace />
               : <Navigate to="/home" replace />
           } />
+        </Route>
+
+        {/* Authentication Routes */}
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
         </Route>
 
         {/* other invalid routes*/}
