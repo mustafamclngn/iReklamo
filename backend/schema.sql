@@ -11,8 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(80) NOT NULL,
     is_active BOOLEAN DEFAULT 1,
     is_admin BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Complaints table

@@ -1,4 +1,4 @@
-from controllers.dbconnection import connection
+from app.controllers.dbconnection import connection
 
 class Update():
     def __init__(self):

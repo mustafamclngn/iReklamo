@@ -1,4 +1,4 @@
-from controllers.dbconnection import connection
+from app.controllers.dbconnection import connection
 
 class Select():
     def __init__(self):
@@ -140,7 +140,15 @@ class Select():
         return self.rows, self.columns
     
     def retDict(self):
-        return [dict(zip(self.columns, row)) for row in self.rows] 
+        if not self.rows:
+            return None  
+        
+        result = [dict(zip(self.columns, row)) for row in self.rows]
+
+        if len(result) == 1:
+            return result[0]
+        return result
+
     
     def tableCols(self):
         if not hasattr(self, "columns") or not self.columns:

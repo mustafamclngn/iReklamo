@@ -1,5 +1,5 @@
 import psycopg2
-from controllers.dbconnection import connection
+from app.controllers.dbconnection import connection
 from psycopg2 import errors
 
 class Delete():

@@ -1,6 +1,5 @@
 from psycopg2 import IntegrityError
-from controllers.dbconnection import connection
-# from ...controllers.dbconnection import connection
+from app.controllers.dbconnection import connection
 
 class Insert():
     def __init__(self):

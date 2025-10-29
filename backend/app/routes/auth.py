@@ -3,7 +3,7 @@
 
 from flask import Blueprint, request, jsonify
 
-from backend.app.forms import loginForm
+from app.controllers.auth.authenticationC import login_user
 
 # Create blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -20,8 +20,7 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    
-    return 
+    return login_user()
 
 @auth_bp.route('/profile', methods=['GET'])
 def get_profile():

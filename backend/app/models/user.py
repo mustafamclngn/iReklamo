@@ -1,4 +1,4 @@
-from functions import Insert, Select, Update, Delete
+from app.functions import Insert, Select, Update, Delete
 
 class User():
     def __init__(self, table="users", tag = None, key = None, limit = None, offset = None):
@@ -30,7 +30,7 @@ class User():
         self.user = (
             self.selector
             .table(self.table)
-            .search(tag="username", key=user_name)
+            .search(tag="user_name", key=user_name)
             .execute()
             .retDict()
         )
@@ -54,12 +54,12 @@ class User():
         return self.user.get("user_id")
 
     @property
-    def username(self):
-        return self.user.get("username")
+    def user_name(self):
+        return self.user.get("user_name")
 
-    @username.setter
-    def username(self, value):
-        self.user["username"] = value
+    @user_name.setter
+    def user_name(self, value):
+        self.user["user_name"] = value
 
     @property
     def first_name(self):
@@ -94,28 +94,28 @@ class User():
         self.user["email"] = value
 
     @property
-    def role(self):
-        return self.user.get("role")
+    def user_role(self):
+        return self.user.get("user_role")
 
-    @role.setter
-    def role(self, value):
-        self.user["role"] = value
-
-    @property
-    def position(self):
-        return self.user.get("position")
-
-    @position.setter
-    def position(self, value):
-        self.user["position"] = value
+    @user_role.setter
+    def user_role(self, value):
+        self.user["user_role"] = value
 
     @property
-    def password(self):
-        return self.user.get("password")
+    def user_position(self):
+        return self.user.get("user_position")
 
-    @password.setter
-    def password(self, value):
-        self.user["password"] = value
+    @user_position.setter
+    def user_position(self, value):
+        self.user["user_position"] = value
+
+    @property
+    def user_password(self):
+        return self.user.get("user_password")
+
+    @user_password.setter
+    def user_password(self, value):
+        self.user["user_password"] = value
 
     # ====================
     # ACTIONS
@@ -127,15 +127,15 @@ class User():
             .values(data)\
             .execute()
          
-    def edit(self, user_code, updates: dict):
+    def edit(self, user_id, updates: dict):
         self.editor\
             .table("users")\
             .set(updates)\
-            .where("user_code", user_code)\
+            .where("user_id", user_id)\
             .execute()
         
-    def delete(self, user_code):
+    def delete(self, user_id):
         self.deleter\
             .table("users")\
-            .where("user_code", user_code)\
+            .where("user_id", user_id)\
             .execute()
