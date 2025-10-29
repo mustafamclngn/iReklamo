@@ -3,6 +3,8 @@
 
 from flask import Blueprint, request, jsonify
 
+from backend.app.forms import loginForm
+
 # Create blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -18,13 +20,8 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """
-    User login endpoint
-
-    Expected data: email, password
-    TODO: Integrate with AuthController.login()
-    """
-    return jsonify({"message": "Login endpoint - implement with raw SQL"})
+    
+    return 
 
 @auth_bp.route('/profile', methods=['GET'])
 def get_profile():
