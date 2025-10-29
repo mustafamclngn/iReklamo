@@ -11,13 +11,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 // =============
 // Hooks and context
 import { useRef, useState, useEffect } from "react";
-import useAuth from "./hooks";
+import useAuth from "./useAuth.jsx";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 // =============
 // Endpoints
 import axios from "../../api/axios";
-const LOGIN_URL = "/login"
+const LOGIN_URL = "api/auth/login"
 
 // ==========
 // IMPORTS
@@ -80,25 +80,50 @@ const LogInPage = () => {
 
             const response = await axios.post(
                 LOGIN_URL,
-                JSON.stringify({ identity, pwd },
+                JSON.stringify({ identity, pwd }),
                 {
-                    headers: {
-                        'Content-Type' : 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     withCredentials: true
                 }
-            ));
+            );
 
+            // debugging purposes
             console.log(JSON.stringify(response?.data));
-            //console.log(JSON.stringify(response));
+
+            // token and authorization
             const accessToken = response?.data?.accessToken;
             const roles = response?.data?.roles;
-            setAuth({ user, pwd, roles, accessToken });
-            setUser('');
+            const userRole = roles?.[0]
+
+            setAuth({ user: identity, pwd, roles, accessToken });
+            setIdentity('');
             setPwd('');
-            navigate(from, { replace: true });
+
+            // redirect path after login
+            let redirectPath = "/";
+
+            switch (userRole) {
+                case "super_admin":
+                    redirectPath = "/superadmin/dashboard";
+                    break;
+                case "city_admin":
+                    redirectPath = "/cityadmin/dashboard";
+                    break;
+                case "brgy_cap":
+                    redirectPath = "/brgycap/dashboard";
+                    break;
+                case "brgy_off":
+                    redirectPath = "/brgyoff/dashboard";
+                    break;
+                default:
+                    redirectPath = from;
+            }
+
+            navigate(redirectPath, { replace: true });
+
         } catch (err) {
             if (!err?.response) {
+                console.log(err)
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 400) {
                 setErrMsg('Missing Username or Password');
@@ -148,16 +173,6 @@ const LogInPage = () => {
             {/* label */}
             <label className="auth-label" htmlFor="identity">
                 Username/Email:
-                
-                {/* validation icons */}
-                <span className={validIdentity ? "valid" : "hide"}>
-                    <FontAwesomeIcon icon={faCheck} />
-                </span>
-                
-                <span className={validIdentity || !identity ? "hide" : "invalid"}>
-                    <FontAwesomeIcon icon={faTimes} />
-                </span>
-
             </label>
 
             {/* input field */}
@@ -168,25 +183,9 @@ const LogInPage = () => {
                 autoComplete="off"
                 onChange={(e) => setIdentity(e.target.value)}
                 required
-                aria-invalid={validIdentity ? "false" : "true"}
-                aria-describedby="uidnote"
-                onFocus={() => setIDentityFocus(true)}
-                onBlur={() => setIDentityFocus(false)}
                 placeholder="Enter your username/email"
                 className="auth-input"
             />
-
-            {/* instructions note */}
-            <p 
-                id="uidnote" 
-                className={identityFocus && identity && !validIdentity ? "instructions" : "offscreen"}>
-                <FontAwesomeIcon icon={faInfoCircle} />
-                    Username must be 4 to 24 characters 
-                    and must begin with a letter. 
-                    <br />
-                    Email must at least be 2 characters long 
-                    and contain a valid domain.
-            </p>           
 
             {/* ========== */}
             {/* Password */}
@@ -194,16 +193,6 @@ const LogInPage = () => {
             {/* label */}
             <label className="auth-label" htmlFor="password">
                 Password:
-                
-                {/* validation icons */}
-                <span className={validPwd ? "valid" : "hide"}>
-                    <FontAwesomeIcon icon={faCheck} />
-                </span>
-                
-                <span className={validPwd || !pwd ? "hide" : "invalid"}>
-                    <FontAwesomeIcon icon={faTimes} />
-                </span>
-
             </label>
             
             {/* input field */}
@@ -212,36 +201,15 @@ const LogInPage = () => {
                 id="password"
                 onChange={(e) => setPwd(e.target.value)}
                 required
-                aria-invalid={validPwd ? "false" : "true"}
-                aria-describedby="pwdnote"
-                onFocus={() => setPwdFocus(true)}
-                onBlur={() => setPwdFocus(false)}
                 placeholder="Enter your password"
                 className="auth-input"
             />
-
-            {/* instructions note */}
-            <p 
-                id="pwdnote" 
-                className={pwdFocus && pwd && !validPwd ? "instructions" : "offscreen"}>
-                <FontAwesomeIcon icon={faInfoCircle} />
-                    Password must be 8 to 24 characters 
-                    and must uppercase and lowercase letters, 
-                    a number and a special character. <br />
-                    Special characters allowed: 
-                        <span aria-label="exclamation mark">!</span>
-                        <span aria-label="at symbol">@</span>
-                        <span aria-label="hashtag">#</span>
-                        <span aria-label="dollar sign">$</span>
-                        <span aria-label="percent">%</span>
-            </p>
 
             {/* ========== */}
             {/* Button */}
             <button 
                 className="auth-button"
-                disabled={!validIdentity || !validPwd ? true : false
-                }>
+                disabled={!pwd || !identity}>
 
                     LOG IN
 
