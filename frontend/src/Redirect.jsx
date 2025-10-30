@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "./pages/auth/useAuth";
+import useAuth from "./hooks/useAuth";
 
 const RedirectFallback = () => {
   const { auth } = useAuth();

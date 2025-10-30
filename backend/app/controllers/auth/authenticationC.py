@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import make_response, request, jsonify
 from app.config import Config
 from werkzeug.security import check_password_hash
 import jwt
@@ -31,25 +31,42 @@ def view_role(user_id):
 
     return jsonify({"role" : role}), 200
 
+# ========================== 
+# USER LOGIN
+# ==========
 def login_user():
+    # ===============
+    # fetch: request
     data = request.get_json()
+    print(request)
 
+    # check: fields provided
     identity = data.get("identity")
     pwd = data.get("pwd")
 
     if not identity or not pwd:
         return jsonify({"error": "Missing username/email or password"}), 400
 
+    # ===============
+    # check: user existing
     user_data = view_user_nameemail(identity)
 
     if not user_data:
         return jsonify({"error": "User not found"}), 404
 
+    # ===============
+    # fetch: hashed password
     stored_hash = user_data.get("user_password")
     if not check_password_hash(stored_hash, pwd):
         return jsonify({"error": "Invalid password"}), 401
     
-    token = jwt.encode(
+    # ===============
+    # fetch: user_role
+    roles = [user_data.get("user_role") or "user"]
+
+    # ===============
+    # create: access token
+    access_token = jwt.encode(
         {
             "user_id": user_data["user_id"],
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
@@ -58,9 +75,20 @@ def login_user():
         algorithm="HS256"
     )
 
-    roles = user_data.get("user_role") or "user"
+    # ===============
+    # create: refresh token
+    refresh_token = jwt.encode(
+        {
+            "user_id": user_data["user_id"],
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )
 
-    return jsonify({
+    # ===============
+    # create: response
+    response = make_response(jsonify({
         "message": "Login successful",
         "user": {
             "user_id": user_data["user_id"],
@@ -72,9 +100,58 @@ def login_user():
             "position": user_data["user_position"],
         },
         "roles": roles,
-        "accessToken": token
-    }), 200
+        "accessToken": access_token
+        }))
+    
+    print(response)
+
+    response.set_cookie(
+        "refreshToken",
+        value=refresh_token,
+        httponly=True,
+        secure=True,  
+        samesite="None",  
+        max_age=7 * 24 * 60 * 60
+    )
+
+    return response, 200
      
+# ========================== 
+# USER TOKEN REFRESH
+# ==========
+def refresh_token():
+    refresh_token = request.cookies.get("refreshToken")
+
+    if not refresh_token:
+        return jsonify({"error": "No refresh token provided"}), 401
+
+    try:
+        decoded = jwt.decode(refresh_token, Config.JWT_SECRET_KEY, algorithms=["HS256"])
+        user_id = decoded.get("user_id")
+
+        user_data = view_user(user_id)
+        if not user_data:
+            return jsonify({"error": "User not found"}), 404
+
+        new_access_token = jwt.encode(
+            {
+                "user_id": user_id,
+                "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
+            },
+            Config.JWT_SECRET_KEY,
+            algorithm="HS256"
+        )
+
+        role = user_data.get("user_role") or "user"
+        return jsonify({
+            "accessToken": new_access_token,
+            "roles": [role]
+        }), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Refresh token expired"}), 403
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid refresh token"}), 403
 
 
 

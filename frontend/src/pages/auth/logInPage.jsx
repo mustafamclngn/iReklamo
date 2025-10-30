@@ -11,13 +11,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 // =============
 // Hooks and context
 import { useRef, useState, useEffect } from "react";
-import useAuth from "./useAuth.jsx";
+import useAuth from "../../hooks/useAuth.jsx";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 // =============
 // Endpoints
 import axios from "../../api/axios";
-const LOGIN_URL = "api/auth/login"
+const LOGIN_URL = "/api/auth/login"
 
 // ==========
 // IMPORTS
@@ -31,7 +31,8 @@ const LogInPage = () => {
 
     // =============
     // Authorization Context
-    const { setAuth } = useAuth();
+    const { setAuth, setPersist } = useAuth();
+
 
     // =============
     // Navigation
@@ -96,6 +97,10 @@ const LogInPage = () => {
             const userRole = roles?.[0]
 
             setAuth({ user: identity, pwd, roles, accessToken });
+
+            setPersist(true);
+            localStorage.setItem("persist", true);
+
             setIdentity('');
             setPwd('');
 

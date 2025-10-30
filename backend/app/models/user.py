@@ -20,7 +20,7 @@ class User():
         self.user = (
             self.selector
             .table(self.table)
-            .search(tag="id", key=user_id)
+            .search(tag="user_id", key=user_id)
             .execute()
             .retDict()
         )
