@@ -9,8 +9,8 @@ CREATE TABLE users (
     first_name VARCHAR(100) NOT NULL,                   
     middle_name VARCHAR(100),                            
     last_name VARCHAR(100) NOT NULL,                    
-    position VARCHAR(100),                             
-    role VARCHAR(50) DEFAULT 'user',                     
+    user_position VARCHAR(100),                             
+    user_role VARCHAR(50) DEFAULT 'user',                     
     user_password TEXT NOT NULL,  
 );
 

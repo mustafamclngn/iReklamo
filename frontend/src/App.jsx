@@ -58,15 +58,13 @@ function App() {
           <Route path="home" element={<CU_HomePage />} />
         </Route>
 
-      <Route element={<PersistLogin />}>
-        <Route element={<RequireAuth allowedRoles={["user"]}/>}>
-          {/* Complainant Route */}
-          <Route element={<ComplainantLayout />}>
-            <Route path="/file-complaint" element={<CU_FileComplaintPage />} />
-            <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
-          </Route>
+        {/* Complainant Route */}
+        <Route element={<ComplainantLayout />}>
+          <Route path="/file-complaint" element={<CU_FileComplaintPage />} />
+          <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
         </Route>
         
+      <Route element={<PersistLogin />}>
         <Route element={<RequireAuth allowedRoles={["super_admin"]}/>}>
           {/* SuperAdmin Routes */}
           <Route path="/superadmin" element={<SuperAdminLayout />}>
