@@ -10,6 +10,10 @@ const HeroBanner = () => {
   const page = segments[segments.length - 1] || 'dashboard';
   const isDashboard = page === 'dashboard';
   
+  if (page === 'login' || page === 'register') {
+    return null;
+  }
+
   // background images for hero banners for each user type
   const pageImages = {
     'superadmin': '/images/superadmin.jpg',

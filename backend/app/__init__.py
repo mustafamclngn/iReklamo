@@ -1,6 +1,7 @@
 import os
 from flask import Flask
-from app.config import config
+from flask_cors import CORS
+from app.config import Config, config
 from app.extensions import init_extensions
 from app.routes.main import main_bp
 from app.routes.auth import auth_bp
@@ -11,7 +12,7 @@ def create_app(config_name=None):
 
     # Create Flask app instance
     app = Flask(__name__)
-
+    
     # Load configuration
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'development')
@@ -23,6 +24,10 @@ def create_app(config_name=None):
 
     # Initialize extensions
     init_extensions(app)
+
+    
+    origins = getattr(Config, "CORS_ORIGINS", "").split(",")
+    CORS(app, origins=origins, supports_credentials=True)
 
     # Register blueprints
     app.register_blueprint(main_bp)

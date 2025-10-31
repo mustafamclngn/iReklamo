@@ -2,17 +2,16 @@
 -- Run this file to create tables for raw SQL implementation
 
 -- Users table
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username VARCHAR(80) NOT NULL UNIQUE,
-    email VARCHAR(120) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(80) NOT NULL,
-    last_name VARCHAR(80) NOT NULL,
-    is_active BOOLEAN DEFAULT 1,
-    is_admin BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,                        
+    user_name VARCHAR(50) UNIQUE NOT NULL,             
+    email VARCHAR(100) UNIQUE NOT NULL,                  
+    first_name VARCHAR(100) NOT NULL,                   
+    middle_name VARCHAR(100),                            
+    last_name VARCHAR(100) NOT NULL,                    
+    user_position VARCHAR(100),                             
+    user_role VARCHAR(50) DEFAULT 'user',                     
+    user_password TEXT NOT NULL,  
 );
 
 -- Complaints table
