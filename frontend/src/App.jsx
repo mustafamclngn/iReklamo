@@ -42,8 +42,8 @@ import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
 //Import complainant pages
 import CU_HomePage from "./pages/complainant/homepage.jsx";
-import CU_FileComplaintPage from "./pages/complainant/filecomplaintpage.jsx";
-import CU_TrackComplaintPage from "./pages/complainant/trackcomplaintpage.jsx";
+import CU_FileComplaintPage from "./pages/complainant/createComplaint/filecomplaintpage.jsx";
+import CU_TrackComplaintPage from "./pages/complainant/trackComplaint/trackcomplaintpage.jsx";
 
 function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
