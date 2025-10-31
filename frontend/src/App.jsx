@@ -48,7 +48,6 @@ import CU_TrackComplaintPage from "./pages/complainant/trackcomplaintpage.jsx";
 function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
   const location = useLocation();
-  const defaultPath = location.state?.from?.pathname || "/home"
 
     return (
     <Routes>
