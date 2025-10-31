@@ -53,7 +53,7 @@ const TopHeader = () => {
               className="w-7 h-7 bg-[#ECECEC] rounded-full flex items-center justify-center"
             >
               <img
-                src="/fbicon.png"
+                src="/icons/fbicon.png"
                 height="14"
                 alt="Facebook"
                 loading="lazy"
