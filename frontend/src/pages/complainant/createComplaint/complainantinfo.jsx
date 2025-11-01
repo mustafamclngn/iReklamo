@@ -1,17 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../components/formcontext.jsx';
 import { ArrowRight, CircleCheck, Home } from "lucide-react";
 import Footer from '../../../components/footer.jsx';
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const CU_FileComplaintPage = () => {
     const navigate = useNavigate();
     const { formData, updateFormData } = useFormData();
 
+    const [barangays, setBarangays] = useState([]);
+    const [errors, setErrors] = React.useState({});
+
     const handleNext = (e) => {
-        e.preventDefault();
-        navigate("/file-complaint/complaintdetails");
+        // for error handlig
+        if (e && e.preventDefault) e.preventDefault();
+        const missing = {};
+        if (!formData.first_name) missing.first_name = 'Required';
+        if (!formData.last_name) missing.last_name = 'Required';
+        if (!formData.sex) missing.sex = 'Required';
+        if (!formData.age) missing.age = 'Required'; 
+        if (formData.age > 120) missing.age = 'Invalid age'
+        if (!formData.barangay) missing.barangay = 'Required';
+        if (!formData.email) missing.email = 'Required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) missing.email = "Invalid email format";
+        if (!formData.contact_number) missing.contact_number = 'Required'
+
+
+        if (Object.keys(missing).length > 0) {
+            setErrors(missing);
+            return;
+        }
+
+        // clear errors and proceed
+        setErrors({});
+        navigate('/file-complaint/complaintdetails');
     };
+    
+    useEffect(() => {
+        fetch(`${API}/api/complaints/barangays`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch barangays');
+                return res.json();
+            })
+            .then((data) => setBarangays(data))
+            .catch((err) => console.error("Error fetching barangays:", err));
+    }, []);
 
 
     return (
@@ -21,15 +56,16 @@ const CU_FileComplaintPage = () => {
                 <div className="flex flex-row mx-auto items-center place-items-center max-w-[1500px] w-[80%] mb-5 gap-3 text-sm text-gray-400">
                     <button> <Home size={17}/> </button>
                     <h1>/</h1>
-                    <button>Complaints</button>
+                    <button className='hover:underline'>Complaints</button>
                     <h1>/</h1>
-                    <button>File a Complaint</button>
+                    <button className='hover:underline'>File a Complaint</button>
                     <h1>/</h1>
-                    <button className='font-medium text-gray-500'>Complaint Summary</button>
+                    <button className='font-medium text-gray-500 hover:underline'>Complainant Info</button>
                 </div>
             </div>
 
             <div className='flex flex-col items-center place-content-between bg-white'>
+                
                 {/* PROGRESS BAR */}
                 <div className='w-full flex justify-center'>
                     <div className="mx-auto max-w-[1500px] w-[80%] mb-5">
@@ -49,7 +85,7 @@ const CU_FileComplaintPage = () => {
                                 </div>
                                 <div className='flex flex-col items-center justify-center w-48'>
                                     <h1 className='font-bold leading-none'>STEP 2</h1>
-                                    <p className='text-sm text-gray-500'>Provide complaint info</p>
+                                    <p className='text-sm text-gray-500'>Provide complaint details</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center w-48'>
                                     <h1 className='font-bold leading-none'>STEP 3</h1>
@@ -59,7 +95,7 @@ const CU_FileComplaintPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className='w-full flex justify-center'> {/* referenceeee */}
+                <div className='w-full flex justify-center'>
                     <div className="border-2 border-gray-200 mx-auto max-w-[1500px] w-[80%] px-10 py-5 rounded-lg mb-5 shadow-md">
                         <div className="flex flex-row gap-1 border-b-2 border-gray-200 pb-2">
                             <h1 className="font-bold text-blue-400 text-2xl">Step 1:</h1>
@@ -76,42 +112,61 @@ const CU_FileComplaintPage = () => {
                                         type="text"
                                         placeholder="Enter your first name"
                                         value={formData.first_name}
-                                        onChange={(e) => updateFormData({ first_name: e.target.value })}
-                                        className="border border-gray-300 px-1 rounded-md text-sm my-2 h-7 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ first_name: e.target.value });
+                                            if (errors.first_name) setErrors(prev => ({ ...prev, first_name: '' }));
+                                        }}
+                                        className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.first_name ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
+                                    {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
+                                    
                                     <div className="flex flex-row gap-5 my-4">
                                         <div className="flex flex-col w-2/4">
                                             <label>Sex:</label>
                                             <select
                                                 value={formData.sex}
-                                                onChange={(e) => updateFormData({ sex: e.target.value })}
-                                                className="border border-gray-300 px-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                                onChange={(e) => {
+                                                    updateFormData({ sex: e.target.value });
+                                                    if (errors.sex) setErrors(prev => ({ ...prev, sex: ''}));
+                                                }}
+                                                className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.sex ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                             >
-                                                <option value="">--Select Sex--</option>
+                                                <option value="">Select Sex</option>
                                                 <option>Female</option>
                                                 <option>Male</option>
                                             </select>
+                                            {errors.sex && <p className="text-red-500 text-xs mt-1">{errors.sex}</p>}
                                         </div>
+                                        
                                         <div className="flex flex-col w-2/4">
                                             <label>Age: </label>
                                             <input
                                                 type="number"
                                                 min='1' max='100'
                                                 value={formData.age}
-                                                onChange={(e) => updateFormData({ age: e.target.value })}
+                                                onChange={(e) => {
+                                                    updateFormData({ age: e.target.value });
+                                                    if (errors.age) setErrors(prev => ({ ...prev, age: ''}));
+                                                }}
                                                 placeholder='Enter your age'
-                                                className="border border-gray-300 p-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                                className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.age ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                             />
+                                            {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
                                         </div>
                                     </div>
+
                                     <label>Contact Number: </label>
                                     <input
                                         type="text"
                                         placeholder="Enter your contact number"
                                         value={formData.contact_number}
-                                        onChange={(e) => updateFormData({ contact_number: e.target.value })}
-                                        className="border border-gray-300 p-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ contact_number: e.target.value });
+                                            if (errors.contact_number) setErrors(prev => ({ ...prev, contact_number: ''}));
+                                        }}
+                                        className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.contact_number ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
+                                    {errors.contact_number && <p className="text-red-500 text-xs mt-1">{errors.contact_number}</p>}
                                 </div>
                                 {/* right */}
                                 <div className="flex flex-col w-2/4">
@@ -120,80 +175,55 @@ const CU_FileComplaintPage = () => {
                                         type="text"
                                         placeholder="Enter your last name"
                                         value={formData.last_name}
-                                        onChange={(e) => updateFormData({ last_name: e.target.value })}
-                                        className="border border-gray-300 p-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ last_name: e.target.value });
+                                            if (errors.last_name) setErrors(prev => ({ ...prev, last_name: '' }));
+                                        }}
+                                        className={`p-1 rounded-md h-7 text-sm my-2 focus:outline-none transition ${errors.last_name ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
+                                    {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
+
                                     <div className="flex flex-col my-4">
-                                        <label>Baranggay: </label>
+                                        <label>Barangay: </label>
                                         <select
-                                            value={formData.baranggay}
-                                            onChange={(e) => updateFormData({ baranggay: e.target.value })}
-                                            className="border border-gray-300 px-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                            value={formData.barangay}
+                                            onChange={(e) => {
+                                                updateFormData({ barangay: e.target.value });
+                                                if (errors.barangay) setErrors(prev => ({ ...prev, barangay: '' }));
+                                            }}
+                                            className={`p-1 rounded-md h-7 text-sm my-2 focus:outline-none transition ${errors.barangay ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                         >
                                             <option value="">Select Barangay</option>
-                                            {/* this should be from the database */}
-                                            <option>Abuno</option>
-                                            <option>Acmac (Mariano Badelles Sr)</option>
-                                            <option>Bagong Silang</option>
-                                            <option>Bonbonon</option>
-                                            <option>Bunawan</option>
-                                            <option>Buru-un</option>
-                                            <option>Dalipuga</option>
-                                            <option>Del Carmen</option>
-                                            <option>Digkilaan</option>
-                                            <option>Ditucalan</option>
-                                            <option>Dulag</option>
-                                            <option>Hinaplanon</option>
-                                            <option>Hindang</option>
-                                            <option>Kabacsanan</option>
-                                            <option>Kalilangan</option>
-                                            <option>Kiwalan</option>
-                                            <option>Lanipao</option>
-                                            <option>Luinab</option>
-                                            <option>Mahayahay</option>
-                                            <option>Mainit</option>
-                                            <option>Mandulog</option>
-                                            <option>Maria Cristina</option>
-                                            <option>Pala-o</option>
-                                            <option>Panoroganan</option>
-                                            <option>Poblacion</option>
-                                            <option>Puga-an</option>
-                                            <option>Rogongon</option>
-                                            <option>San Miguel</option>
-                                            <option>San Roque</option>
-                                            <option>Santa Elena</option>
-                                            <option>Santa Filomena</option>
-                                            <option>Santiago</option>
-                                            <option>Santo Rosario</option>
-                                            <option>Saray-Tibanga</option>
-                                            <option>Suarez</option>
-                                            <option>Tambacan</option>
-                                            <option>Tibanga</option>
-                                            <option>Tipanoy</option>
-                                            <option>Tomas L. Cabili (Tominobo Proper)</option>
-                                            <option>Upper Tominobo</option>
-                                            <option>Tubod</option>
-                                            <option>Ubaldo Laya</option>
-                                            <option>Upper Hinaplanon</option>
-                                            <option>Villa Verde</option>
+                                            {barangays.map((b) => (
+                                                <option key={b.id} value={b.id}>
+                                                    {b.name}
+                                                </option>
+                                            ))}
                                         </select>
+                                        {errors.barangay && <p className="text-red-500 text-xs mt-1">{errors.barangay}</p>}
                                     </div>
+
+                                    
                                     <label>Email Address: </label>
                                     <input
                                         type="email"
                                         placeholder="Enter your email address"
                                         value={formData.email}
-                                        onChange={(e) => updateFormData({ email: e.target.value })}
-                                        className="border border-gray-300 p-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ email: e.target.value });
+                                            if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                                        }}
+                                        className={`p-1 rounded-md h-7 text-sm my-2 focus:outline-none transition ${errors.email ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
+                                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                                 </div>
                             </div>
                         </form>
                         {/* next button */}
                         <div className="grid justify-items-end text-white px-5">
                             <button
-                                type='submit'
-                                onClick={() => navigate("/file-complaint/complaintdetails")}
+                                type='button'
+                                onClick={handleNext}
                                 className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-1 px-5 mb-3 mr-2"
                             >
                                 Next
@@ -207,14 +237,6 @@ const CU_FileComplaintPage = () => {
         </div>
     ); 
 }
-
-
-
-
-
-
-
-
 
 
 

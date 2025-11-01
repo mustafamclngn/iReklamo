@@ -10,7 +10,7 @@ const TopHeader = () => {
               The Official Website of the City Government of Iligan
             </span>
             <img
-              src="/phflagicon.png"
+              src="/icons/phflagicon.png"
               className="h-5"
               alt="Philippine Flag"
               loading="lazy"

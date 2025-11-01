@@ -2,29 +2,90 @@ import { useNavigate } from 'react-router-dom'
 import { useFormData } from '../../../components/formcontext';
 import { ScrollText, SquarePen, UserCircle, CircleCheck, CircleCheckBig, ArrowLeft, Home } from 'lucide-react'
 import { useState } from 'react';
+import Footer from "../../../components/footer"
 
 
 export default function CU_ComplaintSummaryPage() {
     const navigate = useNavigate();
-    const { formData } = useFormData();
+    const { formData, updateFormData } = useFormData();
+
     const [showModal, setShowModal] = useState(false);
     const [showCheckboxError, setShowCheckboxError] = useState(false);
     const [isConfirmedCheckbox, setIsConfirmedCheckbox] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // const handleSubmit = async () => {
-    //     const res = await fetch("http://127.0.0.1:5000/api/complaints", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify(formData),
-    //     });
+    const initialFormData = {
+        first_name: "",
+        last_name: "",
+        sex: "",
+        age: "",
+        contact_number: "",
+        email: "",
+        barangay: "",
+        complaint_title: "",
+        case_type: "",
+        description: "",
+        full_address: "",
+        specific_location: ""
+    };
+    
 
-    //     if (res.ok) {
-    //         alert("Complaint successfully submitted!");
-    //         navigate("/");
-    //     } else {
-    //         alert("Error submitting complaint.");
-    //     }
-    // };
+
+    const handleSubmit = async () => {
+        try {
+            setIsSubmitting(true);
+
+            // Prepare data with proper types
+            const submissionData = {
+                ...formData,
+                age: formData.age ? parseInt(formData.age) : null,
+            };
+
+            // Debug: Log the data being sent
+            console.log('Submitting complaint data:', submissionData);
+
+            const res = await fetch("http://127.0.0.1:5000/api/complaints/create_complaint", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(submissionData),
+            });
+
+            // Always parse JSON body for more useful error/success handling
+            const resData = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                console.error('Server error response:', resData);
+                // Prefer readable message fields, fallback to stringified body
+                const msg = resData.message || resData.error || JSON.stringify(resData) || 'Unknown error';
+                alert(`Failed to submit: ${msg}`);
+                return;
+            }
+
+            // Extract complaint id returned by backend
+            const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
+            const complainantId = resData.complainant_id || resData.complainantId || null;
+
+            // Build a user-facing tracking code in the format CMP-YYYYMMDD-NNNN
+            // where NNNN is the complaint id padded to 4 digits
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const datePart = `${yyyy}${mm}${dd}`;
+            const seqPart = complaintId ? String(complaintId).padStart(4, '0') : '0000';
+            const complaintCode = `CMP-${datePart}-${seqPart}`;
+
+            // Reset form and close modal, then navigate passing tracking info in location state
+            updateFormData(initialFormData);
+            setShowModal(false);
+            navigate("/file-complaint/completionmessage", { state: { complaintCode, complaintId, complainantId } });
+        } catch (error) {
+            console.error('Error submitting complaint:', error);
+            alert('An unexpected error occurred while submitting the complaint. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
 
     return (
@@ -62,7 +123,7 @@ export default function CU_ComplaintSummaryPage() {
                                 </div>
                                 <div className='flex flex-col items-center justify-center w-48'>
                                     <h1 className='font-bold leading-none'>STEP 2</h1>
-                                    <p className='text-sm text-gray-500'>Provide complaint info</p>
+                                    <p className='text-sm text-gray-500'>Provide complaint details</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center w-48'>
                                     <h1 className='font-bold leading-none'>STEP 3</h1>
@@ -115,7 +176,7 @@ export default function CU_ComplaintSummaryPage() {
                                     <div className='flex flex-row justify-between gap-12'>
                                         <div className='text-[#808080] w-32'>
                                             <h1>Contact Number</h1>
-                                            <h1>Baranggay</h1>
+                                            <h1>Barangay</h1>
                                             <h1>Email Address</h1>
                                         </div>
                                         <div className='font-medium'>
@@ -229,22 +290,25 @@ export default function CU_ComplaintSummaryPage() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                            // Ensure the user checked the confirmation box before proceeding
-                                            if (!isConfirmedCheckbox) {
-                                                setShowCheckboxError(true);
-                                                return;
-                                            }
-                                            // Add your submit logic here (checkbox is checked)
-                                            setShowModal(false);
-                                        }}
-                                    className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition">
-                                    Confirm
+                                        if (!isConfirmedCheckbox) {
+                                            setShowCheckboxError(true);
+                                            return;
+                                        }
+                                        handleSubmit();
+                                    }}
+                                    disabled={isSubmitting}
+                                    className={`px-4 py-2 bg-emerald-600 text-white rounded-md transition ${
+                                        isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-700'
+                                    }`}
+                                >
+                                    {isSubmitting ? 'Submitting...' : 'Confirm'}
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
+            <Footer />
         </div>
     )
 }

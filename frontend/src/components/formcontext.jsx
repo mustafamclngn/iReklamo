@@ -12,6 +12,7 @@ export const FormProvider = ({ children }) => {
         contact_number: "",
         email: "",
         barangay: "",
+        
         // Step 2 — Complaint Details
         complaint_title: "",
         case_type: "",

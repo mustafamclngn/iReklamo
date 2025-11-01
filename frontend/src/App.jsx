@@ -43,6 +43,7 @@ import CU_TrackComplaintPage from "./pages/complainant/trackComplaint/trackcompl
 import CU_ComplainantInfoPage from "./pages/complainant/createComplaint/complainantinfo.jsx";
 import CU_ComplaintDetailsPage from "./pages/complainant/createComplaint/complaintdetails.jsx";
 import CU_ComplaintSummaryPage from "./pages/complainant/createComplaint/complaintsummary.jsx";
+import CU_CompletionMessagePage from "./pages/complainant/createComplaint/completionmessage.jsx";
 
 function App() {
   // usertypes: null, 'superadmin', 'cityadmin', 'brgycap', 'brgyoff'
@@ -73,6 +74,7 @@ function App() {
               <Route path="/file-complaint/complainantinfo" element={<CU_ComplainantInfoPage />} />
               <Route path="/file-complaint/complaintdetails" element={<CU_ComplaintDetailsPage />} />
               <Route path="/file-complaint/summary" element={<CU_ComplaintSummaryPage />} />
+              <Route path="/file-complaint/completionmessage" element={<CU_CompletionMessagePage />} />
               <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
             </Route>
         

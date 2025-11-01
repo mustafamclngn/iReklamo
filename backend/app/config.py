@@ -1,5 +1,18 @@
 import os
+from dotenv import load_dotenv
 from datetime import timedelta
+
+# loads .env
+load_dotenv()
+
+# database configuration from .env
+DB_CONFIG = {
+    "host": os.getenv("DATABASE_HOST"),
+    "port": int(os.getenv("DATABASE_PORT", 5432)),  
+    "database": os.getenv("DATABASE_NAME"),
+    "user": os.getenv("DATABASE_USER"),
+    "password": os.getenv("DATABASE_PASSWORD")
+}
 
 class Config:
     """Base configuration"""

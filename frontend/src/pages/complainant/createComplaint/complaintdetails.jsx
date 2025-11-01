@@ -8,11 +8,26 @@ const CU_FileComplaintPage = () => {
     const navigate = useNavigate();
     const { formData, updateFormData } = useFormData();
 
+    const [errors, setErrors] = React.useState({});
 
     const handleNext = (e) => {
-        e.preventDefault();
-        navigate('/file-complaint/summary');
-    };
+        if (e && e.preventDefault) e.preventDefault();
+        const missing = {};
+        if (!formData.complaint_title) missing.complaint_title = 'Required';
+        if (!formData.case_type) missing.case_type = 'Required';
+        if (!formData.description) missing.description = 'Required';
+        if (!formData.full_address) missing.full_address = 'Required';
+        // REQUIRED NI??
+        // if (!formData.specific_location) missing.specific_location = 'Required';
+
+        if (Object.keys(missing).length > 0) {
+            setErrors(missing);
+            return;
+        }
+
+        setErrors({});
+        navigate('/file-complaint/summary')
+    }
 
     return (
         <div>
@@ -25,7 +40,7 @@ const CU_FileComplaintPage = () => {
                     <h1>/</h1>
                     <button>File a Complaint</button>
                     <h1>/</h1>
-                    <button className='font-medium text-gray-500'>Complaint Summary</button>
+                    <button className='font-medium text-gray-500'>Complaint Details</button>
                 </div>
             </div>
 
@@ -49,7 +64,7 @@ const CU_FileComplaintPage = () => {
                                 </div>
                                 <div className='flex flex-col items-center justify-center w-48'>
                                     <h1 className='font-bold leading-none'>STEP 2</h1>
-                                    <p className='text-sm text-gray-500'>Provide complaint info</p>
+                                    <p className='text-sm text-gray-500'>Provide complaint details</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center w-48'>
                                     <h1 className='font-bold leading-none'>STEP 3</h1>
@@ -68,22 +83,31 @@ const CU_FileComplaintPage = () => {
                         </div>
             
                         {/* form */}
-                        <form onSubmit={handleNext} className="flex flex-row w-full text-black gap-20 p-5">
+                        <form onSubmit={handleNext} className="flex flex-row w-full text-black p-5">
                             <div className="flex flex-col flex-1">
                                 <label>Complaint Title: </label>
                                 <input
                                     type="text"
                                     placeholder="Brief description of your complaint"
                                     value={formData.complaint_title}
-                                    onChange={(e) => updateFormData({ complaint_title: e.target.value })}
-                                    className="w-full border border-gray-300 p-1 rounded-md text-sm my-2 h-7 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                    onChange={(e) => {
+                                        updateFormData({ complaint_title: e.target.value });
+                                        if (errors.complaint_title) setErrors(prev => ({ ...prev, complaint_title: '' }));
+                                    }}
+                                    className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.complaint_title ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 />
+                                {errors.complaint_title && <p className="text-red-500 text-xs mt-1">{errors.complaint_title}</p>}
+
+
                                 <div className="flex flex-col w-full">
-                                    <label>Case Type: </label>
+                                    <label className='pt-4'>Case Type: </label>
                                     <select
                                         value={formData.case_type}
-                                        onChange={(e) => updateFormData({ case_type: e.target.value })}
-                                        className="w-full border border-gray-300 p-1 rounded-md h-7 text-sm my-2 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ case_type: e.target.value });
+                                            if (errors.case_type) setErrors(prev => ({ ...prev, case_type: '' }));
+                                        }}
+                                        className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.case_type ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     >
                                         <option value="">Select Case Type</option>
                                         <option>Damaged Roads</option>
@@ -100,29 +124,48 @@ const CU_FileComplaintPage = () => {
                                         <option>Violence or Abuse Report</option>
                                         <option>Other</option>
                                     </select>
-                                    <label>Description:</label>
+                                    {errors.case_type && <p className="text-red-500 text-xs mt-1">{errors.case_type}</p>}
+
+
+                                    <label className='pt-4'>Description:</label>
                                     <textarea
                                         placeholder="Please provide a detailed description of the issue, including all the relevant and necessary information in the complaint"
                                         value={formData.description}
-                                        onChange={(e) => updateFormData({ description: e.target.value })}
-                                        className="w-full border border-gray-300 p-2 rounded-md text-sm my-2 h-24 resize-none focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ description: e.target.value });
+                                            if (errors.description) setErrors(prev => ({ ...prev, description: '' }));
+                                        }}
+                                        className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.description ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
-                                    <label>Full address:</label>
+                                    {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+
+
+                                    <label className='pt-4'>Full address:</label>
                                     <input
                                         type="text"
                                         placeholder="Provide the complete address where the incident took place"
                                         value={formData.full_address}
-                                        onChange={(e) => updateFormData({ full_address: e.target.value })}
-                                        className="w-full border border-gray-300 p-1 rounded-md text-sm my-2 h-7 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ full_address: e.target.value });
+                                            if (errors.full_address) setErrors(prev => ({ ...prev, full_address: '' }));
+                                        }}
+                                        className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.full_address ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
-                                    <label>Specific location: </label>
+                                    {errors.full_address && <p className="text-red-500 text-xs mt-1">{errors.full_address}</p>}
+
+
+                                    <label className='pt-4'>Specific location: </label>
                                     <input
                                         type="text"
                                         placeholder="e.g. in front of Barangay Hall, near the park, etc."
                                         value={formData.specific_location}
-                                        onChange={(e) => updateFormData({ specific_location: e.target.value })}
-                                        className="w-full border border-gray-300 p-1 rounded-md text-sm my-2 h-7 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+                                        onChange={(e) => {
+                                            updateFormData({ specific_location: e.target.value });
+                                            if (errors.specific_location) setErrors(prev => ({ ...prev, specific_location: '' }));
+                                        }}
+                                        className={`px-1 rounded-md text-sm my-2 h-7 focus:outline-none transition ${errors.specific_location ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
+                                    {errors.specific_location && <p className="text-red-500 text-xs m-0">{errors.specific_location}</p>}
                                 </div>
                             </div>
                         </form>
@@ -137,8 +180,8 @@ const CU_FileComplaintPage = () => {
                             </button>
             
                             <button
-                                type="submit"
-                                onClick={() => navigate("/file-complaint/summary")}
+                                type="button"
+                                onClick={handleNext}
                                 className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-1 px-5 mb-3"
                             >
                                 Next
