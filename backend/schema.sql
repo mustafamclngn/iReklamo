@@ -11,7 +11,8 @@ CREATE TABLE users (
     last_name VARCHAR(100) NOT NULL,                    
     user_position VARCHAR(100),                             
     user_role VARCHAR(50) DEFAULT 'user',                     
-    user_password TEXT NOT NULL,  
+    user_password TEXT NOT NULL, 
+    token_version BIGINT DEFAULT 0, 
 );
 
 -- Complaints table

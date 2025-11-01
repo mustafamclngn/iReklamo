@@ -4,32 +4,8 @@ from werkzeug.security import check_password_hash
 import jwt
 import datetime
 from app.models.user import User
-
-# ========================== 
-# USER VIEW
-# ==========
-def view_user(user_id):
-    user = User()         
-    data = user.getID(user_id)  
-
-    return data
-
-def view_user_nameemail(user_id):
-    user = User() 
-
-    if "@" in user_id:
-        data = user.getEmail(user_id)  
-    else:
-        data = user.getName(user_id)  
-
-    return data
-
-def view_role(user_id):
-    user = User()
-    user.getID(user_id)  
-    role = user.user_role
-
-    return jsonify({"role" : role}), 200
+from backend.app.controllers.auth.viewUserC import view_user, view_user_nameemail
+from backend.app.functions.Update import Update
 
 # ========================== 
 # USER LOGIN
@@ -61,14 +37,18 @@ def login_user():
         return jsonify({"error": "Invalid password"}), 401
     
     # ===============
-    # fetch: user_role
+    # fetch: user_role, token_version, id
     roles = [user_data.get("user_role") or "user"]
+    user_id = user_data.get("user_id")
+    token_version = user_data.get("token_version", 0)
 
     # ===============
     # create: access token
     access_token = jwt.encode(
         {
-            "user_id": user_data["user_id"],
+            "user_id": user_id,
+            "user_role": roles,
+            "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
         },
         Config.JWT_SECRET_KEY,
@@ -79,12 +59,20 @@ def login_user():
     # create: refresh token
     refresh_token = jwt.encode(
         {
-            "user_id": user_data["user_id"],
+            "user_id": user_id,
+            "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7)
         },
         Config.JWT_SECRET_KEY,
         algorithm="HS256"
     )
+
+    # ===============
+    # store refresh token in db
+    updater = Update()
+    updater.table("users").set({
+        "refresh_token": refresh_token
+        }).where(whereCol="user_id", whereVal=user_id).execute()
 
     # ===============
     # create: response
@@ -128,21 +116,29 @@ def refresh_token():
     try:
         decoded = jwt.decode(refresh_token, Config.JWT_SECRET_KEY, algorithms=["HS256"])
         user_id = decoded.get("user_id")
+        token_version = decoded.get("token_version")
 
         user_data = view_user(user_id)
+        
         if not user_data:
             return jsonify({"error": "User not found"}), 404
+        
+        if user_data.get("token_version") != token_version:
+            return jsonify({"message": "Token revoked or invalid"}), 403
+        
+        role = user_data.get("user_role") or "user"
 
         new_access_token = jwt.encode(
             {
-                "user_id": user_id,
-                "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
-            },
-            Config.JWT_SECRET_KEY,
-            algorithm="HS256"
-        )
+            "user_id": user_id,
+            "user_role": role,
+            "token_version":token_version,
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )
 
-        role = user_data.get("user_role") or "user"
         return jsonify({
             "accessToken": new_access_token,
             "roles": [role]

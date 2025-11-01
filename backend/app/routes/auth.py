@@ -4,6 +4,7 @@
 from flask import Blueprint, request, jsonify
 
 from app.controllers.auth.authenticationC import login_user, refresh_token
+from app.controllers.auth.revokeTokenC import revoke_token
 
 # Create blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -25,6 +26,10 @@ def login():
 @auth_bp.route('/refresh', methods=['GET'])
 def refresh():
     return refresh_token()
+
+@auth_bp.route('/revoke', methods=['POST'])
+def revoke():
+    return revoke_token()
 
 @auth_bp.route('/profile', methods=['GET'])
 def get_profile():
