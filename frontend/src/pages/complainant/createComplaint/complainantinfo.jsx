@@ -17,10 +17,10 @@ const CU_FileComplaintPage = () => {
         // for error handlig
         if (e && e.preventDefault) e.preventDefault();
         const missing = {};
-        if (!formData.first_name) missing.first_name = 'Required';
-        if (!formData.last_name) missing.last_name = 'Required';
-        if (!formData.sex) missing.sex = 'Required';
-        if (!formData.age) missing.age = 'Required'; 
+        // if (!formData.first_name) missing.first_name = 'Required';
+        // if (!formData.last_name) missing.last_name = 'Required';
+        // if (!formData.sex) missing.sex = 'Required';
+        // if (!formData.age) missing.age = 'Required'; 
         if (formData.age > 120) missing.age = 'Invalid age'
         if (!formData.barangay) missing.barangay = 'Required';
         if (!formData.email) missing.email = 'Required';

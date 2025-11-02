@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Check } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import Footer from "../../../components/footer"
 
 export default function Completion() {
@@ -30,9 +30,10 @@ export default function Completion() {
                 </p>
                 <p className="mt-4 text-xl font-semibold text-blue-400">Tracking ID:</p>
                 <button 
-                    className="w-60 h-20 my-3 px-6 py-2 bg-gray-200 rounded-lg font-bold text-lg transform transition duration-300 hover:scale-105"
+                    className="flex flex-row items-center gap-3 w-70 h-20 my-3 px-6 py-2 bg-gray-200 rounded-lg font-bold text-lg transform transition duration-300 hover:scale-105"
                     onClick={(e) => handleCopy(e.target.innerText)}
                 >
+                    <Copy color={"#333333"}/>
                     {complaintCode}
                 </button>
 

@@ -167,10 +167,10 @@ export default function CU_ComplaintSummaryPage() {
                                             <h1>Age</h1>
                                         </div>
                                         <div className='font-medium'>
-                                            <h1>{formData.first_name}</h1>
-                                            <h1>{formData.last_name}</h1>
-                                            <h1>{formData.sex}</h1>
-                                            <h1>{formData.age}</h1>
+                                            <h1>{formData.first_name || "Not provided"}</h1>
+                                            <h1>{formData.last_name || "Not provided"}</h1>
+                                            <h1>{formData.sex || "Not provided"}</h1>
+                                            <h1>{formData.age || "Not provided"}</h1>
                                         </div>
                                     </div>
                                     <div className='flex flex-row justify-between gap-12'>
@@ -227,7 +227,7 @@ export default function CU_ComplaintSummaryPage() {
                                     </div>
                                     <div className='flex flex-row'>
                                         <h1 className='w-44 text-[#808080]'>Specific Location</h1>
-                                        <p className='w-10/12 font-medium'>{formData.specific_location}</p>
+                                        <p className='w-10/12 font-medium'>{formData.specific_location || "Not provided"}</p>
                                     </div>
                                 </div>
                             </div>
