@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import BaseLayout from "./baseLayout";
-import SuperAdminNavBar from "../components/navbarSuperAdmin";
+import SuperAdminNavBar from "../components/navheaders/navbarSuperAdmin";
 
 const SuperAdminLayout = () => {
   return (

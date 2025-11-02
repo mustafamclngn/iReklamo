@@ -3,16 +3,18 @@
 
 -- Users table
 CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,                        
-    user_name VARCHAR(50) UNIQUE NOT NULL,             
-    email VARCHAR(100) UNIQUE NOT NULL,                  
-    first_name VARCHAR(100) NOT NULL,                   
-    middle_name VARCHAR(100),                            
-    last_name VARCHAR(100) NOT NULL,                    
-    user_position VARCHAR(100),                             
-    user_role VARCHAR(50) DEFAULT 'user',                     
-    user_password TEXT NOT NULL, 
-    token_version BIGINT DEFAULT 0, 
+    user_id SERIAL PRIMARY KEY,
+    user_name VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    contact_number VARCHAR(20),
+    barangay VARCHAR(50),
+    position VARCHAR(100),
+    role VARCHAR(50) DEFAULT 'user',
+    user_password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Complaints table
