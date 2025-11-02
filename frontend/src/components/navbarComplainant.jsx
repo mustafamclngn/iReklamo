@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
+import IliganLogo from "./iliganLogo";
 
 // ComplainantNavBar Component
 const ComplainantNavBar = () => {
@@ -8,18 +9,7 @@ const ComplainantNavBar = () => {
   return (
     <nav className="bg-white py-6 font-[Inter] font-black shadow mb-5">
       <div className="max-w-[1591px] mx-auto px-8 flex justify-between items-center">
-        <Link to="/home" className="flex items-center gap-4">
-          <img
-            src="https://iligan.gov.ph/assets/img/iligancity-welcome-logo.png"
-            alt="Iligan City Logo"
-            className="h-14"
-          />
-          <img
-            src="https://iligan.gov.ph/assets/img/logo-website.png"
-            alt="Iligan City Seal"
-            className="h-14"
-          />
-        </Link>
+        <IliganLogo />
 
         <ul className="flex items-center gap-8">
           {links.map((label) => (
