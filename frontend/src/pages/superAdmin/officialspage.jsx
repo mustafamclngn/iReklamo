@@ -226,6 +226,6 @@ const SA_OfficialsPage = () => {
       </div>
     </div>
   );
-}
+};
 
 export default SA_OfficialsPage;

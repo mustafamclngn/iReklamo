@@ -4,8 +4,8 @@ from werkzeug.security import check_password_hash
 import jwt
 import datetime
 from app.models.user import User
-from backend.app.controllers.auth.viewUserC import view_user, view_user_nameemail
-from backend.app.functions.Update import Update
+from app.controllers.auth.viewUserC import view_user, view_user_nameemail
+from app.functions.Update import Update
 
 # ========================== 
 # USER LOGIN

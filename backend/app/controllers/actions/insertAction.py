@@ -14,7 +14,7 @@ def add_user():
 
     try: 
         user.add(data)
-        return jsonify({"message": "Student added successfully"}), 201
+        return jsonify({"message": "User added successfully"}), 201
     
     except IntegrityError as ie:
         err_msg =  str(ie).split('\n')[0]
