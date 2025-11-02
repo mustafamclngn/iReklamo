@@ -1,9 +1,9 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import BaseLayout from "./baseLayout";
-import ComplainantNavBar from "../components/navbarComplainant";
-import HeroBannerHome from "../components/defaultBanner";
-import Footer from "../components/footer";
+import ComplainantNavBar from "../components/navheaders/navbarComplainant";
+import HeroBannerHome from "../components/navheaders/defaultBanner";
+import Footer from "../components/navheaders/footer";
 
 const ComplainantHomeLayout = () => {
   const location = useLocation();

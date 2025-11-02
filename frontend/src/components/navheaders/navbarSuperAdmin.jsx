@@ -4,7 +4,7 @@ import IliganLogo from "./iliganLogo";
 
 // SuperAdminNavbar Component
 const SuperAdminNavbar = () => {
-  const links = ["Dashboard", "Complaints", "Barangays", "Reports", "Officials"];
+  const links = ["Dashboard", "Complaints", "Barangays", "Officials", "Reports"];
 
   return (
     <nav className="bg-white py-6 font-[Inter] font-black">

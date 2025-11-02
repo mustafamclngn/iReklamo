@@ -76,9 +76,7 @@ const LogInPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // fetch and post to backend
         try {
-
             const response = await axios.post(
                 LOGIN_URL,
                 JSON.stringify({ identity, pwd }),
@@ -88,15 +86,15 @@ const LogInPage = () => {
                 }
             );
 
-            // debugging purposes
-            console.log(JSON.stringify(response?.data));
-
-            // token and authorization
             const accessToken = response?.data?.accessToken;
             const roles = response?.data?.roles;
-            const userRole = roles?.[0]
+            const user = response?.data?.user; 
 
-            setAuth({ user: identity, pwd, roles, accessToken });
+            setAuth({ 
+                user, 
+                roles, 
+                accessToken 
+            });
 
             setPersist(true);
             localStorage.setItem("persist", true);
@@ -107,6 +105,7 @@ const LogInPage = () => {
             // redirect path after login
             let redirectPath = "/";
 
+            const userRole = roles?.[0];
             switch (userRole) {
                 case "super_admin":
                     redirectPath = "/superadmin/dashboard";
