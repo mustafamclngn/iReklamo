@@ -37,7 +37,7 @@ def login_user():
         return jsonify({"error": "Invalid password"}), 401
     
     # ===============
-    # fetch: user_role, token_version, id
+    # fetch: role, token_version, id
     roles = [user_data.get("role") or "user"]  
     user_id = user_data.get("user_id")
     token_version = user_data.get("token_version", 0)
@@ -47,7 +47,7 @@ def login_user():
     access_token = jwt.encode(
         {
             "user_id": user_id,
-            "user_role": roles,
+            "role": roles,
             "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
         },
@@ -132,7 +132,7 @@ def refresh_token():
         new_access_token = jwt.encode(
             {
             "user_id": user_id,
-            "user_role": role,
+            "role": role,
             "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
         },

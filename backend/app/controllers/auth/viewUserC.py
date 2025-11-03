@@ -23,6 +23,6 @@ def view_user_nameemail(user_id):
 def view_role(user_id):
     user = User()
     user.getID(user_id)  
-    role = user.user_role
+    role = user.role
 
     return jsonify({"role" : role}), 200
