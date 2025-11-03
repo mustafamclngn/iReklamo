@@ -1,15 +1,18 @@
 import './modal.css'
 import complaintsApi from '../../api/complaintsApi'
 import { useEffect, useState } from 'react'
-import DeleteModal from './DeleteUserModal'
+import ConfirmDelete from './ConfirmDelete'
 
-const ViewModal = ({ isOpen, onClose, viewData }) => {
+const DeleteModal = ({ isOpen, onClose, deleteData }) => {
   const [assignedComplaints, setAssignedComplaints] = useState([])
-  const user_id = viewData?.user_id
+  const user_id = deleteData?.user_id
 
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const handleRevokePermissions = () => {
-    setIsDeleteOpen(true);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [revokeType, setRevokeType] = useState('')
+
+  const handleConfirmRevoke = (type) => {
+    setRevokeType(type);
+    setIsConfirmOpen(true);
   };
 
   useEffect(() => {
@@ -29,7 +32,7 @@ const ViewModal = ({ isOpen, onClose, viewData }) => {
     fetchComplaints()
   }, [isOpen, user_id])
 
-  if (!isOpen || !viewData) return null
+  if (!isOpen || !deleteData) return null
 
   return (
     <>
@@ -40,39 +43,19 @@ const ViewModal = ({ isOpen, onClose, viewData }) => {
           <form className="form">
             <div className="form-group">
               <label>Username</label>
-              <input value={viewData["user_name"] || ""} readOnly />
-            </div>
-            <div className="form-group">
-              <label>First Name</label>
-              <input value={viewData["first_name"] || ""} readOnly />
-            </div>
-            <div className="form-group">
-              <label>Last Name</label>
-              <input value={viewData["last_name"] || ""} readOnly />
-            </div>
-            <div className="form-group">
-              <label>Email Address</label>
-              <input value={viewData["email"] || ""} readOnly />
-            </div>
-            <div className="form-group">
-              <label>Contact Number</label>
-              <input value={viewData["contact_number"] || ""} readOnly />
+              <input value={deleteData.user_name || ""} readOnly />
             </div>
             <div className="form-group">
               <label>Barangay</label>
-              <input value={viewData["barangay"] || ""} readOnly />
+              <input value={deleteData.barangay || ""} readOnly />
             </div>
             <div className="form-group">
               <label>Position</label>
-              <input value={viewData["position"] || ""} readOnly />
+              <input value={deleteData.position || ""} readOnly />
             </div>
             <div className="form-group">
               <label>Role</label>
-              <input value={viewData["role"] || ""} readOnly />
-            </div>
-            <div className="form-group">
-              <label>Password</label>
-              <input type="password" value={viewData["user_password"] || ""} readOnly />
+              <input value={deleteData.role || ""} readOnly />
             </div>
             <div className="form-group">
               <label>Ongoing Assignments</label>
@@ -91,25 +74,43 @@ const ViewModal = ({ isOpen, onClose, viewData }) => {
               </div>
             </div>
             <div className="popup-footer">
-              <button className="revoke-button" onClick={() => handleRevokePermissions}>
-                Revoke
-              </button>
-              <button className="okay-button" onClick={onClose}>
-                Okay
+              <div className="tooltip">
+                <button type="button" className="revoke-button" onClick={() => handleConfirmRevoke("Permissions")}>
+                  Revoke Permissions
+                </button>
+                <span className="tooltip-text">
+                  Removes this user’s access to their role permissions.
+                </span>
+              </div>
+              <div className="tooltip">
+                <button type="button" className="revoke-button" onClick={() => handleConfirmRevoke("Account")}>
+                  Revoke Account
+                </button>
+                <span className="tooltip-text">
+                  Permanently disables the user’s account and removes login access.
+                </span>
+              </div>
+              <button type="button" className="okay-button" onClick={onClose}>
+                Cancel
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      <DeleteModal 
-        isOpen={isDeleteOpen} 
-        onClose={() => setIsDeleteOpen(false)}
-        deleteData={viewData}
-        >
-      </DeleteModal>
+      <ConfirmDelete 
+        isOpen={isConfirmOpen} 
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => {
+          setIsConfirmOpen(false)
+          onClose() 
+        }}
+        assignedComplaints={assignedComplaints}
+        revokeType={revokeType}
+        user={deleteData}
+      />
     </>
   )
-}
+};
 
-export default ViewModal
+export default DeleteModal;

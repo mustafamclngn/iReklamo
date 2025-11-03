@@ -14,7 +14,7 @@ def init_extensions(app):
             resources={
                 r"/api/*": {
                     "origins": origins or ["http://localhost:5173"],
-                    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
                     "allow_headers": ["Content-Type", "Authorization"],
                 }
             },

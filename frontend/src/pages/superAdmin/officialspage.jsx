@@ -6,6 +6,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 
 import ViewModal from '../../components/modals/ViewUserModal';
+import DeleteModal from '../../components/modals/DeleteUserModal';
 
 const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -102,7 +103,8 @@ const SA_OfficialsPage = () => {
   // Revoke Permissions
   const handleRevokePermissions = (official) => {
     console.log('Revoke permissions for:', official);
-    // change lang ni joshua
+    setOfficialData(official);
+    setIsDeleteOpen(true);
   };
 
   // Create Account
@@ -233,6 +235,13 @@ const SA_OfficialsPage = () => {
         viewData={officialData}
         >
       </ViewModal>
+
+      <DeleteModal 
+        isOpen={isDeleteOpen} 
+        onClose={() => setIsDeleteOpen(false)}
+        deleteData={officialData}
+        >
+      </DeleteModal>
     </>
   );
 };

@@ -3,7 +3,7 @@ from app.functions.Select import Select
 from app.functions.Update import Update
 
 # ========================== 
-# USER LOGOUT, ROLE CHANGE, ACCOUNT REVOKED
+# USER LOGOUT
 # ==========
 def revoke_token():
 

@@ -3,6 +3,8 @@
 
 from flask import Blueprint, request, jsonify
 
+from app.controllers.complaints.complaintList import list_by_assignee
+
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
 
@@ -53,11 +55,6 @@ def delete_complaint(complaint_id):
     """
     return jsonify({"message": f"Delete complaint {complaint_id} endpoint - implement with raw SQL"})
 
-@complaints_bp.route('/user/<int:user_id>', methods=['GET'])
-def get_user_complaints(user_id):
-    """
-    Get complaints by a specific user
-
-    TODO: Integrate with ComplaintController.get_complaints_by_user()
-    """
-    return jsonify({"message": f"Get complaints by user {user_id} endpoint - implement with raw SQL"})
+@complaints_bp.route('ongoing/<int:assignee>', methods=['GET'])
+def get_user_complaints(assignee):
+    return list_by_assignee(assignee)
