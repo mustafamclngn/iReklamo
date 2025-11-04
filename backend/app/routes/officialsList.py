@@ -45,3 +45,48 @@ def get_all_officials():
             'success': False,
             'error': str(e)
         }), 500
+
+@officialsList_bp.route('/<int:user_id>', methods=['GET'])
+def get_official_by_id(user_id):
+    """Get a single official by user_id"""
+    try:
+        print(f"DEBUG: Fetching user_id: {user_id}")
+        
+        selector = Select().table("users").search(tag="user_id", key=user_id)
+        result = selector.execute().retDict()
+        
+        print(f"DEBUG: Query result: {result}")
+        
+        if result is None:
+            print(f"DEBUG: No user found with user_id {user_id}")
+            return jsonify({
+                'success': False,
+                'error': 'Official not found'
+            }), 404
+        
+        official = result if isinstance(result, dict) else result[0] if result else None
+        
+        if not official:
+            return jsonify({
+                'success': False,
+                'error': 'Official not found'
+            }), 404
+        
+        print(f"DEBUG: Found official: {official.get('first_name')} {official.get('last_name')}")
+        
+        if 'user_password' in official:
+            del official['user_password']
+        
+        return jsonify({
+            'success': True,
+            'data': official
+        }), 200
+        
+    except Exception as e:
+        print(f"ERROR fetching official: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

@@ -10,7 +10,14 @@ const HeroBanner = () => {
   const page = segments[segments.length - 1] || 'dashboard';
   const isDashboard = page === 'dashboard';
   
+  // hide banner for login,register pages
   if (page === 'login' || page === 'register') {
+    return null;
+  }
+
+  // if page is a detail page then hide banner
+  const isDetailPage = segments.length > 2 && !isNaN(segments[segments.length - 1]);
+  if (isDetailPage) {
     return null;
   }
 

@@ -72,18 +72,6 @@ const BC_OfficialsPage = () => {
     return matchesSearch && matchesPosition;
   });
 
-  // View Official Details
-  const handleViewDetails = (official) => {
-    console.log('View details for:', official);
-    // to be added pani (kani tong pag view sa details sa official)
-  };
-
-  // Assign Official to Complaint
-  const handleUserAction = (official) => {
-    console.log('User action for:', official);
-    // to be added pani (kani tong assign an official to a complaint)
-  };
-
   // pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -155,8 +143,6 @@ const BC_OfficialsPage = () => {
                   <BrgyCapOfficialCard
                     key={official.user_id}
                     official={official}
-                    onViewDetails={handleViewDetails}
-                    onUserAction={handleUserAction}
                   />
                 ))}
 
