@@ -13,6 +13,7 @@ CREATE TABLE users (
     position VARCHAR(100),
     role VARCHAR(50) DEFAULT 'user',
     user_password TEXT NOT NULL,
+    profile_picture VARCHAR(250),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from app.config import Config, config
 from app.extensions import init_extensions
@@ -39,6 +39,17 @@ def create_app(config_name=None):
     app.register_blueprint(user_bp)
 
     app.register_blueprint(officialsList_bp)
+
+    # Serve static files (profile pictures)
+    STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
+    
+    @app.route('/storage/profile_pictures/<filename>')  # CHANGED: Added underscore
+    def serve_profile_picture(filename):
+        """Serve profile picture files"""
+        return send_from_directory(
+            os.path.join(STORAGE_FOLDER, 'profile_pictures'),
+            filename
+        )
 
     # TODO: Run schema.sql manually to create tables for raw SQL implementation
     # Database tables should be created using the schema.sql file

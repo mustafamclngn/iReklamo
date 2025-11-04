@@ -1,26 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const SuperAdminOfficialCard = ({ official, onViewDetails, onUserAction, onRevokePermissions }) => {
   const fullName = `${official.first_name} ${official.last_name}`;
+  const API_BASE_URL = 'http://localhost:5000'; // backend url
+  const [imageError, setImageError] = useState(false);
+  
+  const hasValidImage = official.profile_picture && !imageError;
   
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-xl font-bold mb-2">{fullName}</h3>
-          <p className="text-gray-600 mb-1">
-            <span className="font-medium">Email:</span> {official.email}
-          </p>
-          {official.barangay && (
+        <div className="flex gap-4">
+          <div className={`w-32 h-32 bg-gray-200 ${hasValidImage ? 'border-0' : 'border-2 border-dashed border-gray-400'} rounded flex-shrink-0 flex items-center justify-center overflow-hidden`}>
+            {hasValidImage ? (
+              <img 
+                src={`${API_BASE_URL}${official.profile_picture}`}
+                alt={fullName}
+                className="w-full h-full object-cover rounded"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <i className="bi bi-person text-5xl text-gray-400"></i>
+            )}
+          </div>
+          <div>
+            <h3 className="text-xl font-bold mb-2">{fullName}</h3>
             <p className="text-gray-600 mb-1">
-              <span className="font-medium">Barangay:</span> {official.barangay}
+              <span className="font-medium">Email:</span> {official.email}
             </p>
-          )}
-          {official.position && (
-            <p className="text-gray-600 mb-1">
-              <span className="font-medium">Position:</span> {official.position}
-            </p>
-          )}
+            {official.barangay && (
+              <p className="text-gray-600 mb-1">
+                <span className="font-medium">Barangay:</span> {official.barangay}
+              </p>
+            )}
+            {official.position && (
+              <p className="text-gray-600 mb-1">
+                <span className="font-medium">Position:</span> {official.position}
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <button 
