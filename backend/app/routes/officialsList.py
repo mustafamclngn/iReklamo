@@ -1,11 +1,18 @@
 from flask import Blueprint, jsonify, request
 from app.functions.Select import Select
+from app.middleware.verifyJwt import verify_jwt
+from app.middleware.verifyRoles import verify_roles
 
 officialsList_bp = Blueprint('superadmin_officials', __name__, url_prefix='/api/officials')
 
 @officialsList_bp.route('/', methods=['GET'])
+@verify_jwt
+@verify_roles('super_admin', 'city_admin', 'brgy_cap', 'brgy_off')
 def get_all_officials():
     """Get officials from the database with optional barangay filtering"""
+
+    print("JWT decoded user data:", getattr(request, "user", None))
+    
     try:
         barangay = request.args.get('barangay')
         selector = Select().table("users")

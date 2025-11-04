@@ -12,8 +12,7 @@ const RedirectFallback = () => {
       return;
     }
 
-    const role = auth?.roles?.[0];
-
+    const role = auth?.role?.[0];
     switch (role) {
       case "super_admin":
         navigate("/superadmin/dashboard", { replace: true });

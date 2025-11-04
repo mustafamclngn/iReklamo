@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import SuperAdminOfficialCard from '../../components/cards/offcardSuperAdmin';
-import officialsApi from '../../api/officialsApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 
 import ViewModal from '../../components/modals/ViewUserModal';
 import DeleteModal from '../../components/modals/DeleteUserModal';
+import useOfficialsApi from '../../api/officialsApi';
 
 const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+
+  const { getAllOfficials, getOfficialsbyBarangay } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +43,7 @@ const SA_OfficialsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await officialsApi.getAllOfficials();
+      const response = await getAllOfficials();
       
       if (response.success) {
         setOfficials(response.data);

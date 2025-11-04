@@ -38,7 +38,7 @@ def login_user():
     
     # ===============
     # fetch: role, token_version, id
-    roles = [user_data.get("role") or "user"]  
+    role = [user_data.get("role")]  
     user_id = user_data.get("user_id")
     token_version = user_data.get("token_version", 0)
 
@@ -47,7 +47,7 @@ def login_user():
     access_token = jwt.encode(
         {
             "user_id": user_id,
-            "role": roles,
+            "role": role,
             "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)
         },
@@ -88,7 +88,7 @@ def login_user():
             "contact_number": user_data.get("contact_number"),
             "barangay": user_data.get("barangay")
         },
-        "roles": roles,
+        "role": role,
         "accessToken": access_token
         }))
     
@@ -127,7 +127,7 @@ def refresh_token():
         if user_data.get("token_version") != token_version:
             return jsonify({"message": "Token revoked or invalid"}), 403
         
-        role = user_data.get("role") or "user"
+        role = [user_data.get("role")]  
 
         new_access_token = jwt.encode(
             {
@@ -142,7 +142,7 @@ def refresh_token():
 
         return jsonify({
             "accessToken": new_access_token,
-            "roles": [role]
+            "role": role
         }), 200
 
     except jwt.ExpiredSignatureError:

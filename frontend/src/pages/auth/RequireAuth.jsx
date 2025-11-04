@@ -7,7 +7,7 @@ const RequireAuth = ({ allowedRoles }) => {
 
     if (auth === undefined) return null;
 
-    const userRole = auth?.roles?.[0];
+    const userRole = auth?.role?.[0];
     const isAuthorized = allowedRoles?.includes(userRole);
 
     if (!auth?.accessToken){
