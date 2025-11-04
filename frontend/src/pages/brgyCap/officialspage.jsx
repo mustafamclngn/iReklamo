@@ -10,7 +10,7 @@ const BC_OfficialsPage = () => {
   const { auth } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   
-  const { getAllOfficials, getOfficialsbyBarangay, getOfficialsbyID } = useOfficialsApi();
+  const { getAllOfficials, getOfficialsByBarangay, getOfficialsbyID } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ const BC_OfficialsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getOfficialsbyBarangay(userBarangay);
+      const response = await getOfficialsByBarangay(userBarangay);
       
       if (response.success) {
         setOfficials(response.data);

@@ -1,11 +1,70 @@
 from flask import make_response, request, jsonify
 from app.config import Config
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
+import random
+import string
 import jwt
 import datetime
 from app.models.user import User
 from app.controllers.auth.viewUserC import view_user, view_user_nameemail
 from app.functions.Update import Update
+
+# ========================== 
+# USER REGISTER
+# ==========
+def register_user():
+    # ===============
+    # fetch: request
+    data = request.get_json()
+
+    username = data.get('user')
+    email = data.get('email')
+    barangay = data.get('barangay')
+    position = data.get('position')
+    role = data.get('role')
+
+    # check: fields provided
+    if not username or not email:
+        return jsonify({"error": "Missing username or emailquired fields"}), 400
+    
+    # ===============
+    # generate random password
+    random_str = ''.join(random.choices(string.ascii_letters, k=15))
+    random_pwd = generate_password_hash(random_str)
+
+    # ===============
+    # check for duplicates
+    existing_username = view_user_nameemail(username)
+
+    if existing_username:
+        return jsonify({"error": "User already exists"}), 409
+    
+    existing_email = view_user_nameemail(email)
+
+    if existing_email:
+        return jsonify({"error": "Email already in use"}), 409
+    
+    # ===============
+    # insert new user
+    user = User()
+    user.add({
+        "user_name": username,
+        "email": email,
+        "first_name": "N/A",
+        "last_name": "N/A",
+        "contact_number": "",
+        "barangay": barangay,
+        "position": position,
+        "role": role,
+        "user_password": random_pwd
+    })
+
+    return jsonify({
+        "message": "User registered successfully",
+        "username": username,
+        "email": email,
+        "temporary_password": random_str
+    }), 201
 
 # ========================== 
 # USER LOGIN

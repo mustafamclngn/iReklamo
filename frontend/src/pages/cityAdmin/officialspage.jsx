@@ -11,7 +11,7 @@ import useOfficialsApi from '../../api/officialsApi';
 const CA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { getAllOfficials, getOfficialsbyBarangay, getOfficialsbyID } = useOfficialsApi();
+  const { getAllOfficials, getOfficialsByBarangay, getOfficialsbyID } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
 
   const [loading, setLoading] = useState(true);

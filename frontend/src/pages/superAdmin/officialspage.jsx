@@ -7,12 +7,13 @@ import Pagination from '../../components/common/Pagination';
 import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import useOfficialsApi from '../../api/officialsApi';
+import CreateAdmin from '../../components/modals/CreateAdmin';
 
 const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  const { getAllOfficials, getOfficialsbyBarangay, getOfficialsbyID } = useOfficialsApi();
+  const { getAllOfficials, getOfficialsByBarangay, getOfficialsbyID } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -21,8 +22,9 @@ const SA_OfficialsPage = () => {
   const itemsPerPage = 5;
 
   // modal states
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [officialData, setOfficialData] = useState(null)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [officialData, setOfficialData] = useState(null);
 
   // filter states
   const [filters, setFilters] = useState({
@@ -112,7 +114,7 @@ const SA_OfficialsPage = () => {
 
   // Create Account
   const handleCreateAccount = () => {
-    // change lang ni joshua
+    setIsCreateOpen(true);
   };
 
   // pagination logic
@@ -230,7 +232,11 @@ const SA_OfficialsPage = () => {
           </div>
         </div>
       </div>
-
+      <CreateAdmin 
+        isOpen={isCreateOpen} 
+        onClose={() => setIsCreateOpen(false)}
+        >
+      </CreateAdmin>
       <DeleteModal 
         isOpen={isDeleteOpen} 
         onClose={() => setIsDeleteOpen(false)}

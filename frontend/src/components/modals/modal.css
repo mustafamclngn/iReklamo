@@ -128,6 +128,22 @@
   transform: scale(1.05);
 }
 
+.okay-button:disabled,
+.revoke-button:disabled {
+  background-color: #ccc;        
+  color: #777;                   
+  border-color: #999;           
+  cursor: not-allowed;           
+  transform: none;              
+  opacity: 0.7;                 
+}
+
+.okay-button:disabled:hover,
+.revoke-button:disabled:hover {
+  background-color: #ccc;
+  transform: none;
+}
+
 .tooltip {
   position: relative;
   display: inline-block;

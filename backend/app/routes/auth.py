@@ -3,7 +3,7 @@
 
 from flask import Blueprint, request, jsonify
 
-from app.controllers.auth.authenticationC import login_user, refresh_token
+from app.controllers.auth.authenticationC import login_user, refresh_token, register_user
 from app.controllers.auth.revokeTokenC import revoke_token
 
 # Create blueprint
@@ -11,13 +11,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    """
-    User registration endpoint
-
-    Expected data: username, email, password, first_name, last_name
-    TODO: Integrate with AuthController.register()
-    """
-    return jsonify({"message": "Registration endpoint - implement with raw SQL"})
+    return register_user()
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
