@@ -4,14 +4,15 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 
-import ViewModal from '../../components/modals/ViewUserModal';
+import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import useOfficialsApi from '../../api/officialsApi';
 
 const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
-  const { getAllOfficials, getOfficialsbyBarangay } = useOfficialsApi();
+  const { getAllOfficials, getOfficialsbyBarangay, getOfficialsbyID } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,6 @@ const SA_OfficialsPage = () => {
   const itemsPerPage = 5;
 
   // modal states
-  const [isViewOpen, setIsViewOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [officialData, setOfficialData] = useState(null)
 
@@ -94,7 +94,7 @@ const SA_OfficialsPage = () => {
   const handleViewDetails = (official) => {
     console.log('View details for:', official);
     setOfficialData(official);
-    setIsViewOpen(true);
+    navigate(`/officials/${official.id}`, { state: { official } });
   };
 
   // Assign Official to Complaint
@@ -230,13 +230,6 @@ const SA_OfficialsPage = () => {
           </div>
         </div>
       </div>
-
-      <ViewModal 
-        isOpen={isViewOpen} 
-        onClose={() => setIsViewOpen(false)}
-        viewData={officialData}
-        >
-      </ViewModal>
 
       <DeleteModal 
         isOpen={isDeleteOpen} 

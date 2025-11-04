@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BrgyCapOfficialCard from '../../components/cards/offcardBrgyCap';
-import officialsApi from '../../api/officialsApi';
+import useOfficialsApi from '../../api/officialsApi';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
@@ -9,7 +9,10 @@ import Pagination from '../../components/common/Pagination';
 const BC_OfficialsPage = () => {
   const { auth } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const { getAllOfficials, getOfficialsbyBarangay, getOfficialsbyID } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +41,7 @@ const BC_OfficialsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await officialsApi.getOfficialsByBarangay(userBarangay);
+      const response = await getOfficialsbyBarangay(userBarangay);
       
       if (response.success) {
         setOfficials(response.data);

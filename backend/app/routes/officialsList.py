@@ -34,10 +34,10 @@ def get_all_officials():
                 if user.get('barangay') == barangay and user.get('role') == 'brgy_off'
             ]
         else:
-            # superadmin = show all (captain and officials)
+            # superadmin = show all (captain and officials) --> must show all 
             officials = [
                 user for user in all_users 
-                if user.get('role') in ['brgy_cap', 'brgy_off']
+                # if user.get('role') in ['brgy_cap', 'brgy_off'] 
             ]
 
         return jsonify({

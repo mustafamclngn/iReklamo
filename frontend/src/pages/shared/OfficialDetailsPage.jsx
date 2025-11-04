@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import officialsApi from '../../api/officialsApi';
+import useOfficialsApi from '../../api/officialsApi';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
@@ -15,6 +15,8 @@ const OfficialDetailsPage = () => {
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState(false);
 
+  const { getAllOfficials, getOfficialsByBarangay, getOfficialById } = useOfficialsApi();
+
   const hasValidImage = official?.profile_picture && !imageError;
 
   useEffect(() => {
@@ -25,7 +27,7 @@ const OfficialDetailsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await officialsApi.getOfficialById(user_id);
+      const response = await getOfficialById(user_id);
       
       if (response.success) {
         setOfficial(response.data);

@@ -3,6 +3,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 const useOfficialsApi = () => {
   const axiosPrivate = useAxiosPrivate();
 
+  // Get all officials under a barangay
   const getOfficialsByBarangay = async (barangay) => {
     try {
       const encodedBarangay = encodeURIComponent(barangay);
@@ -14,6 +15,7 @@ const useOfficialsApi = () => {
     }
   };
 
+  // Get all officials
   const getAllOfficials = async () => {
     try {
       const response = await axiosPrivate.get('/api/officials');
@@ -27,13 +29,15 @@ const useOfficialsApi = () => {
   // Get single official by ID
   const getOfficialById = async (userId) => {
     try {
-      const response = await axios.get(`/api/officials/${userId}`);
+      const response = await axiosPrivate.get(`/api/officials/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching official by ID:', error);
       throw error;
     }
-  }
+  };
+
+  return { getAllOfficials, getOfficialsByBarangay, getOfficialById, }
 };
 
 export default useOfficialsApi;

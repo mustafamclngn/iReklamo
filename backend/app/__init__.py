@@ -7,7 +7,6 @@ from app.routes.main import main_bp
 from app.routes.auth import auth_bp
 from app.routes.complaints import complaints_bp
 from app.routes.users import user_bp
-
 from app.routes.officialsList import officialsList_bp
 
 def create_app(config_name=None):
@@ -37,7 +36,6 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(complaints_bp)
     app.register_blueprint(user_bp)
-
     app.register_blueprint(officialsList_bp)
 
     # Serve static files (profile pictures)

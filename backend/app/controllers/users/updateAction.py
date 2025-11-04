@@ -41,6 +41,7 @@ def revoke_permissions(user_id):
     
     try:
         user.edit(user_id, updates)
+        # TODO: update affected complaints, set assignee_id to null
         return jsonify({"message": "User permissions revoked and tokens invalidated"}), 200
 
     except Exception as e:
