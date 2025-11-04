@@ -52,7 +52,7 @@ function App() {
     return (
     <Routes>
         {/* Home route (Default) */}
-        <Route path="/" element={<BC_DashboardPage />}>
+        <Route path="/" element={<BO_DashboardPage />}>
           <Route index element={<Navigate to="home" replace />} />
           <Route path="home" element={<CU_HomePage />} />
         </Route>
