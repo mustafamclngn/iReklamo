@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../components/formcontext.jsx';
 import { ArrowRight, ArrowLeft, CircleCheck, CircleCheckBig, Home } from "lucide-react";
-import Footer from '../../../components/footer.jsx';
 
 const CU_FileComplaintPage = () => {
     const navigate = useNavigate();
@@ -190,7 +189,6 @@ const CU_FileComplaintPage = () => {
                         </div>
                     </div>
                 </div>
-                <Footer />
             </div>
         </div>
     ); 

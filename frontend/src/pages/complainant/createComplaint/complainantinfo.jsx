@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../components/formcontext.jsx';
 import { ArrowRight, CircleCheck, Home } from "lucide-react";
-import Footer from '../../../components/footer.jsx';
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -56,11 +55,11 @@ const CU_FileComplaintPage = () => {
                 <div className="flex flex-row mx-auto items-center place-items-center max-w-[1500px] w-[80%] mb-5 gap-3 text-sm text-gray-400">
                     <button> <Home size={17}/> </button>
                     <h1>/</h1>
-                    <button className='hover:underline'>Complaints</button>
+                    <button>Complaints</button>
                     <h1>/</h1>
-                    <button className='hover:underline'>File a Complaint</button>
+                    <button>File a Complaint</button>
                     <h1>/</h1>
-                    <button className='font-medium text-gray-500 hover:underline'>Complainant Info</button>
+                    <button className='font-medium text-gray-500'>Complainant Info</button>
                 </div>
             </div>
 
@@ -232,7 +231,6 @@ const CU_FileComplaintPage = () => {
                         </div>
                     </div>
                 </div>
-                <Footer />
             </div>
         </div>
     ); 

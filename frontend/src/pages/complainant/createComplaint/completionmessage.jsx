@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Check, Copy } from 'lucide-react'
-import Footer from "../../../components/footer"
+
 
 export default function Completion() {
     const location = useLocation();
@@ -66,7 +66,6 @@ export default function Completion() {
                     Return to Home
                 </button>
             </div>
-            <Footer />
         </div>
     );
 }

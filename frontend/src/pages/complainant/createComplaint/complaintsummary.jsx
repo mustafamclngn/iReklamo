@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { useFormData } from '../../../components/formcontext';
 import { ScrollText, SquarePen, UserCircle, CircleCheck, CircleCheckBig, ArrowLeft, Home } from 'lucide-react'
 import { useState } from 'react';
-import Footer from "../../../components/footer"
 
 
 export default function CU_ComplaintSummaryPage() {
@@ -308,7 +307,6 @@ export default function CU_ComplaintSummaryPage() {
                     </div>
                 )}
             </div>
-            <Footer />
         </div>
     )
 }
