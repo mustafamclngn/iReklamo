@@ -112,7 +112,6 @@ const SA_OfficialsPage = () => {
 
   // Create Account
   const handleCreateAccount = () => {
-    console.log('Create account clicked');
     // change lang ni joshua
   };
 

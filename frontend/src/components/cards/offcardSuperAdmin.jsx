@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const SuperAdminOfficialCard = ({ official, onViewDetails, onUserAction, onRevokePermissions }) => {
+  const navigate = useNavigate();
   const fullName = `${official.first_name} ${official.last_name}`;
   const API_BASE_URL = 'http://localhost:5000'; // backend url
   const [imageError, setImageError] = useState(false);
   
   const hasValidImage = official.profile_picture && !imageError;
+  
+  const handleViewDetails = () => {
+    const basePath = window.location.pathname.split('/').slice(0, 2).join('/');
+    const targetPath = `${basePath}/officials/${official.user_id}`;
+    navigate(targetPath);
+  };
   
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
@@ -48,7 +56,7 @@ const SuperAdminOfficialCard = ({ official, onViewDetails, onUserAction, onRevok
             Revoke Account
           </button>
           <button 
-            onClick={() => onViewDetails && onViewDetails(official)}
+            onClick={handleViewDetails}
             className="px-4 py-2 bg-[#E3E3E3] text-black rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
           >
             View Details

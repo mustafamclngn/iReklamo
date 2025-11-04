@@ -40,10 +40,13 @@ import BO_AssignedComplaintsPage from "./pages/brgyOff/assignedcomplaintspage.js
 import BO_BarangaysPage from "./pages/brgyOff/barangayspage.jsx";
 import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
-//Import complainant pages
+// Import complainant pages
 import CU_HomePage from "./pages/complainant/homepage.jsx";
 import CU_FileComplaintPage from "./pages/complainant/createComplaint/filecomplaintpage.jsx";
 import CU_TrackComplaintPage from "./pages/complainant/trackComplaint/trackcomplaintpage.jsx";
+
+// Import shared official detail page
+import OfficialDetailsPage from "./pages/shared/OfficialDetailsPage.jsx";
 
 function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
@@ -72,11 +75,13 @@ function App() {
             <Route path="complaints" element={<ComplaintsPage />} />
             <Route path="barangays" element={<BarangaysPage />} />
             <Route path="officials" element={<OfficialsPage />} />
+            <Route path="officials/:user_id" element={<OfficialDetailsPage />} />
             <Route path="reports" element={<ReportsPage />} />
             {/* invalid routes */}
             <Route path="*" element={ <Navigate to="/superadmin/dashboard" replace />} />
           </Route>
         </Route>
+
         <Route element={<RequireAuth allowedRoles={["city_admin"]}/>}>
           {/* CityAdmin Routes */}
           <Route path="/cityadmin" element={<CityAdminLayout />}>
@@ -85,11 +90,13 @@ function App() {
             <Route path="complaints" element={<CA_ComplaintsPage />} />
             <Route path="barangays" element={<CA_BarangaysPage />} />
             <Route path="officials" element={<CA_OfficialsPage />} />
+            <Route path="officials/:user_id" element={<OfficialDetailsPage />} />
             <Route path="reports" element={<CA_ReportsPage />} />
             {/* invalid routes */}
             <Route path="*" element={ <Navigate to="/cityadmin/dashboard" replace />} />
           </Route>
         </Route>
+
         <Route element={<RequireAuth allowedRoles={["brgy_cap"]}/>}>
           {/* Barangay Captain Routes */}
           <Route path="/brgycap" element={<BarangayCapLayout />}>
@@ -97,12 +104,14 @@ function App() {
             <Route path="dashboard" element={<BC_DashboardPage />} />
             <Route path="complaints" element={<BC_ComplaintsPage />} />
             <Route path="officials" element={<BC_OfficialsPage />} />
+            <Route path="officials/:user_id" element={<OfficialDetailsPage />} />
             <Route path="reports" element={<BC_ReportsPage />} />
             <Route path="account" element={<BC_AccountPage />} />
             {/* invalid routes */}
             <Route path="*" element={ <Navigate to="/brgycap/dashboard" replace />} />
           </Route>
         </Route>
+
         <Route element={<RequireAuth allowedRoles={["brgy_off"]}/>}>
           {/* Barangay Official Routes */}
           <Route path="/brgyoff" element={<BarangayOffLayout />}>
