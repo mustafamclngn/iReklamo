@@ -136,14 +136,6 @@ const SA_ComplaintsPage = () => {
     <div className="bg-gray-50 min-h-screen py-8">
       <div className="max-w-[1650px] mx-auto px-8">
         <div className="bg-white rounded-sm shadow-lg p-8 border border-[#B5B5B5]">
-          {/* PAGE HEADER */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">All Complaints</h1>
-            <p className="text-gray-600 text-sm mt-1">
-              Manage and monitor complaints across all barangays
-            </p>
-          </div>
-
           {/* FILTERS SECTION - 4 FILTERS FOR SUPER ADMIN */}
           <div className="flex gap-4 mb-8">
             {/* Search Input */}
