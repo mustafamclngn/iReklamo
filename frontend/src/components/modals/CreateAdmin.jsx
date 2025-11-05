@@ -4,6 +4,9 @@ import { faCheck, faTimes, faInfoCircle } from "@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import useRegister from '../../hooks/useRegister';
 
+import SuccessModal from './SuccessModal';
+import ErrorModal from './ErrorModal';
+
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -39,9 +42,10 @@ const CreateAdmin = ({ isOpen, onClose }) => {
   
       // =============
       // Error and Success messages 
-      // TODO: Popup
+      const [isErrorOpen, setIsErrorOpen] = useState(false);
       const [errMsg, setErrMsg] = useState('');
-      const [success, setSuccess] = useState('');
+      const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+      const [successMessage, setSuccessMessage] = useState('');
 
       // =============
       // State update
@@ -84,6 +88,7 @@ const CreateAdmin = ({ isOpen, onClose }) => {
           const v2 = EMAIL_REGEX.test(formData.email);
           if (!v1 || !v2){
               setErrMsg("Invalid Entry");
+              setIsErrorOpen(true);
               return;
           }
   
@@ -101,18 +106,21 @@ const CreateAdmin = ({ isOpen, onClose }) => {
                 }
               )
               console.log(response)
-              setSuccess(true);
-              onClose();
+              setSuccessMessage(response.message);
+              setIsSuccessOpen(true);
 
           } catch (err) {
               if (!err?.response) {
                   setErrMsg('No Server Response');
+                  setIsErrorOpen(true);
               } 
               else if (err.response?.status === 409) {
                   setErrMsg('Username Taken');
+                  setIsErrorOpen(true);
               }
               else {
-                  setErrMsg('Registration Failed')
+                  setErrMsg('Registration Failed');
+                  setIsErrorOpen(true);
               }
               errRef.current.focus();
           }
@@ -128,33 +136,9 @@ const CreateAdmin = ({ isOpen, onClose }) => {
   // ==========
   return (
     <>
-      {/* ========== */}
-      {/* Success Message */}
-      {/* TODO: Design */}
-      {/* {success ? ( 
-          <div>
-              <h1>
-                  Success!
-              </h1>
-              <p>
-                  <a href="#">Log In</a>
-              </p>
-          </div>
-      ) : ( */}
-      {/* <div className="auth-container"> */}
-
       <div className="popup-overlay">
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
-
-          {/* ========== */}
-          {/* Error Message */}
-          <p 
-              ref={errRef} 
-              className={errMsg ? "errmsg" : "offscreen"} 
-              aria-live="assertive">
-                  {errMsg}
-          </p>
 
           {/* ========== */}
           {/* Header */}
@@ -303,6 +287,20 @@ const CreateAdmin = ({ isOpen, onClose }) => {
           </form>
         </div>
       </div>
+
+      <SuccessModal
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        onConfirm={onClose}
+        message={successMessage}
+      />
+
+      <ErrorModal
+        isOpen={isErrorOpen}
+        onClose={() => setIsErrorOpen(false)}
+        onConfirm={onClose}
+        message={errMsg}
+      />
     </>
   )
 };

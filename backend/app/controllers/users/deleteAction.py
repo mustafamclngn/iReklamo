@@ -20,7 +20,7 @@ def delete_user(user_id):
             user.edit(user_id, updates)
 
         user.delete(user_id)
-        return jsonify({"message": "User added successfully"}), 201
+        return jsonify({"message": "Account revoked successfully"}), 201
     
     except Exception as e:
         print(f"Server error: {e}")
