@@ -116,14 +116,6 @@ const BO_AssignedComplaintsPage = () => {
     <div className="bg-gray-50 min-h-screen py-8">
       <div className="max-w-[1650px] mx-auto px-8">
         <div className="bg-white rounded-sm shadow-lg p-8 border border-[#B5B5B5]">
-          {/* PAGE HEADER */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">My Assigned Complaints</h1>
-            <p className="text-gray-600 text-sm mt-1">
-              View and manage complaints assigned to you
-            </p>
-          </div>
-
           {/* FILTERS SECTION - 3 TOTAL (Search + Status + Priority) */}
           <div className="flex gap-4 mb-8">
             {/* Search Input */}

@@ -5,10 +5,12 @@ const HeroBanner = () => {
   const location = useLocation();
   const path = location.pathname;
   const segments = path.split('/').filter(Boolean);
-  
+
   const userType = segments[0] || 'superadmin';
   const page = segments[segments.length - 1] || 'dashboard';
   const isDashboard = page === 'dashboard';
+
+
   
   // hide banner for login,register pages
   if (page === 'login' || page === 'register') {
@@ -40,9 +42,25 @@ const HeroBanner = () => {
     return titles[userType] || 'Dashboard';
   };
   
-  const title = isDashboard 
+  const title = isDashboard
     ? getDashboardTitle()
     : page.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+  // Check if current page is a complaints page
+  const isComplaintsPage = page === 'complaints' || page === 'assigned-complaints';
+
+  // Get subtext for complaints pages based on user type
+  const getComplaintsSubtext = () => {
+    const subtexts = {
+      'superadmin': 'Manage and monitor complaints across all barangays',
+      'cityadmin': 'Manage and monitor complaints across city barangays',
+      'brgycap': 'Manage complaints for your barangay',
+      'brgyoff': 'View and manage complaints assigned to you'
+    };
+    return subtexts[userType] || 'Manage your complaints';
+  };
+
+
 
   // default image if no image found
   const backgroundImage = pageImages[userType] || '/images/default-hero.jpg';
@@ -68,6 +86,11 @@ const HeroBanner = () => {
         {isDashboard && (
           <p className="text-[#DFDFDF] text-lg font-[Inter] mt-2">
             Himoon nato karong adlawa nga usa ka produktibo nga adlaw
+          </p>
+        )}
+        {isComplaintsPage && (
+          <p className="text-[#DFDFDF] text-lg font-[Inter] mt-2">
+            {getComplaintsSubtext()}
           </p>
         )}
       </div>
