@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import officialsApi from '../../api/officialsApi';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import ErrorAlert from '../../components/common/ErrorAlert';
 import { getRoleBasePath } from '../../utils/roleUtils';
 
 const OfficialDetailsPage = () => {
@@ -102,6 +101,12 @@ const OfficialDetailsPage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-[1591px] mx-auto px-8 py-8">
+      <button
+        onClick={() => { const basePath = getRoleBasePath(auth); navigate(`${basePath}/officials`); }}
+        className="w-[337px] h-[45px] bg-white hover:bg-[#E6E6E6] text-black rounded-lg flex items-center justify-center gap-x-3 text-[24px] font-small mb-6 transition-colors">
+        <i className="bi bi-arrow-left text-xl"></i>
+        Back to Officials
+      </button>
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
           <div className="flex items-start gap-6">
             <div className="flex-shrink-0">
