@@ -4,6 +4,7 @@ import officialsApi from '../../api/officialsApi';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
+import { getRoleBasePath } from '../../utils/roleUtils';
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
@@ -25,16 +26,26 @@ const OfficialDetailsPage = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // validate user id
+      if (!user_id || isNaN(Number(user_id))) {
+        const basePath = getRoleBasePath(auth);
+        navigate(`${basePath}/officials`, { replace: true });
+        return;
+      }
+      
       const response = await officialsApi.getOfficialById(user_id);
       
-      if (response.success) {
+      if (response.success && response.data) {
         setOfficial(response.data);
       } else {
-        setError('Failed to fetch official details');
+        // if no official found, back to officials list page
+        const basePath = getRoleBasePath(auth);
+        navigate(`${basePath}/officials`, { replace: true });
       }
     } catch (err) {
-      setError('Error connecting to server. Please try again.');
-      console.error('Error fetching official details:', err);
+      const basePath = getRoleBasePath(auth);
+      navigate(`${basePath}/officials`, { replace: true });
     } finally {
       setLoading(false);
     }
@@ -56,16 +67,6 @@ const OfficialDetailsPage = () => {
       return `+63 ${digits.slice(1,4)} ${digits.slice(4,7)} ${digits.slice(7)}`;
     }
     return num; // fallback
-  };
-
-  const getRoleBasePath = () => {
-    const role = auth?.user?.role;
-    switch (role) {
-      case 'super_admin': return '/superadmin';
-      case 'city_admin': return '/cityadmin';
-      case 'brgy_cap': return '/brgycap';
-      default: return '/';
-    }
   };
 
   const calculateProfileCompletion = () => {
@@ -96,25 +97,6 @@ const OfficialDetailsPage = () => {
 
   if (loading) {
     return <LoadingSpinner message="Loading official details..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorAlert 
-        message={error}
-        onRetry={fetchOfficialDetails}
-        onBack={() => navigate(`${getRoleBasePath()}/officials`)}
-      />
-    );
-  }
-
-  if (!official) {
-    return (
-      <ErrorAlert 
-        message="Official not found"
-        onBack={() => navigate(`${getRoleBasePath()}/officials`)}
-      />
-    );
   }
 
   return (
