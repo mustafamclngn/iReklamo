@@ -108,7 +108,7 @@ const OfficialDetailsPage = () => {
         Back to Officials
       </button>
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
-          <div className="flex items-start gap-6">
+          <div className="flex items-center gap-6">
             <div className="flex-shrink-0">
               <div className={`w-32 h-32 bg-gray-200 ${
                 hasValidImage ? 'border-0' : 'border-2 border-dashed border-gray-400'
@@ -132,10 +132,10 @@ const OfficialDetailsPage = () => {
                 {official.first_name} {official.last_name}
               </h1>
               <p className="text-gray-600 font-medium mb-1 text-lg">
-                {official.position || (official.role === 'brgy_cap' ? 'Barangay Captain' : 'Barangay Official')}
+                {official.position || (official.position)}
               </p>
               <p className="text-gray-600 text-lg">
-                {official.barangay || 'N/A'}, Iligan City +9200
+                {official.barangay}, Iligan City +9200
               </p>
             </div>
 
@@ -212,7 +212,7 @@ const OfficialDetailsPage = () => {
             </div>
 
             <div>
-              <label className="block text-md text-gray-600 mb-2">Contact:</label>
+              <label className="block text-md text-gray-600 mb-2">Contact Number:</label>
               <p className="text-gray-900 font-medium text-lg">{formatPhone(official.contact_number) || 'N/A'}</p>
             </div>
 

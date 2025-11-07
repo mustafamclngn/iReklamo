@@ -36,14 +36,14 @@ const BrgyCapOfficialCard = ({ official, onViewDetails, onUserAction }) => {
             <p className="text-gray-600 mb-1">
               <span className="font-medium">Email:</span> {official.email}
             </p>
-            {official.barangay && (
-              <p className="text-gray-600 mb-1">
-                <span className="font-medium">Barangay:</span> {official.barangay}
-              </p>
-            )}
             {official.position && (
               <p className="text-gray-600 mb-1">
                 <span className="font-medium">Position:</span> {official.position}
+              </p>
+            )}
+            {official.contact_number && (
+              <p className="text-gray-600 mb-1">
+                <span className="font-medium">Contact:</span> {official.contact_number}
               </p>
             )}
           </div>
