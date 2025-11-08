@@ -1,8 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../components/formcontext';
-import { ScrollText, SquarePen, UserCircle, CircleCheck, CircleCheckBig, ArrowLeft, Home } from 'lucide-react'
-import { useState } from 'react';
-
+import { ScrollText, SquarePen, UserCircle, CircleCheck, CircleCheckBig, ArrowLeft, Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function CU_ComplaintSummaryPage() {
     const navigate = useNavigate();
@@ -12,7 +11,39 @@ export default function CU_ComplaintSummaryPage() {
     const [showCheckboxError, setShowCheckboxError] = useState(false);
     const [isConfirmedCheckbox, setIsConfirmedCheckbox] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [barangayName, setBarangayName] = useState('');
+    const [barangays, setBarangays] = useState([]);
 
+    useEffect(() => {
+        const fetchBarangayName = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/complaints/barangays');
+                    if (!response.ok) {
+                    throw new Error('Failed to fetch barangays');
+                }
+
+                const barangays = await response.json();
+                const selectedBarangay = barangays.find(
+                    (b) => b.id === parseInt(formData.barangay)
+                );
+
+                if (selectedBarangay) {
+                    setBarangayName(selectedBarangay.name);
+                } else {
+                    setBarangayName('Unknown Barangay');
+                }
+            } catch (error) {
+                console.error('Error fetching barangay name:', error);
+                setBarangayName('Error loading barangay');
+            }
+        };
+
+        if (formData.barangay) {
+            fetchBarangayName();
+        }
+    }, [formData.barangay]);
+
+    
     const initialFormData = {
         first_name: "",
         last_name: "",
@@ -27,6 +58,7 @@ export default function CU_ComplaintSummaryPage() {
         full_address: "",
         specific_location: ""
     };
+
     
 
 
@@ -180,7 +212,7 @@ export default function CU_ComplaintSummaryPage() {
                                         </div>
                                         <div className='font-medium'>
                                             <h1>{formData.contact_number}</h1>
-                                            <h1>{formData.barangay}</h1>
+                                            <h1>{barangayName || "Loading..."}</h1>
                                             <h1>{formData.email}</h1>
                                         </div>
                                     </div>

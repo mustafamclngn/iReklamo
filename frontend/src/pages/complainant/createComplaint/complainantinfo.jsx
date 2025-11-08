@@ -22,8 +22,11 @@ const CU_FileComplaintPage = () => {
         // if (!formData.age) missing.age = 'Required'; 
         if (formData.age > 120) missing.age = 'Invalid age'
         if (!formData.barangay) missing.barangay = 'Required';
-        if (!formData.email) missing.email = 'Required';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) missing.email = "Invalid email format";
+        if (!formData.email) {
+            missing.email = 'Required' 
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            missing.email = "Invalid email format";
+        }
         if (!formData.contact_number) missing.contact_number = 'Required'
 
 
