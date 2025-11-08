@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import BaseLayout from "./baseLayout";
-import CityAdminNavBar from "../components/navbarCityAdmin";
+import CityAdminNavBar from "../components/navheaders/navbarCityAdmin";
 
 const CityAdminLayout = () => {
   return (

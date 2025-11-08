@@ -62,7 +62,7 @@ def login_user():
     
     # ===============
     # fetch: user_role
-    roles = [user_data.get("user_role") or "user"]
+    roles = [user_data.get("role") or "user"]  # FIXED: changed from "user_role" to "role"
 
     # ===============
     # create: access token
@@ -95,9 +95,10 @@ def login_user():
             "username": user_data["user_name"],
             "email": user_data["email"],
             "first_name": user_data["first_name"],
-            "middle_name": user_data["middle_name"],
             "last_name": user_data["last_name"],
-            "position": user_data["user_position"],
+            "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
+            "contact_number": user_data.get("contact_number"),
+            "barangay": user_data.get("barangay")
         },
         "roles": roles,
         "accessToken": access_token
@@ -142,7 +143,7 @@ def refresh_token():
             algorithm="HS256"
         )
 
-        role = user_data.get("user_role") or "user"
+        role = user_data.get("role") or "user"  # FIXED: changed from "user_role" to "role"
         return jsonify({
             "accessToken": new_access_token,
             "roles": [role]
@@ -152,8 +153,3 @@ def refresh_token():
         return jsonify({"error": "Refresh token expired"}), 403
     except jwt.InvalidTokenError:
         return jsonify({"error": "Invalid refresh token"}), 403
-
-
-
-
-

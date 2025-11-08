@@ -6,18 +6,40 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     user_name VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+<<<<<<< HEAD
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     contact_number VARCHAR(20),
+=======
+	first_name VARCHAR(100),
+	last_name VARCHAR(100),
+>>>>>>> 53e81b75048b8f8679e63e3adae1f2a108b37098
     barangay VARCHAR(50),
     position VARCHAR(100),
     role VARCHAR(50) DEFAULT 'user',
     user_password TEXT NOT NULL,
+<<<<<<< HEAD
     profile_picture VARCHAR(250),
     sex VARCHAR(10),
     birthdate DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+=======
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User Info table
+CREATE TABLE user_info (
+    info_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    contact_number VARCHAR(20),
+    sex VARCHAR(10),
+    birthdate DATE,
+    purok VARCHAR(100),
+    street VARCHAR(150),
+	profile_picture VARCHAR(250)
+>>>>>>> 53e81b75048b8f8679e63e3adae1f2a108b37098
 );
 
 -- Complaints table
