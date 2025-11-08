@@ -36,6 +36,11 @@ class Select():
         self.groupquery = f"GROUP BY {group}"
         return self
     
+    # join method
+    def join(self, join_type, table, on_condition):
+        self.tablequery += f" {join_type} {table} ON {on_condition}"
+        return self
+        
     def count(self, count):
         self.countquery = (f"COUNT {count}", "COUNT (*)")
         return self

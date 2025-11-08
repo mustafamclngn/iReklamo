@@ -9,16 +9,34 @@ officialsList_bp = Blueprint('superadmin_officials', __name__, url_prefix='/api/
 @verify_jwt
 @verify_roles('super_admin', 'city_admin', 'brgy_cap', 'brgy_off')
 def get_all_officials():
-    """Get officials from the database with optional barangay filtering"""
-
-    print("JWT decoded user data:", getattr(request, "user", None))
-    
     try:
         barangay = request.args.get('barangay')
+        
         selector = Select().table("users")
+        
+        columns = [
+            "users.user_id",
+            "users.first_name",
+            "users.last_name",
+            "users.email",
+            "users.role",
+            "users.barangay",
+            "users.position",
+            "users.created_at",
+            "user_info.contact_number",
+            "user_info.sex",
+            "user_info.birthdate",
+            "user_info.purok",
+            "user_info.street",
+            "user_info.profile_picture"
+        ]
+        
+        selector.special_col(columns)
+        
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id"
+        
         result = selector.sort("user_id", "DESC").execute().retDict()
 
-        # return list
         if result is None:
             all_users = []
         elif isinstance(result, dict):
@@ -26,15 +44,12 @@ def get_all_officials():
         else:
             all_users = result
         
-        # filter officials based on role
         if barangay:
-            # barangay captain = show officials under barangay
             officials = [
                 user for user in all_users 
                 if user.get('barangay') == barangay and user.get('role') == 'brgy_off'
             ]
         else:
-            # superadmin = show all (captain and officials) --> must show all 
             officials = [
                 user for user in all_users 
                 # if user.get('role') in ['brgy_cap', 'brgy_off'] 
@@ -55,44 +70,48 @@ def get_all_officials():
 
 @officialsList_bp.route('/<int:user_id>', methods=['GET'])
 def get_official_by_id(user_id):
-    """Get a single official by user_id"""
     try:
-        print(f"DEBUG: Fetching user_id: {user_id}")
+        selector = Select().table("users")
         
-        selector = Select().table("users").search(tag="user_id", key=user_id)
-        result = selector.execute().retDict()
+        columns = [
+            "users.user_id",
+            "users.first_name",
+            "users.last_name",
+            "users.email",
+            "users.role",
+            "users.barangay",
+            "users.position",
+            "users.created_at",
+            "user_info.contact_number",
+            "user_info.sex",
+            "user_info.birthdate",
+            "user_info.purok",
+            "user_info.street",
+            "user_info.profile_picture"
+        ]
         
-        print(f"DEBUG: Query result: {result}")
+        selector.special_col(columns)
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id"
         
-        if result is None:
-            print(f"DEBUG: No user found with user_id {user_id}")
+        result = selector.search("user_id", user_id, table="users").execute().retDict()
+        
+        if not result:
             return jsonify({
                 'success': False,
                 'error': 'Official not found'
             }), 404
         
-        official = result if isinstance(result, dict) else result[0] if result else None
-        
-        if not official:
-            return jsonify({
-                'success': False,
-                'error': 'Official not found'
-            }), 404
-        
-        print(f"DEBUG: Found official: {official.get('first_name')} {official.get('last_name')}")
-        
-        if 'user_password' in official:
-            del official['user_password']
+        result['assigned_cases'] = 0
+        result['pending_cases'] = 0
+        result['resolved_cases'] = 0
         
         return jsonify({
             'success': True,
-            'data': official
+            'data': result
         }), 200
         
     except Exception as e:
-        print(f"ERROR fetching official: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Error fetching official by ID: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
