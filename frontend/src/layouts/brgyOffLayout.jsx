@@ -1,7 +1,7 @@
 import React from "react";
 import {Outlet} from "react-router-dom";
 import BaseLayout from "./baseLayout";
-import BarangayOffNavBar from "../components/navbarBrgyOff";
+import BarangayOffNavBar from "../components/navheaders/navbarBrgyOff";
 
 const BarangayOffLayout = () => {
   return (

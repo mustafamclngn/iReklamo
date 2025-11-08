@@ -1,5 +1,5 @@
 import React from "react";
-import TopHeader from "../components/topHeader";
+import TopHeader from "../components/navheaders/topHeader";
 
 const ComplainantBaseLayout = ({ NavBar, children }) => {
   return (

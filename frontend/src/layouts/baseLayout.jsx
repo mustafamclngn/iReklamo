@@ -1,6 +1,6 @@
 import React from "react";
-import TopHeader from "../components/topHeader";
-import HeroBanner from "../components/heroBanner";
+import TopHeader from "../components/navheaders/topHeader";
+import HeroBanner from "../components/navheaders/heroBanner";
 
 const BaseLayout = ({ NavBar, CustomHeroBanner, children }) => {
   return (
