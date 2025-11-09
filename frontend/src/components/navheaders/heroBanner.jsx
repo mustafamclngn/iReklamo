@@ -53,7 +53,7 @@ const HeroBanner = () => {
   const getComplaintsSubtext = () => {
     const subtexts = {
       'superadmin': 'Manage and monitor complaints across all barangays',
-      'cityadmin': 'Manage and monitor complaints across city barangays',
+      'cityadmin': 'Manage and monitor complaints across all barangays',
       'brgycap': 'Manage complaints for your barangay',
       'brgyoff': 'View and manage complaints assigned to you'
     };

@@ -54,7 +54,14 @@ class Select():
     
     def special_col(self, spec_col):
         self.columnquery    = ", ".join([f"{col}" for col in spec_col])
-        self.columns = [col.split(" AS ")[-1].split(".")[-1] for col in spec_col]
+        self.columns = []
+        for col in spec_col:
+            # Handle both " AS " and " as " aliases
+            if " as " in col:
+                alias_part = col.split(" as ")[-1].strip()
+                self.columns.append(alias_part.split(".")[-1])
+            else:
+                self.columns.append(col.split(".")[-1])
         return self
     
     def search(self, tag = None, key = None, table = None, search_mult = {}):

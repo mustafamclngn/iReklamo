@@ -4,8 +4,10 @@ import complaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
+import useAuth from '../../hooks/useAuth';
 
 const BO_AssignedComplaintsPage = () => {
+  const { auth } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,9 +34,17 @@ const BO_AssignedComplaintsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      // Backend should filter complaints assigned to this barangay official
-      const response = await complaintsApi.getAssignedComplaints(); // or getAllComplaints() with backend filtering
-      
+
+      // Get authenticated user ID
+      const userId = auth?.user?.user_id;
+      if (!userId) {
+        setError('User not authenticated');
+        return;
+      }
+
+      // Use role-based endpoint for barangay official - gets only assigned complaints
+      const response = await complaintsApi.getBarangayOfficialComplaints(userId);
+
       if (response.success) {
         setComplaints(response.data);
       } else {
@@ -60,9 +70,10 @@ const BO_AssignedComplaintsPage = () => {
   const filteredComplaints = complaints.filter(complaint => {
     // Search filter
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       complaint.title?.toLowerCase().includes(searchLower) ||
       complaint.description?.toLowerCase().includes(searchLower) ||
+      complaint.complaint_code?.toLowerCase().includes(searchLower) ||
       complaint.id?.toString().includes(searchLower);
 
     // Status filter

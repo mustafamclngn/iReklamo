@@ -38,8 +38,8 @@ const ComplaintCardBrgyCap = ({
 
           {/* Complaint Info */}
           <div className="flex-1">
-            <h3 className="text-xl font-bold mb-2">{complaint.title}</h3>
-            <p className="text-gray-600 mb-1">{complaint.description}</p>
+            <p className="text-xl font-bold mb-1">{complaint.complaint_code}</p>
+            <h3 className="text-gray-500 text-sm font-medium mb-2">{complaint.title}</h3>
             <p className="text-gray-500 text-sm">
               <span className="font-medium">Assigned Official:</span> {complaint.assignedOfficial || 'Unassigned'}
             </p>

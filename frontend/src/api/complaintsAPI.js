@@ -1,53 +1,46 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { axiosPrivate } from './axios';
 
 const complaintsApi = {
   getAllComplaints: async (filters = {}) => {
     const params = new URLSearchParams(filters);
-    const response = await fetch(`${API_BASE_URL}/api/complaints/?${params}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    return await response.json();
+    const response = await axiosPrivate.get(`/api/complaints/?${params}`);
+    return response.data;
   },
 
   getComplaintById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/api/complaints/${id}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    return await response.json();
+    const response = await axiosPrivate.get(`/api/complaints/${id}`);
+    return response.data;
   },
 
   updateComplaint: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/api/complaints/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return await response.json();
+    const response = await axiosPrivate.put(`/api/complaints/${id}`, data);
+    return response.data;
+  },
+
+  getBarangays: async () => {
+    const response = await axiosPrivate.get('/api/complaints/barangays');
+    return response.data;
   },
 
   getBarangayComplaints: async (barangayName) => {
-    const response = await fetch(`${API_BASE_URL}/api/complaints/barangay/${barangayName}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    return await response.json();
+    const response = await axiosPrivate.get(`/api/complaints/barangay/${barangayName}`);
+    return response.data;
   },
 
   getAssignedComplaints: async (officialId) => {
-    const response = await fetch(`${API_BASE_URL}/api/complaints/assigned/${officialId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    return await response.json();
+    const response = await axiosPrivate.get(`/api/complaints/assigned/${officialId}`);
+    return response.data;
+  },
+
+  // Role-based endpoints
+  getBarangayCaptainComplaints: async (userId) => {
+    const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}`);
+    return response.data;
+  },
+
+  getBarangayOfficialComplaints: async (userId) => {
+    const response = await axiosPrivate.get(`/api/complaints/barangay-official/${userId}`);
+    return response.data;
   },
 };
 
