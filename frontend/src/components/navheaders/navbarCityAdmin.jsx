@@ -2,20 +2,20 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import IliganLogo from "./iliganLogo";
 
-// SuperAdminNavbar Component
-const SuperAdminNavbar = () => {
-  const links = ["Dashboard", "Complaints", "Barangays", "Reports", "Officials"];
+// CityAdminNavBar Component
+const CityAdminNavBar = () => {
+  const links = ["Dashboard", "Complaints", "Barangays", "Officials", "Reports"];
 
   return (
     <nav className="bg-white py-6 font-[Inter] font-black">
       <div className="max-w-[1591px] mx-auto px-8 flex justify-between items-center">
         <IliganLogo />
 
-        <ul className="flex items-center gap-8">
+        <ul className="flex items-center gap-5">
           {links.map((label) => (
             <li key={label}>
-              <NavLink
-                to={`/superadmin/${label.toLowerCase()}`}
+              <NavLink 
+                to={`/cityadmin/${label.toLowerCase()}`}
                 className={({ isActive }) =>
                   `text-base uppercase tracking-wide transition-all duration-200 pb-2 ${
                     isActive
@@ -34,4 +34,4 @@ const SuperAdminNavbar = () => {
   );
 };
 
-export default SuperAdminNavbar;
+export default CityAdminNavBar;

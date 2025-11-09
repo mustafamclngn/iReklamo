@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Complaint Received</title>
+    <style>
+      body { font-family: Arial, sans-serif; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background:#0ea5e9; color: #fff; padding: 12px; border-radius:6px }
+      .content { margin-top: 16px; }
+      .tracking { background:#f3f4f6; padding:10px; border-radius:4px; font-weight:bold }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>iReklamo</h2>
+      </div>
+      <div class="content">
+        <p>Hi {first_name},</p>
+        <p>We have received your complaint titled "{complaint_title}". Thank you for filing it with us.</p>
+        <p class="tracking">Your tracking ID: {tracking_id}</p>
+        <p>Please keep this ID for future reference. We will send updates to this email as your complaint progresses.</p>
+        <p>Regards,<br/>iReklamo Team</p>
+      </div>
+    </div>
+  </body>
+</html>

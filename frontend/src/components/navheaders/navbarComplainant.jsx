@@ -1,21 +1,21 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import IliganLogo from "./iliganLogo";
 
-// CityAdminNavBar Component
-const CityAdminNavBar = () => {
-  const links = ["Dashboard", "Complaints", "Barangays", "Reports", "Officials"];
+// ComplainantNavBar Component
+const ComplainantNavBar = () => {
+  const links = ["Know Iligan", "For Residents", "For Businesses", "For Visitors", "Transparency", "News", "Events"];
 
   return (
-    <nav className="bg-white py-6 font-[Inter] font-black">
+    <nav className="bg-white py-6 font-[Inter] font-black shadow mb-5">
       <div className="max-w-[1591px] mx-auto px-8 flex justify-between items-center">
         <IliganLogo />
 
-        <ul className="flex items-center gap-5">
+        <ul className="flex items-center gap-8">
           {links.map((label) => (
             <li key={label}>
-              <NavLink 
-                to={`/cityadmin/${label.toLowerCase()}`}
+              <NavLink
+                to={`/${label.toLowerCase()}`}
                 className={({ isActive }) =>
                   `text-base uppercase tracking-wide transition-all duration-200 pb-2 ${
                     isActive
@@ -34,4 +34,4 @@ const CityAdminNavBar = () => {
   );
 };
 
-export default CityAdminNavBar;
+export default ComplainantNavBar;

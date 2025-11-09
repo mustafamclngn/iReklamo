@@ -70,14 +70,6 @@ class User():
         self.user["first_name"] = value
 
     @property
-    def middle_name(self):
-        return self.user.get("middle_name")
-
-    @middle_name.setter
-    def middle_name(self, value):
-        self.user["middle_name"] = value
-
-    @property
     def last_name(self):
         return self.user.get("last_name")
 
@@ -94,20 +86,36 @@ class User():
         self.user["email"] = value
 
     @property
+    def contact_number(self):
+        return self.user.get("contact_number")
+
+    @contact_number.setter
+    def contact_number(self, value):
+        self.user["contact_number"] = value
+
+    @property
+    def barangay(self):
+        return self.user.get("barangay")
+
+    @barangay.setter
+    def barangay(self, value):
+        self.user["barangay"] = value
+
+    @property
     def user_role(self):
-        return self.user.get("user_role")
+        return self.user.get("role")  # FIXED: database column is "role" not "user_role"
 
     @user_role.setter
     def user_role(self, value):
-        self.user["user_role"] = value
+        self.user["role"] = value  # FIXED: database column is "role" not "user_role"
 
     @property
     def user_position(self):
-        return self.user.get("user_position")
+        return self.user.get("position")  # FIXED: database column is "position" not "user_position"
 
     @user_position.setter
     def user_position(self, value):
-        self.user["user_position"] = value
+        self.user["position"] = value  # FIXED: database column is "position" not "user_position"
 
     @property
     def user_password(self):

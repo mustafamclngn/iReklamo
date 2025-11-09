@@ -1,4 +1,5 @@
 import React from 'react';
+import { Copy } from 'lucide-react'
 
 const CU_FileComplaintPage = () => {
   return (
