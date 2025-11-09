@@ -1,7 +1,4 @@
-# Authentication routes - Implement with controllers in future
-# TODO: from app.controllers.auth_controller import AuthController
-
-from flask import Blueprint, request, jsonify
+from flask import Blueprint
 
 from app.controllers.auth.authenticationC import login_user, refresh_token, register_user
 from app.controllers.auth.revokeTokenC import revoke_token
@@ -24,12 +21,3 @@ def refresh():
 @auth_bp.route('/revoke', methods=['POST'])
 def revoke():
     return revoke_token()
-
-@auth_bp.route('/profile', methods=['GET'])
-def get_profile():
-    """
-    Get current user profile
-
-    TODO: Implement JWT authentication and integrate with AuthController.get_profile()
-    """
-    return jsonify({"message": "Profile endpoint - implement with raw SQL"})

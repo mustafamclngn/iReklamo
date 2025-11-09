@@ -7,12 +7,16 @@ import useRegister from '../../hooks/useRegister';
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 
+import useUserInfoApi from '../../api/userInfo';
+
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const CreateAdmin = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null
+
+  const { getBarangays, getRoles } = useUserInfoApi();
 
   // ==================
   // SETUP
@@ -47,8 +51,33 @@ const CreateAdmin = ({ isOpen, onClose }) => {
       const [isSuccessOpen, setIsSuccessOpen] = useState(false);
       const [successMessage, setSuccessMessage] = useState('');
 
+      // ================
+      // Dropdown data
+      const [barangays, setBarangays] = useState([]);
+      const [roles, setRoles] = useState([]);
+
       // =============
       // State update
+
+      // ================
+      // Fetch barangays & roles on open
+      useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const [barangayRes, rolesRes] = await Promise.all([
+              getBarangays(),
+              getRoles()
+            ]);
+
+            setBarangays(barangayRes.data || []);
+            setRoles(rolesRes.data || []);
+          } catch (err) {
+            console.error("Error fetching:", err);
+          }
+        };
+
+        if (isOpen) fetchData();
+      }, [isOpen]);
   
       // user reference state
       useEffect(() => {
@@ -241,15 +270,27 @@ const CreateAdmin = ({ isOpen, onClose }) => {
               </p>   
             </div>
 
-            {/* Other info fields */}
+            {/* ========== */}
+            {/* Barangay */}
             <div className="form-group">
               <label>Barangay</label>
-              <input 
+              <select
                 name="barangay"
                 value={formData.barangay}
                 onChange={handleChange}
-                required 
-              />
+                required
+              >
+                <option value="">Select Barangay</option>
+                {barangays.length > 0 ? (
+                  barangays.map((b) => (
+                    <option key={b.id} value={b.name || b.barangay_name}>
+                      {b.name || b.barangay_name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Loading...</option>
+                )}
+              </select>
             </div>
 
             <div className="form-group">
@@ -262,14 +303,27 @@ const CreateAdmin = ({ isOpen, onClose }) => {
               />
             </div>
 
+            {/* ========== */}
+            {/* Roles */}
             <div className="form-group">
               <label>Role</label>
-              <input 
+              <select
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                required 
-              />
+                required
+              >
+                <option value="">Select Role</option>
+                {roles.length > 0 ? (
+                  roles.map((r) => (
+                    <option key={r.id} value={r.name || r.role_name}>
+                      {r.name || r.role_name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Loading...</option>
+                )}
+              </select>
             </div>
 
             <div className="popup-footer">

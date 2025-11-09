@@ -132,9 +132,6 @@ def create_complaint():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-
-
-
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
     """
@@ -143,8 +140,6 @@ def get_complaint(complaint_id):
     TODO: Integrate with ComplaintController.get_complaint_by_id()
     """
     return jsonify({"message": f"Get complaint {complaint_id} endpoint - implement with raw SQL"})
-
-
 
 
 @complaints_bp.route('/<int:complaint_id>', methods=['PUT'])
@@ -156,10 +151,6 @@ def update_complaint(complaint_id):
     TODO: Integrate with ComplaintController.update_complaint()
     """
     return jsonify({"message": f"Update complaint {complaint_id} endpoint - implement with raw SQL"})
-
-
-
-
 
 @complaints_bp.route('/<int:complaint_id>', methods=['DELETE'])
 def delete_complaint(complaint_id):

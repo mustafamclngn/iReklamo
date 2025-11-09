@@ -1,5 +1,5 @@
 import './modal.css'
-import useUsersApi from "../../api/usersApi";
+import useUsersApi from "../../api/usersApi.js";
 import { useState } from 'react';
 
 import SuccessModal from './SuccessModal';
