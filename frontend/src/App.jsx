@@ -1,4 +1,8 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { FormProvider } from "./components/formcontext.jsx";
+
+// Layouts
 import SuperAdminLayout from "./layouts/superAdminLayout.jsx";
 import CityAdminLayout from "./layouts/cityAdminLayout.jsx";
 import BarangayCapLayout from "./layouts/brgyCapLayout.jsx";
@@ -42,27 +46,35 @@ import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
 // Import complainant pages
 import CU_HomePage from "./pages/complainant/homepage.jsx";
-import CU_FileComplaintPage from "./pages/complainant/createComplaint/filecomplaintpage.jsx";
 import CU_TrackComplaintPage from "./pages/complainant/trackComplaint/trackcomplaintpage.jsx";
+import CU_ComplainantInfoPage from "./pages/complainant/createComplaint/complainantinfo.jsx";
+import CU_ComplaintDetailsPage from "./pages/complainant/createComplaint/complaintdetails.jsx";
+import CU_ComplaintSummaryPage from "./pages/complainant/createComplaint/complaintsummary.jsx";
+import CU_CompletionMessagePage from "./pages/complainant/createComplaint/completionmessage.jsx";
+
 
 // Import shared official detail page
 import OfficialDetailsPage from "./pages/shared/OfficialDetailsPage.jsx";
 
 function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
-  const location = useLocation();
 
-    return (
-    <Routes>
-        {/* Home route (Default) */}
-        <Route path="/" element={<ComplainantHomeLayout />}>
-          <Route index element={<Navigate to="home" replace />} />
-          <Route path="home" element={<CU_HomePage />} />
-        </Route>
+  return (
+    <FormProvider>
+      <Routes>
+          {/* Home route (Default) */}
+          <Route path="/" element={<ComplainantHomeLayout />}>
+            <Route index element={<Navigate to="home" replace />} />
+            <Route path="home" element={<CU_HomePage />} />
+          </Route>
 
         {/* Complainant Route */}
         <Route element={<ComplainantLayout />}>
-          <Route path="/file-complaint" element={<CU_FileComplaintPage />} />
+          <Route path="/file-complaint/complainantinfo" element={<CU_ComplainantInfoPage />} />
+          <Route path="/file-complaint/complaintdetails" element={<CU_ComplaintDetailsPage />} />
+          <Route path="/file-complaint/summary" element={<CU_ComplaintSummaryPage />} />
+          <Route path="/file-complaint/completionmessage" element={<CU_CompletionMessagePage />} />
+
           <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
         </Route>
         
@@ -133,7 +145,8 @@ function App() {
       
       {/* other invalid routes*/}
       <Route path="*" element={<RedirectFallback />} />
-    </Routes>
+  </Routes>
+  </FormProvider>
   );
 }
 

@@ -49,7 +49,5 @@ def create_app(config_name=None):
             filename
         )
 
-    # TODO: Run schema.sql manually to create tables for raw SQL implementation
-    # Database tables should be created using the schema.sql file
 
     return app
