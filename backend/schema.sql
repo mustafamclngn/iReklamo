@@ -5,7 +5,6 @@
 -- - Barangay captain can assign complaints to kagawads (updates assigned_official_id).
 
 
-
 -- ==============================
 -- Roles — defines user permissions
 -- ==============================
@@ -14,6 +13,33 @@ CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(50) UNIQUE NOT NULL, 
         -- e.g., 'superadmin', 'city_admin', 'barangay_captain', 'kagawad'
     description TEXT
+
+-- Users table
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    user_name VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+	first_name VARCHAR(100),
+	last_name VARCHAR(100),
+    barangay VARCHAR(50),
+    position VARCHAR(100),
+    role VARCHAR(50) DEFAULT 'user',
+    user_password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User Info table
+CREATE TABLE user_info (
+    info_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    contact_number VARCHAR(20),
+    sex VARCHAR(10),
+    birthdate DATE,
+    purok VARCHAR(100),
+    street VARCHAR(150),
+	profile_picture VARCHAR(250)
+>>>>>>> origin/main
 );
 
 
