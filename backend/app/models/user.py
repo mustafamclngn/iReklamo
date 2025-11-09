@@ -102,12 +102,12 @@ class User():
         self.user["barangay"] = value
 
     @property
-    def role(self):
-        return self.user.get("role")  # FIXED: database column is "role" not "user_role"
+    def role_id(self):
+        return self.user.get("role_id")  # FIXED: database column is "role" not "user_role"
 
-    @role.setter
-    def role(self, value):
-        self.user["role"] = value  # FIXED: database column is "role" not "user_role"
+    @role_id.setter
+    def role_id(self, value):
+        self.user["role_id"] = value  # FIXED: database column is "role" not "user_role"
 
     @property
     def position(self):

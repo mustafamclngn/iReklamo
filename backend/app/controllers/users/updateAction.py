@@ -34,7 +34,7 @@ def revoke_permissions(user_id):
         return jsonify({"error": "User not found"}), 404
     
     updates = {
-        "role":"on_hold",
+        "role_id":5,
         "refresh_token": "",
         "token_version": data.get("token_version", 0) + 1
     }

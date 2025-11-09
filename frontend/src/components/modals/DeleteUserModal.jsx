@@ -101,9 +101,9 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
       <ConfirmDelete 
         isOpen={isConfirmOpen} 
         onClose={() => setIsConfirmOpen(false)}
-        onConfirm={() => {
+        onConfirm={(type) => {
           setIsConfirmOpen(false)
-          onClose() 
+          onClose(type) 
         }}
         assignedComplaints={assignedComplaints}
         revokeType={revokeType}

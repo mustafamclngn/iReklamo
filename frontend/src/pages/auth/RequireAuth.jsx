@@ -18,20 +18,20 @@ const RequireAuth = ({ allowedRoles }) => {
         let redirectPath = "/"
 
         switch (userRole){
-            case "super_admin":
-             redirectPath = "/superadmin/dashboard";
-            break;
-        case "city_admin":
-            redirectPath = "/cityadmin/dashboard";
-            break;
-        case "brgy_cap":
-            redirectPath = "/brgycap/dashboard";
-            break;
-        case "brgy_off":
-            redirectPath = "/brgyoff/dashboard";
-            break;
-        default:
-            redirectPath = "/home";
+            case 1:
+                redirectPath = "/superadmin/dashboard";
+                break;
+            case 2:
+                redirectPath = "/cityadmin/dashboard";
+                break;
+            case 3:
+                redirectPath = "/brgycap/dashboard";
+                break;
+            case 4:
+                redirectPath = "/brgyoff/dashboard";
+                break;
+            default:
+                redirectPath = "/home";
         }
 
         return <Navigate to={redirectPath} replace />;

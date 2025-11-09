@@ -6,7 +6,7 @@ import BarangayOffLayout from "./layouts/brgyOffLayout.jsx";
 import ComplainantHomeLayout from "./layouts/complainantHomeLayout.jsx";
 import ComplainantLayout from "./layouts/complainantLayout.jsx";
 import AuthLayout from "./layouts/authLayout.jsx";
-import RedirectFallback from "./Redirect.jsx";
+import RedirectFallback from "./utils/Redirect.jsx";
 
 // Import Authentication Pages
 import LoginPage from "./pages/auth/logInPage.jsx";
@@ -67,9 +67,9 @@ function App() {
         </Route>
         
       <Route element={<PersistLogin />}>
-        <Route element={<RequireAuth allowedRoles={["super_admin"]}/>}>
+        <Route element={<RequireAuth allowedRoles={[1]}/>}>
           {/* SuperAdmin Routes */}
-          <Route path="/superadmin" element={<SuperAdminLayout />}>
+          <Route path="/superadmin" element={<SuperAdminLayout />}> 
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="complaints" element={<ComplaintsPage />} />
@@ -82,7 +82,7 @@ function App() {
           </Route>
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={["city_admin"]}/>}>
+        <Route element={<RequireAuth allowedRoles={[2]}/>}>
           {/* CityAdmin Routes */}
           <Route path="/cityadmin" element={<CityAdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -97,7 +97,7 @@ function App() {
           </Route>
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={["brgy_cap"]}/>}>
+        <Route element={<RequireAuth allowedRoles={[3]}/>}>
           {/* Barangay Captain Routes */}
           <Route path="/brgycap" element={<BarangayCapLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -112,7 +112,7 @@ function App() {
           </Route>
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={["brgy_off"]}/>}>
+        <Route element={<RequireAuth allowedRoles={[4]}/>}>
           {/* Barangay Official Routes */}
           <Route path="/brgyoff" element={<BarangayOffLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />

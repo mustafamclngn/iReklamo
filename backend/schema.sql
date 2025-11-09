@@ -1,19 +1,53 @@
--- Database schema for iReklamo
--- Run this file to create tables for raw SQL implementation
+-- - Complainant submits form → creates record in complainants + complaints.
+-- - Barangay official sees complaints for their barangay (WHERE complaints.barangay_id = users.barangay_id).
+-- - City admin sees all complaints (no filter).
+-- - Superadmin can manage users, roles, and barangays.
+-- - Barangay captain can assign complaints to kagawads (updates assigned_official_id).
 
--- Users table
-CREATE TABLE users (
+
+-- ==============================
+-- Roles — defines user permissions
+-- ==============================
+CREATE TABLE IF NOT EXISTS roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL CHECK (
+        name IN (
+            'super_admin',
+            'city_admin',
+            'brgy_cap',
+            'brgy_off',
+            'on_hold'
+        )
+    ),
+    description TEXT
+);
+
+-- ==============================
+-- Barangays — list of barangays
+-- ==============================
+CREATE TABLE IF NOT EXISTS barangays (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+
+-- ==============================
+-- Users — admins & officials (no complainants here)
+-- ==============================
+CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     user_name VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-	first_name VARCHAR(100),
-	last_name VARCHAR(100),
-    barangay VARCHAR(50),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    barangay_id INTEGER REFERENCES barangays(id), --> changes in: fetching data for view official
     position VARCHAR(100),
-    role VARCHAR(50) DEFAULT 'user',
+    role_id INTEGER REFERENCES roles(id), --> changes in: fetching data for authorization
     user_password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    refresh_token VARCHAR(255),
+    token_version BIGINT DEFAULT 0
 );
 
 -- User Info table
@@ -28,24 +62,35 @@ CREATE TABLE user_info (
 	profile_picture VARCHAR(250)
 );
 
--- Complaints table
+-- ==============================
+-- Complaints — filed by complainants
+-- ==============================
 CREATE TABLE IF NOT EXISTS complaints (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
+    complaint_code VARCHAR(20) UNIQUE,
     title VARCHAR(200) NOT NULL,
+    case_type VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    status VARCHAR(50) DEFAULT 'pending',
-    priority VARCHAR(20) DEFAULT 'medium',
-    location VARCHAR(255),
-    image_url VARCHAR(500),
-    user_id INTEGER NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    full_address TEXT NOT NULL,
+    specific_location VARCHAR(255),
+            status VARCHAR(50) DEFAULT 'Pending',
+            priority VARCHAR(20) DEFAULT 'Moderate',
+    barangay_id INTEGER REFERENCES barangays(id),
+    assigned_official_id INTEGER REFERENCES users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create indexes for performance
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_complaints_user_id ON complaints(user_id);
-CREATE INDEX IF NOT EXISTS idx_complaints_status ON complaints(status);
+
+-- ==============================
+-- (OPNTIONAL) Complaint History — track status changes
+-- ==============================
+CREATE TABLE IF NOT EXISTS complaint_history (
+    id SERIAL PRIMARY KEY,
+    complaint_id INTEGER REFERENCES complaints(id),
+    updated_by INTEGER REFERENCES users(user_id),
+    old_status VARCHAR(50),
+    new_status VARCHAR(50),
+    notes TEXT,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

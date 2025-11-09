@@ -1,14 +1,14 @@
 export const getRoleBasePath = (auth) => {
-  const role = auth?.user?.role || auth?.roles?.[0];
+  const role = auth?.user?.role || auth?.role?.[0];
   
   switch (role) {
-    case 'super_admin': 
+    case 1: 
       return '/superadmin';
-    case 'city_admin': 
+    case 2: 
       return '/cityadmin';
-    case 'brgy_cap': 
+    case 3: 
       return '/brgycap';
-    case 'brgy_off': 
+    case 4: 
       return '/brgyoff';
     default: 
       return '/';

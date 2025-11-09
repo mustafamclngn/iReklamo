@@ -38,9 +38,9 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
   };
 
   const handleConfirm = () => {
-    onClose();
-    onConfirm();
-  }
+  onClose();
+  onConfirm(revokeType);  
+  };
 
   return (
     <>

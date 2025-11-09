@@ -87,16 +87,16 @@ const LogInPage = () => {
             const userRole = role?.[0];
             console.log(auth);
             switch (userRole) {
-                case "super_admin":
+                case 1: 
                     redirectPath = "/superadmin/dashboard";
                     break;
-                case "city_admin":
+                case 2:
                     redirectPath = "/cityadmin/dashboard";
                     break;
-                case "brgy_cap":
+                case 3:
                     redirectPath = "/brgycap/dashboard";
                     break;
-                case "brgy_off":
+                case 4:
                     redirectPath = "/brgyoff/dashboard";
                     break;
                 default:

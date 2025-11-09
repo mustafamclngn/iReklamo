@@ -7,7 +7,7 @@ officialsList_bp = Blueprint('superadmin_officials', __name__, url_prefix='/api/
 
 @officialsList_bp.route('/', methods=['GET'])
 @verify_jwt
-@verify_roles('super_admin', 'city_admin', 'brgy_cap', 'brgy_off')
+@verify_roles(1, 2, 3, 4)
 def get_all_officials():
     try:
         barangay = request.args.get('barangay')
@@ -19,8 +19,8 @@ def get_all_officials():
             "users.first_name",
             "users.last_name",
             "users.email",
-            "users.role",
-            "users.barangay",
+            "users.role_id",
+            "barangays.name",
             "users.position",
             "users.created_at",
             "user_info.contact_number",
@@ -33,7 +33,7 @@ def get_all_officials():
         
         selector.special_col(columns)
         
-        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id"
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         result = selector.sort("user_id", "DESC").execute().retDict()
 
@@ -47,7 +47,7 @@ def get_all_officials():
         if barangay:
             officials = [
                 user for user in all_users 
-                if user.get('barangay') == barangay and user.get('role') == 'brgy_off'
+                if user.get('barangay') == barangay and user.get('role_id') == 4
             ]
         else:
             officials = [
@@ -69,6 +69,8 @@ def get_all_officials():
         }), 500
 
 @officialsList_bp.route('/<int:user_id>', methods=['GET'])
+@verify_jwt
+@verify_roles(1, 2, 3, 4)
 def get_official_by_id(user_id):
     try:
         selector = Select().table("users")
@@ -78,8 +80,8 @@ def get_official_by_id(user_id):
             "users.first_name",
             "users.last_name",
             "users.email",
-            "users.role",
-            "users.barangay",
+            "users.role_id",
+            "barangays.name",
             "users.position",
             "users.created_at",
             "user_info.contact_number",
@@ -91,7 +93,8 @@ def get_official_by_id(user_id):
         ]
         
         selector.special_col(columns)
-        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id"
+        
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         result = selector.search("user_id", user_id, table="users").execute().retDict()
         

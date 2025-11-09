@@ -52,10 +52,9 @@ def register_user():
         "email": email,
         "first_name": "N/A",
         "last_name": "N/A",
-        "contact_number": "",
-        "barangay": barangay,
+        "barangay_id": barangay,
         "position": position,
-        "role": role,
+        "role_id": role,
         "user_password": random_pwd
     })
 
@@ -92,12 +91,17 @@ def login_user():
     # ===============
     # fetch: hashed password
     stored_hash = user_data.get("user_password")
+
+    print("User data:", user_data)
+    print("Stored hash:", stored_hash)
+    print("pwd:", pwd)
+
     if not check_password_hash(stored_hash, pwd):
         return jsonify({"error": "Invalid password"}), 401
     
     # ===============
     # fetch: role, token_version, id
-    role = [user_data.get("role")]  
+    role = [user_data.get("role_id")]  
     user_id = user_data.get("user_id")
     token_version = user_data.get("token_version", 0)
 
@@ -144,8 +148,7 @@ def login_user():
             "first_name": user_data["first_name"],
             "last_name": user_data["last_name"],
             "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
-            "contact_number": user_data.get("contact_number"),
-            "barangay": user_data.get("barangay")
+            "barangay_id": user_data.get("barangay_id")
         },
         "role": role,
         "accessToken": access_token
@@ -186,7 +189,7 @@ def refresh_token():
         if user_data.get("token_version") != token_version:
             return jsonify({"message": "Token revoked or invalid"}), 403
         
-        role = [user_data.get("role")]  
+        role = [user_data.get("role_id")]  
 
         new_access_token = jwt.encode(
             {
