@@ -38,8 +38,8 @@ const ComplaintCardSuperAdmin = ({
 
           {/* Complaint Info - WITH BARANGAY */}
           <div className="flex-1">
-            <h3 className="text-xl font-bold mb-2">{complaint.title}</h3>
-            <p className="text-gray-600 mb-1">{complaint.description}</p>
+            <p className="text-xl font-bold mb-1">{complaint.complaint_code}</p>
+            <h3 className="text-gray-500 text-sm font-medium mb-2">{complaint.title}</h3>
             <div className="flex gap-4 text-sm">
               <p className="text-gray-500">
                 <span className="font-medium">Barangay:</span> {complaint.barangay || 'N/A'}

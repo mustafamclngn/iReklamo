@@ -67,9 +67,10 @@ const CA_ComplaintsPage = () => {
   const filteredComplaints = complaints.filter(complaint => {
     // Search filter
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       complaint.title?.toLowerCase().includes(searchLower) ||
       complaint.description?.toLowerCase().includes(searchLower) ||
+      complaint.complaint_code?.toLowerCase().includes(searchLower) ||
       complaint.id?.toString().includes(searchLower) ||
       (complaint.barangay && complaint.barangay.toLowerCase().includes(searchLower)) ||
       (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower));
