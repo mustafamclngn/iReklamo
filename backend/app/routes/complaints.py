@@ -1,29 +1,137 @@
-# Complaint routes - Implement with controllers in future
-# TODO: from app.controllers.complaint_controller import ComplaintController
-
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from datetime import datetime
+from app.config import DB_CONFIG
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
 
-@complaints_bp.route('/', methods=['GET'])
+CORS(complaints_bp)
+
+
+
+# FOR GENERATING TRACKING ID
+def generate_complaint_id(cursor):
+    today = datetime.now().strftime("%Y%m%d")  # YYYYMMDD
+    # Count how many complaints exist today
+    cursor.execute("SELECT COUNT(*) FROM complaints WHERE created_at::date = CURRENT_DATE;")
+    count_today = cursor.fetchone()['count'] + 1  # Start from 1
+    sequential = str(count_today).zfill(4)  # Pad to 4 digits, e.g., 0001
+    return f"CMP-{today}-{sequential}"
+
+
+# LIST OF ALL COMPLAINTS
+@complaints_bp.route('/all_complaints', methods=['GET'])
 def get_complaints():
-    """
-    Get all complaints
+    conn = psycopg2.connect(**DB_CONFIG)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    TODO: Integrate with ComplaintController.get_all_complaints()
-    """
-    return jsonify({"message": "Get complaints endpoint - implement with raw SQL"})
+    cursor.execute("SELECT * FROM complaints;")
 
-@complaints_bp.route('/', methods=['POST'])
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify(results)
+
+
+# LIST OF ALL BARANGAYS
+@complaints_bp.route('/barangays', methods=['GET'])
+def get_barangays():
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        cursor.execute("""
+            SELECT id, name
+            FROM barangays
+            ORDER BY name;
+        """)
+
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+@complaints_bp.route('/create_complaint', methods=['POST'])
 def create_complaint():
-    """
-    Create a new complaint
+    try:
+        data = request.get_json()
+        print("Received complaint:", data)
 
-    Expected data: title, description, category, user_id (priority, location, image_url optional)
-    TODO: Integrate with ComplaintController.create_complaint()
-    """
-    return jsonify({"message": "Create complaint endpoint - implement with raw SQL"})
+        conn = psycopg2.connect(
+            host=DB_CONFIG['host'],
+            port=DB_CONFIG['port'],
+            database=DB_CONFIG['database'],
+            user=DB_CONFIG['user'],
+            password=DB_CONFIG['password']
+        )
+
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            complaint_id_str = generate_complaint_id(cursor)
+
+            #insert complainant info
+            cursor.execute("""
+                INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id;
+            """, (
+                data['first_name'],         
+                data['last_name'], 
+                data['sex'], 
+                data['age'],
+                data['contact_number'], 
+                data['email'], 
+                int(data.get('barangay'))
+            ))
+            complainant_id = cursor.fetchone()['id']
+
+            #insert complaint
+            cursor.execute("""
+                INSERT INTO complaints (
+                    complaint_code, title, case_type, description, full_address, specific_location,
+                    complainant_id, barangay_id, assigned_official_id
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id;
+            """, (
+                complaint_id_str,              # tracking id
+                data['complaint_title'],       # title
+                data['case_type'],             # case_type
+                data['description'],           # description
+                data['full_address'],          # full_address
+                data['specific_location'],     # specific_location
+                complainant_id,                # complainant_id FK
+                int(data.get('barangay')),     # barangay_id FK
+                1                              # assigned_official_id NULL
+            ))
+            complaint_id = cursor.fetchone()['id']
+
+
+            conn.commit()
+
+
+        # Save data to DB here
+        return jsonify({
+            "success": True, 
+            "message": "Complaint created!",
+            'complainant_id': complainant_id,
+            'complaint_id': complaint_id,
+        }), 201
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+
+
 
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
@@ -33,6 +141,9 @@ def get_complaint(complaint_id):
     TODO: Integrate with ComplaintController.get_complaint_by_id()
     """
     return jsonify({"message": f"Get complaint {complaint_id} endpoint - implement with raw SQL"})
+
+
+
 
 @complaints_bp.route('/<int:complaint_id>', methods=['PUT'])
 def update_complaint(complaint_id):
@@ -44,6 +155,10 @@ def update_complaint(complaint_id):
     """
     return jsonify({"message": f"Update complaint {complaint_id} endpoint - implement with raw SQL"})
 
+
+
+
+
 @complaints_bp.route('/<int:complaint_id>', methods=['DELETE'])
 def delete_complaint(complaint_id):
     """
@@ -52,6 +167,11 @@ def delete_complaint(complaint_id):
     TODO: Integrate with ComplaintController.delete_complaint()
     """
     return jsonify({"message": f"Delete complaint {complaint_id} endpoint - implement with raw SQL"})
+
+
+
+
+
 
 @complaints_bp.route('/user/<int:user_id>', methods=['GET'])
 def get_user_complaints(user_id):
