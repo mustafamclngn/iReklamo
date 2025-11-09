@@ -283,8 +283,8 @@ const CreateAdmin = ({ isOpen, onClose }) => {
                 <option value="">Select Barangay</option>
                 {barangays.length > 0 ? (
                   barangays.map((b) => (
-                    <option key={b.id} value={b.name || b.barangay_name}>
-                      {b.name || b.barangay_name}
+                    <option key={b.id} value={b.id}>
+                      {b.name}
                     </option>
                   ))
                 ) : (
@@ -316,8 +316,8 @@ const CreateAdmin = ({ isOpen, onClose }) => {
                 <option value="">Select Role</option>
                 {roles.length > 0 ? (
                   roles.map((r) => (
-                    <option key={r.id} value={r.name || r.role_name}>
-                      {r.name || r.role_name}
+                    <option key={r.id} value={r.id}>
+                      {r.name}
                     </option>
                   ))
                 ) : (

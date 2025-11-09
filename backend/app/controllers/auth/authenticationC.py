@@ -52,9 +52,9 @@ def register_user():
         "email": email,
         "first_name": "N/A",
         "last_name": "N/A",
-        "barangay_id": barangay,
+        "barangay_id": int(barangay),
         "position": position,
-        "role_id": role,
+        "role_id": int(role),
         "user_password": random_pwd
     })
 
