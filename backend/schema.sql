@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL, 
         -- e.g., 'superadmin', 'city_admin', 'barangay_captain', 'kagawad'
-    description TEXT
+    description TEXT 
+)
 
 -- Users table
 CREATE TABLE users (
@@ -39,7 +40,6 @@ CREATE TABLE user_info (
     purok VARCHAR(100),
     street VARCHAR(150),
 	profile_picture VARCHAR(250)
->>>>>>> origin/main
 );
 
 

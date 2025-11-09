@@ -70,10 +70,10 @@ function App() {
 
         {/* Complainant Route */}
         <Route element={<ComplainantLayout />}>
-          <Route path="/file-complaint_complainanatinfo" element={<CU_ComplainantInfoPage />} />
-          <Route path="/file-complaint_complaintdetails" element={<CU_ComplaintDetailsPage />} />
-          <Route path="/file-complaint_complaintsummary" element={<CU_ComplaintSummaryPage />} />
-          <Route path="/file-complaint_completionmessage" element={<CU_CompletionMessagePage />} />
+          <Route path="/file-complaint/complainantinfo" element={<CU_ComplainantInfoPage />} />
+          <Route path="/file-complaint/complaintdetails" element={<CU_ComplaintDetailsPage />} />
+          <Route path="/file-complaint/summary" element={<CU_ComplaintSummaryPage />} />
+          <Route path="/file-complaint/completionmessage" element={<CU_CompletionMessagePage />} />
 
           <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
         </Route>

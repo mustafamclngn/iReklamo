@@ -44,7 +44,7 @@ const HeroBannerHome = () => {
     if (value) {
       // navigate to complainant info when choosing file-complaint (shorthand used elsewhere)
       if (value === "file-complaint") {
-        navigate(`/file-complaint/complainantinfo`);
+        navigate('/file-complaint/complainantinfo');
       } else {
         navigate(`/${value}`);
       }
