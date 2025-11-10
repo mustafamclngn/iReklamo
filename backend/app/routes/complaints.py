@@ -5,7 +5,7 @@ from psycopg2.extras import RealDictCursor
 from datetime import datetime
 from app.config import DB_CONFIG
 
-from app.controllers.complaints.complaintList import list_by_assignee
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_complaints
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
@@ -27,16 +27,7 @@ def generate_complaint_id(cursor):
 # LIST OF ALL COMPLAINTS
 @complaints_bp.route('/all_complaints', methods=['GET'])
 def get_complaints():
-    conn = psycopg2.connect(**DB_CONFIG)
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-    cursor.execute("SELECT * FROM complaints;")
-
-    results = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    return jsonify(results)
+    return get_all_complaints()
 
 
 # LIST OF ALL BARANGAYS
@@ -164,3 +155,7 @@ def delete_complaint(complaint_id):
 @complaints_bp.route('ongoing/<int:assignee>', methods=['GET'])
 def get_user_complaints(assignee):
     return list_by_assignee(assignee)
+
+@complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
+def assign_complaint(complaint_id, assign_official_id):
+    return assign_complaint(complaint_id, assign_official_id)

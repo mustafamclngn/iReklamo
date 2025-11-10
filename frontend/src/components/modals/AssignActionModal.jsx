@@ -1,17 +1,46 @@
 import './modal.css'
 import { useEffect, useState } from 'react'
 import useUserInfoApi from '../../api/userInfo'
+import useOfficialsApi from '../../api/officialsApi';
+import useComplaintsApi from '../../api/complaintsApi';
+import useAuth from '../../hooks/useAuth';
 
-const AssignActionModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+const AssignActionModal = ({ isOpen, onClose, Action }) => {
 
-  const { getBarangays } = useUserInfoApi();
+  // ===========
+  // User states
+  const { auth } = useAuth();
+  const userRole = auth.role[0];
+  const userBrgy = auth.user.barangay_id;
+
+  // ===========
+  // Barangay states
+  const { getBarangays, getBarangayById } = useUserInfoApi();
   const [barangays, setBarangays] = useState([]);
   const [selectedBarangay, setSelectedBarangay] = useState('');
 
+  // ===========
+  // Official states
+  const { getOfficialsByBarangay } = useOfficialsApi();
+  const [officials, setOfficials] = useState([]);
+  const [selectedOfficial, setSelectedOfficial] = useState('');
+
+  // ===========
+  // Complaint states
+  const { complaintsByBarangayId } = useComplaintsApi();
+  const [complaints, setComplaints] = useState([]);
+  const [selectedComplaint, setSelectedComplaint] = useState('');
+
+  // ===========
+  // Component contents
+  let header = null;
+  let content = null;
+
+  if (!isOpen) return null;
+
   // Fetch barangays when modal opens
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBarangayList = async () => {
       try {
         const res = await getBarangays();
         setBarangays(res.data || []);
@@ -20,12 +49,25 @@ const AssignActionModal = ({ isOpen, onClose }) => {
       }
     };
 
-    if (isOpen) fetchData();
-  }, [isOpen]);
+    const fetchBarangay = async () => {
+      try {
+        const res = await getBarangayById(userBrgy);
+        setBarangays(res.barangay || []);
+        setSelectedBarangay(res.barangay.id || null)
+      } catch (err) {
+        console.error("Error fetching barangay:", err);
+      }
+    };
 
-  const handleChange = (e) => {
-    setSelectedBarangay(e.target.value);
-  };
+    if (isOpen){
+       if (userRole === 1 || userRole === 2) {
+        fetchBarangayList();
+      }
+      else if (userRole === 3 || userRole === 4) {
+        fetchBarangay();
+      }
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,11 +75,101 @@ const AssignActionModal = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  if (Action === "Assign Complaint"){
+    // Fetch barangay officials when barangay changes
+    useEffect(() => {
+      const fetchOfficials = async () => {
+        try {
+          const res = await getOfficialsByBarangay(selectedBarangay);
+          setOfficials(res.data || []);
+        } catch (err) {
+          console.error("Error fetching officials:", err);
+        }
+      };
+
+      if (selectedBarangay) {
+        fetchOfficials();
+      }
+    }, [selectedBarangay]);
+
+    header = (
+      <h2 className="title">Assign Complaint</h2>
+    )
+
+    content = (
+      <div className="form-group">
+        <label>Official</label>
+        <select
+          name="official"
+          value={selectedOfficial}
+          onChange={(e) => setSelectedOfficial(e.target.value)}
+          required
+        >
+          <option value="">Select Official</option>
+          {officials.length > 0 ? (
+            officials.map((o) => (
+              <option key={o.user_id} value={o.user_id}>
+                {o.first_name} {o.last_name}
+              </option>
+            ))
+          ) : (
+            <option disabled>Loading...</option>
+          )}
+        </select>
+      </div>
+      )
+  }
+
+  else if (Action === "Assign Official"){
+    // Fetch barangay complaints when barangay changes
+    useEffect(() => {
+      const fetchComplaints = async () => {
+        try {
+          const res = await complaintsByBarangayId(selectedBarangay);
+          setOfficials(res.data || []);
+        } catch (err) {
+          console.error("Error fetching complaints:", err);
+        }
+      };
+
+      if (selectedBarangay) {
+        fetchComplaints();
+      }
+    }, [selectedBarangay]);
+
+    header = (
+      <h2 className="title">Assign Official</h2>
+    )
+
+    content = (
+      <div className="form-group">
+        <label>Complaint</label>
+        <select
+          name="complaint"
+          value={selectedComplaint}
+          onChange={(e) => setSelectedComplaint(e.target.value)}
+          required
+        >
+          <option value="">Select Complaint</option>
+          {complaints.length > 0 ? (
+            complaints.map((c) => (
+              <option key={c.complaint_id} value={c.complaint_id}>
+                {c.complaint_code}: {o.complaint_title}
+              </option>
+            ))
+          ) : (
+            <option disabled>Loading...</option>
+          )}
+        </select>
+      </div>
+      )
+  }
+
   return (
     <div className="popup-overlay">
       <div className="popup-content">
         <button onClick={onClose} className="popup-close">✕</button>
-        <h2 className="title">Assign Action</h2>
+        {header}
 
         <form onSubmit={handleSubmit} className="form">
           <div className="form-group">
@@ -45,8 +177,9 @@ const AssignActionModal = ({ isOpen, onClose }) => {
             <select
               name="barangay"
               value={selectedBarangay}
-              onChange={handleChange}
+              onChange={(e) => setSelectedBarangay(e.target.value)}
               required
+              disabled = {userRole === 3 || userRole === 4}
             >
               <option value="">Select Barangay</option>
               {barangays.length > 0 ? (
@@ -61,8 +194,10 @@ const AssignActionModal = ({ isOpen, onClose }) => {
             </select>
           </div>
 
+          {content}
+
           <div className="popup-footer">
-            <button type="submit" className="okay-button">Assign</button>
+            <button type="submit" className="okay-button" disabled = {!selectedBarangay || !selectedOfficial}>Assign</button>
             <button type="button" onClick={onClose} className="revoke-button">Cancel</button>
           </div>
         </form>
