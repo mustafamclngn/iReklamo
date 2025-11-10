@@ -22,7 +22,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
       try {
         console.log("Searching for complaints for user:", user_id)
         const response = await complaintsApi.ongoingComplaintsAssignee(user_id)
-        setAssignedComplaints(response?.data || response || [])
+        setAssignedComplaints(response.data || [])
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)
         setAssignedComplaints([])

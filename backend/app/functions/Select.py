@@ -74,7 +74,7 @@ class Select():
                 else:
                     conditions.append(f"{search_tag} LIKE %s")
                     self.params.append(f"%{val}%")
-            self.searchquery = "WHERE " + {search_mult_connect}.join(conditions)
+            self.searchquery = "WHERE " + (search_mult_connect).join(conditions)
 
         elif tag and key:
             search_tag = self.aliascolumn.get(tag, f"{table}.{tag}")
