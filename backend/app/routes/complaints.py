@@ -321,29 +321,55 @@ def create_complaint():
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
     """
-    Get a specific complaint by ID
+    Get a specific complaint by ID with joined data
     """
     try:
-        selector = Select().table("complaints")
+        # Use raw SQL with JOINs to get complete complaint data
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        columns = [
-            "complaints.id",
-            "complaints.complaint_code",
-            "complaints.title",
-            "complaints.case_type",
-            "complaints.description",
-            "complaints.full_address",
-            "complaints.specific_location",
-            "complaints.status",
-            "complaints.priority",
-            "complaints.barangay_id",
-            "complaints.assigned_official_id",
-            "complaints.created_at",
-            "complaints.updated_at"
-        ]
+        query = """
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.barangay_id,
+                complaints.assigned_official_id,
+                complaints.created_at,
+                complaints.updated_at,
+                complaints.complainant_id,
+                -- Joined barangay data
+                barangays.name as barangay,
+                -- Joined complainant data
+                complainants.first_name as complainant_first_name,
+                complainants.last_name as complainant_last_name,
+                complainants.sex as complainant_sex,
+                complainants.age as complainant_age,
+                complainants.contact_number as complainant_contact_number,
+                complainants.email as complainant_email,
+                -- Joined assigned official data
+                CASE
+                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
+                    THEN CONCAT(users.first_name, ' ', users.last_name)
+                    ELSE 'Unassigned'
+                END as assignedOfficial
+            FROM complaints
+            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
+            LEFT JOIN complainants ON complaints.complainant_id = complainants.id
+            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
+            WHERE complaints.id = %s
+        """
 
-        selector.special_col(columns)
-        result = selector.search("id", complaint_id, table="complaints").execute().retDict()
+        cursor.execute(query, (complaint_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
 
         if not result:
             return jsonify({
@@ -351,9 +377,12 @@ def get_complaint(complaint_id):
                 'error': 'Complaint not found'
             }), 404
 
+        # Convert RealDictCursor result to regular dict
+        complaint_data = dict(result)
+
         return jsonify({
             'success': True,
-            'data': result
+            'data': complaint_data
         }), 200
 
     except Exception as e:

@@ -29,7 +29,7 @@ const ComplaintCardSuperAdmin = ({
             onClick={() => onPriorityUpdate(complaint)}
             className="flex items-center justify-center flex-shrink-0 bg-transparent border-0 p-0 cursor-pointer hover:opacity-80 transition-opacity mt-1"
             style={{ width: "20px", height: "20px" }}
-            title={complaint.priority}
+            title={`Priority: ${complaint.priority}`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M18.4212 10.0002C18.4212 14.651 14.651 18.4212 10.0002 18.4212C5.34933 18.4212 1.5791 14.651 1.5791 10.0002C1.5791 5.34933 5.34934 1.5791 10.0002 1.5791C14.651 1.5791 18.4212 5.34934 18.4212 10.0002Z" fill={priorityColors[complaint.priority]}/>
