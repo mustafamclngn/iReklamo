@@ -7,7 +7,7 @@ def list_by_assignee(assignee):
         result = selector\
                     .table("complaints")\
                     .search(search_mult={
-                        "assignee_official_id": assignee,
+                        "assigned_official_id": assignee,
                         "status": "in-progress"
                     })\
                     .execute().retDict()

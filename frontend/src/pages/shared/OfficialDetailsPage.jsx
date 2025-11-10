@@ -85,6 +85,7 @@ const OfficialDetailsPage = () => {
     if (!official) return 0;
     
     const fields = [
+      official.user_name,
       official.first_name,
       official.last_name,
       official.sex,

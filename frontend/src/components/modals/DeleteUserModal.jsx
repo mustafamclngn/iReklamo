@@ -32,7 +32,19 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
     fetchComplaints()
   }, [isOpen, user_id])
 
+  const getRoleLabel = (roleId) => {
+    switch(roleId) {
+      case 1: return 'Super Admin';
+      case 2: return 'City Admin';
+      case 3: return 'Barangay Captain';
+      case 4: return 'Barangay Official';
+      default: return roleId || 'N/A';
+    }
+  };
+
   if (!isOpen || !deleteData) return null
+
+  console.log(deleteData);
 
   return (
     <>
@@ -47,7 +59,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
             </div>
             <div className="form-group">
               <label>Barangay</label>
-              <input value={deleteData.barangay || ""} readOnly />
+              <input value={deleteData.barangay_name || ""} readOnly />
             </div>
             <div className="form-group">
               <label>Position</label>
@@ -55,7 +67,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
             </div>
             <div className="form-group">
               <label>Role</label>
-              <input value={deleteData.role || ""} readOnly />
+              <input value={getRoleLabel(deleteData.role_id) || ""} readOnly />
             </div>
             <div className="form-group">
               <label>Ongoing Assignments</label>

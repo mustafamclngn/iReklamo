@@ -16,6 +16,7 @@ def get_all_officials():
         
         columns = [
             "users.user_id",
+            "users.user_name",
             "users.first_name",
             "users.last_name",
             "users.email",
@@ -77,6 +78,7 @@ def get_official_by_id(user_id):
         
         columns = [
             "users.user_id",
+            "users.user_name",
             "users.first_name",
             "users.last_name",
             "users.email",
