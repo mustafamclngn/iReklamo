@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CU_TrackComplaintPage = () => {
   const [complaintId, setComplaintId] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = () => {
+    if (!complaintId.trim()) return;
+    navigate(`/track/${complaintId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -27,6 +34,7 @@ const CU_TrackComplaintPage = () => {
               />
               
               <button
+                onClick={handleSubmit}
                 className="w-full bg-[#66BBFB] hover:bg-[#5DADE2] text-white px-6 py-4 rounded-xl font-bold text-2xl transition-colors"
               >
                 SUBMIT
@@ -42,6 +50,6 @@ const CU_TrackComplaintPage = () => {
       </div>
     </div>
   );
-}
+};
 
 export default CU_TrackComplaintPage;
