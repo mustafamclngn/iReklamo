@@ -56,6 +56,9 @@ import CU_CompletionMessagePage from "./pages/complainant/createComplaint/comple
 // Import shared official detail page
 import OfficialDetailsPage from "./pages/shared/OfficialDetailsPage.jsx";
 
+// Import track complaint pages
+import CU_TrackComplaintDetailsPage from "./pages/complainant/trackComplaint/trackcomplaintdetailspage.jsx"
+
 function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
 
@@ -74,8 +77,8 @@ function App() {
           <Route path="/file-complaint/complaintdetails" element={<CU_ComplaintDetailsPage />} />
           <Route path="/file-complaint/summary" element={<CU_ComplaintSummaryPage />} />
           <Route path="/file-complaint/completionmessage" element={<CU_CompletionMessagePage />} />
-
           <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
+          <Route path="/track/:complaintCode" element={<CU_TrackComplaintDetailsPage />} />
         </Route>
         
       <Route element={<PersistLogin />}>
