@@ -15,6 +15,10 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
   const [errMsg, setErrMsg] = useState('');
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // ==============
+  // Checkbox confirmation
+  const [isConfirmed, setIsConfirmed] = useState(false);
   
   if (!isOpen) return null;
 
@@ -68,8 +72,23 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
                 )}
               </div>
             </div>
+
+            <div className="form-group checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={isConfirmed}
+                  onChange={() => setIsConfirmed((prev) => !prev)}
+                />
+                <span>
+                  I hereby confirm, by the management responsibilities bestowed upon me, 
+                  to revoke the <strong>{revokeType}</strong> of this user.
+                </span>
+              </label>
+            </div>
+
             <div className="popup-footer">
-                <button type="button" className="revoke-button" onClick={handleRevoke}>
+                <button type="button" className="revoke-button" onClick={handleRevoke} disabled={!isConfirmed}>
                   Revoke {revokeType}
                 </button>
               <button type="button" className="okay-button" onClick={onClose}>

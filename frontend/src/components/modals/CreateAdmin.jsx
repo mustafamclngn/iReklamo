@@ -6,6 +6,7 @@ import useRegister from '../../hooks/useRegister';
 
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
+import ConfirmCreateAdmin from './ConfirmCreateAdmin';
 
 import useUserInfoApi from '../../api/userInfo';
 
@@ -33,8 +34,10 @@ const CreateAdmin = ({ isOpen, onClose }) => {
         user: '',
         email: '',
         barangay: '',
+        barangay_display_name: '',
         position: '',
-        role: ''
+        role: '',
+        role_display_name: ''
       });
 
       // =============
@@ -50,6 +53,7 @@ const CreateAdmin = ({ isOpen, onClose }) => {
       const [errMsg, setErrMsg] = useState('');
       const [isSuccessOpen, setIsSuccessOpen] = useState(false);
       const [successMessage, setSuccessMessage] = useState('');
+      const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
       // ================
       // Dropdown data
@@ -104,7 +108,28 @@ const CreateAdmin = ({ isOpen, onClose }) => {
       // unified input change handler
       const handleChange = (e) => {
           const { name, value } = e.target;
-          setFormData((prev) => ({ ...prev, [name]: value }));
+          
+          if (name === "barangay") {
+            const selectedBarangay = barangays.find((b) => b.id == value);
+            setFormData((prev) => ({
+              ...prev,
+              barangay: value,
+              barangay_display_name: selectedBarangay ? selectedBarangay.name : ""
+            }))
+          }
+
+          else if (name === "role") {
+            const selectedRole = roles.find((r) => r.id == value);
+            setFormData((prev) => ({
+              ...prev,
+              role: value,
+              role_display_name: selectedRole ? selectedRole.name : ""
+            }))
+          }
+
+          else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+          }
       };
 
       // =============
@@ -121,19 +146,20 @@ const CreateAdmin = ({ isOpen, onClose }) => {
               return;
           }
   
-          // fetch and post to backend
+          setIsConfirmOpen(true);
+      }
+
+      const handleConfirmCreate = async () => {
           const register = useRegister();
 
           try {
-              const response = await register(
-                {
-                  user: formData.user,
-                  email: formData.email,
-                  barangay: formData.barangay,
-                  position: formData.position,
-                  role: formData.role
-                }
-              )
+              const response = await register({
+                user: formData.user,
+                email: formData.email,
+                barangay: formData.barangay,
+                position: formData.position,
+                role: formData.role
+              });
               console.log(response)
               setSuccessMessage(response.message);
               setIsSuccessOpen(true);
@@ -341,6 +367,16 @@ const CreateAdmin = ({ isOpen, onClose }) => {
           </form>
         </div>
       </div>
+
+      <ConfirmCreateAdmin 
+        isOpen={isConfirmOpen} 
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => {
+          setIsConfirmOpen(false);
+          handleConfirmCreate();
+        }}
+        user={formData}
+      />
 
       <SuccessModal
         isOpen={isSuccessOpen}
