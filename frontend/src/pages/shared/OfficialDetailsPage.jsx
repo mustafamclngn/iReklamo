@@ -71,6 +71,16 @@ const OfficialDetailsPage = () => {
     return num; // fallback
   };
 
+  const getRoleLabel = (roleId) => {
+    switch(roleId) {
+      case 1: return 'Super Admin';
+      case 2: return 'City Admin';
+      case 3: return 'Barangay Captain';
+      case 4: return 'Barangay Official';
+      default: return roleId || 'N/A';
+    }
+  };
+
   const calculateProfileCompletion = () => {
     if (!official) return 0;
     
@@ -175,10 +185,10 @@ const OfficialDetailsPage = () => {
                   {official.first_name} {official.last_name}
                 </h1>
                 <p className="text-gray-600 font-medium mb-1 text-lg">
-                  {official.position || (official.position)}
+                  {official.position || 'N/A'}
                 </p>
                 <p className="text-gray-600 text-lg">
-                  {official.barangay}, Iligan City +9200
+                  {official.barangay_name || 'N/A'}, Iligan City +9200
                 </p>
               </div>
 
@@ -254,9 +264,7 @@ const OfficialDetailsPage = () => {
               <div>
                 <label className="block text-md text-gray-600 mb-2">User Role:</label>
                 <p className="text-gray-900 font-medium text-lg">
-                  {official.role === 3 ? 'Barangay Captain' :
-                   official.role === 4 ? 'Barangay Official' :
-                   official.role}
+                  {getRoleLabel(official.role_id)}
                 </p>
               </div>
               <div>
@@ -290,12 +298,12 @@ const OfficialDetailsPage = () => {
 
             <div>
               <p className="block text-md text-gray-600 mb-2">Barangay:</p>
-              <p className="text-gray-900 font-medium text-lg">{official.barangay || "N/A"}</p>
+              <p className="text-gray-900 font-medium text-lg">{official.barangay_name || "N/A"}</p>
             </div>
 
             <div>
               <p className="block text-md text-gray-600 mb-2">City:</p>
-              <p className="text-gray-900 font-medium text-lg">{"Iligan City"}</p>
+              <p className="text-gray-900 font-medium text-lg">Iligan City</p>
             </div>
           </div>
         </div>

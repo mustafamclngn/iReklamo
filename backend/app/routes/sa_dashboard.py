@@ -10,9 +10,6 @@ sa_dashboard_bp = Blueprint('sa_dashboard', __name__, url_prefix='/api/sa_dashbo
 
 CORS(sa_dashboard_bp)
 
-
-
-
 @sa_dashboard_bp.route('/all_count', methods=['GET'])
 def get_all_counts():
     conn = psycopg2.connect(**DB_CONFIG)

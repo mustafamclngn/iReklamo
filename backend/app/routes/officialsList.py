@@ -20,7 +20,7 @@ def get_all_officials():
             "users.last_name",
             "users.email",
             "users.role_id",
-            "barangays.name",
+            "barangays.name AS barangay_name",
             "users.position",
             "users.created_at",
             "user_info.contact_number",
@@ -47,12 +47,12 @@ def get_all_officials():
         if barangay:
             officials = [
                 user for user in all_users 
-                if user.get('barangay') == barangay and user.get('role_id') == 4
+                if user.get('barangay_name') == barangay and user.get('role_id') == 4
             ]
         else:
             officials = [
                 user for user in all_users 
-                # if user.get('role') in ['brgy_cap', 'brgy_off'] 
+                if user.get('role_id') in [3, 4] 
             ]
 
         return jsonify({
@@ -81,7 +81,7 @@ def get_official_by_id(user_id):
             "users.last_name",
             "users.email",
             "users.role_id",
-            "barangays.name",
+            "barangays.name AS barangay_name",
             "users.position",
             "users.created_at",
             "user_info.contact_number",
