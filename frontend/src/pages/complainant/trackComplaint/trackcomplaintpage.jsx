@@ -32,6 +32,11 @@ const CU_TrackComplaintPage = () => {
                 SUBMIT
               </button>
             </div>
+            <p className="text-white text-lg text-center mt-12 max-w-3xl leading-relaxed">
+              Note: Before tracking your complaint make sure you have received a unique complaint 
+              ID associated with your submitted complaint. This complaint ID typically provided 
+              to you upon successfully submitting a complaint through your provided email address
+            </p>
           </div>
         </div>
       </div>
