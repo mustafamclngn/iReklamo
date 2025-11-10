@@ -56,9 +56,10 @@ class Select():
         self.columns = [col.split(" AS ")[-1].split(".")[-1] for col in spec_col]
         return self
     
-    def search(self, tag = None, key = None, table = None, search_mult = {}):
+    def search(self, tag = None, key = None, table = None, search_mult = {}, search_mult_connect = " AND "):
         self.searchquery = ""
         self.params = []
+        integer_searches = ["user_id", "assigned_official_id", "barangay_id", "role_id"]
 
         if table is None:
             table = self.table_name
@@ -67,18 +68,18 @@ class Select():
             conditions = []
             for col, val in search_mult.items():
                 search_tag = self.aliascolumn.get(col, f"{table}.{col}")
-                if col == "user_id" or col == "assigned_official_id":
+                if col in integer_searches:
                     conditions.append(f"{search_tag} = %s")
                     self.params.append(int(val))
                 else:
                     conditions.append(f"{search_tag} LIKE %s")
                     self.params.append(f"%{val}%")
-            self.searchquery = "WHERE " + " AND ".join(conditions)
+            self.searchquery = "WHERE " + {search_mult_connect}.join(conditions)
 
         elif tag and key:
             search_tag = self.aliascolumn.get(tag, f"{table}.{tag}")
             self.searchquery = f"WHERE {search_tag} LIKE %s "
-            if tag == "user_id" or tag == "assigned_official_id":
+            if tag in integer_searches:
                 self.searchquery = f"WHERE {search_tag} = %s"
                 self.params.append(int(key))
             else:

@@ -25,7 +25,7 @@ const BC_OfficialsPage = () => {
   const uniquePositions = [...new Set(officials.map(o => o.position).filter(Boolean))];
 
   // get logged in user barangay
-  const userBarangay = auth?.user?.barangay;
+  const userBarangay = auth?.user?.barangay_id;
 
   // fetch officials
   useEffect(() => {
@@ -42,6 +42,7 @@ const BC_OfficialsPage = () => {
       setLoading(true);
       setError(null);
       const response = await getOfficialsByBarangay(userBarangay);
+      console.log(response);
       
       if (response.success) {
         setOfficials(response.data);

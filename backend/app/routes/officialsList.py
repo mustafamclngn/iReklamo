@@ -22,6 +22,7 @@ def get_all_officials():
             "users.email",
             "users.role_id",
             "barangays.name AS barangay_name",
+            "users.barangay_id",
             "users.position",
             "users.created_at",
             "user_info.contact_number",
@@ -36,25 +37,23 @@ def get_all_officials():
         
         selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
+        if barangay:
+            selector.search(tag="barangay_id", key=barangay)
+        else:
+            selector.search()
+            selector.search({
+                "role_id": 3,
+                "role_id": 4
+            }, search_mult_connect=" OR ")
+
         result = selector.sort("user_id", "DESC").execute().retDict()
 
         if result is None:
-            all_users = []
+            officials = []
         elif isinstance(result, dict):
-            all_users = [result]
+            officials = [result]
         else:
-            all_users = result
-        
-        if barangay:
-            officials = [
-                user for user in all_users 
-                if user.get('barangay_name') == barangay and user.get('role_id') == 4
-            ]
-        else:
-            officials = [
-                user for user in all_users 
-                if user.get('role_id') in [3, 4] 
-            ]
+            officials = result
 
         return jsonify({
             'success': True,

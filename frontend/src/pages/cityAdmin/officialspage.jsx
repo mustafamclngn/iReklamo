@@ -59,7 +59,7 @@ const CA_OfficialsPage = () => {
       ...prev,
       [filterType]: value
     }));
-  };
+  }; 
 
   // filter
   const filteredOfficials = officials.filter(official => {

@@ -157,6 +157,20 @@
   transform: none;
 }
 
+.revoke-button:disabled {
+  background-color: #fd8080;        
+  color: #777;                   
+  border-color: #999;           
+  cursor: not-allowed;           
+  transform: none;              
+  opacity: 0.7;                 
+}
+
+.revoke-button:disabled:hover {
+  background-color: #fd8080;
+  transform: none;
+}
+
 .tooltip {
   position: relative;
   display: inline-block;

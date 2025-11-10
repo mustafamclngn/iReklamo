@@ -141,6 +141,9 @@ def login_user():
     # create: response
     response = make_response(jsonify({
         "message": "Login successful",
+        
+        "accessToken": access_token,
+        "role": role,
         "user": {
             "user_id": user_data["user_id"],
             "username": user_data["user_name"],
@@ -150,8 +153,6 @@ def login_user():
             "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
             "barangay_id": user_data.get("barangay_id")
         },
-        "role": role,
-        "accessToken": access_token
         }))
     
     print(response)
@@ -204,7 +205,16 @@ def refresh_token():
 
         return jsonify({
             "accessToken": new_access_token,
-            "role": role
+            "role": role,
+            "user": {
+                "user_id": user_data["user_id"],
+                "username": user_data["user_name"],
+                "email": user_data["email"],
+                "first_name": user_data["first_name"],
+                "last_name": user_data["last_name"],
+                "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
+                "barangay_id": user_data.get("barangay_id")
+            }
         }), 200
 
     except jwt.ExpiredSignatureError:
