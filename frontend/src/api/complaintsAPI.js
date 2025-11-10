@@ -17,6 +17,12 @@ const complaintsApi = {
     return response.data;
   },
 
+  // track complaint
+  trackComplaint: async (complaintCode) => {
+    const response = await axiosPrivate.get(`/api/complaints/track/${complaintCode}`);
+    return response.data;
+  },
+
   getBarangays: async () => {
     const response = await axiosPrivate.get('/api/complaints/barangays');
     return response.data;
