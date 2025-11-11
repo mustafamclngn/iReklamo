@@ -58,9 +58,37 @@ const useComplaintsApi = () => {
   };
 
   const getAllComplaints = async (filters = {}) => {
-    const params = new URLSearchParams(filters);
-    const response = await axiosPrivate.get(`/api/complaints/?${params}`);
-    return response.data;
+      try {
+        const params = new URLSearchParams(filters);
+        const response = await axiosPrivate.get(`/api/complaints/?${params}`);
+        console.log(response)
+        return response.data;
+      } catch (error) {
+        console.error('Error assigning complaint to officer', error);
+        throw error;
+      }
+  };
+
+  const getActiveCases = async (assigned_official_id) => {
+      try {
+        const response = await axiosPrivate.get(`/api/complaints/cases/active/${assigned_official_id}`);
+        console.log(response)
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching complaint', error);
+        throw error;
+      }
+  };
+
+  const getResolvedCases = async (assigned_official_id) => {
+      try {
+        const response = await axiosPrivate.get(`/api/complaints/cases/resolved/${assigned_official_id}`);
+        console.log(response)
+        return response.data;
+      } catch (error) {
+        console.error('Error assigning complaint', error);
+        throw error;
+      }
   };
 
   const getComplaintById = async (id) => {
@@ -110,7 +138,9 @@ return {
     getBarangayComplaints,
     getAssignedComplaints,
     getBarangayCaptainComplaints,
-    getBarangayOfficialComplaints
+    getBarangayOfficialComplaints,
+    getActiveCases,
+    getResolvedCases
   };
 
 };

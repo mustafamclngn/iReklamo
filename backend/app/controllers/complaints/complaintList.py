@@ -9,7 +9,57 @@ def list_by_assignee(assignee):
                     .table("complaints")\
                     .search(search_mult={
                         "assigned_official_id": assignee,
-                        "status": "in-progress"
+                        "status": "In Progress"
+                    })\
+                    .execute().retDict()
+        
+        print(result)
+
+        return jsonify({
+            'success': True,
+            'data': result
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    
+def activeCases_official(assignee):
+    try:
+        selector = Select()
+        result = selector\
+                    .table("complaints")\
+                    .search(search_mult={
+                        "assigned_official_id": assignee,
+                        "status": "In Progress"
+                    })\
+                    .execute().retDict()
+        
+        print(result)
+
+        return jsonify({
+            'success': True,
+            'data': result
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+def resolvedCases_official(assignee):
+    try:
+        selector = Select()
+        result = selector\
+                    .table("complaints")\
+                    .search(search_mult={
+                        "assigned_official_id": assignee,
+                        "status": "Resolved"
                     })\
                     .execute().retDict()
         

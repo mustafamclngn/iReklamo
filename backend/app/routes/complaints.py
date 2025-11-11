@@ -8,7 +8,7 @@ from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
 
-from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
 from app.controllers.complaints.complaintAssignC import assign_complaint
 
 # Create blueprint
@@ -34,13 +34,14 @@ def get_complaints():
 @complaints_bp.route('/', methods=['GET'])
 def get_all_complaints():
     """
-    Get all complaints with optional filters: ?barangay=X&status=Y&priority=Z
+    Get all complaints with optional filters: ?barangay=X&status=Y&priority=Z&assigned_official_id=W
     """
     try:
         # Get query parameters
         barangay_filter = request.args.get('barangay')
         status_filter = request.args.get('status')
         priority_filter = request.args.get('priority')
+        assigned_filter = request.args.get('assigned_official_id')
 
         # Use raw SQL with proper JOINs to resolve foreign keys
         conn = psycopg2.connect(**DB_CONFIG)
@@ -88,6 +89,10 @@ def get_all_complaints():
         if priority_filter:
             conditions.append("complaints.priority = %s")
             params.append(priority_filter)
+
+        if assigned_filter:
+            conditions.append("complaints.assigned_official_id = %s")
+            params.append(assigned_filter)
 
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
@@ -612,3 +617,11 @@ def get_user_complaints(assignee):
 @complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
 def perform_assignment(complaint_id, assigned_official_id):
     return assign_complaint(complaint_id, assigned_official_id)
+
+@complaints_bp.route('cases/active/<int:assigned_official_id>')
+def get_active_cases(assigned_official_id):
+    return activeCases_official(assigned_official_id)
+
+@complaints_bp.route('cases/resolved/<int:assigned_official_id>')
+def get_resolved_cases(assigned_official_id):
+    return resolvedCases_official(assigned_official_id)

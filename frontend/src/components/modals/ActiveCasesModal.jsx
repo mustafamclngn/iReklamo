@@ -6,7 +6,7 @@ const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
   const [assignedComplaints, setAssignedComplaints] = useState([])
   const user_id = officialData?.user_id
 
-  const { ongoingComplaints } = useComplaintsApi();
+  const { getActiveCases } = useComplaintsApi();
 
   useEffect(() => {
 
@@ -15,7 +15,7 @@ const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
     const fetchComplaints = async () => {
       try {
         console.log("Searching for complaints for user:", user_id)
-        const response = await ongoingComplaints(user_id)
+        const response = await getActiveCases(user_id)
         setAssignedComplaints(response.data || [])
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)

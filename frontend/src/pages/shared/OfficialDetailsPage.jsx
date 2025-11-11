@@ -7,17 +7,22 @@ import { getRoleBasePath } from '../../utils/roleUtils';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 import ActiveCasesModal from '../../components/modals/ActiveCasesModal';
+import useComplaintsApi from '../../api/complaintsApi';
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
+  const { getActiveCases, getResolvedCases } = useComplaintsApi();
   
   const [official, setOfficial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState(false);
 
+  const [active, setActive] = useState();
+  const [resolved, setResolved] = useState();
+  
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
@@ -28,7 +33,22 @@ const OfficialDetailsPage = () => {
   const hasValidImage = official?.profile_picture && !imageError;
 
   useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const activeCases = await getActiveCases(user_id);
+        const resolvedCases = await getResolvedCases(user_id);
+
+        setActive(activeCases?.data?.length || 0);
+        setResolved(resolvedCases?.data?.length || 0);
+      } catch (error) {
+        console.error("Error fetching case data:", error);
+        setActive(0);
+        setResolved(0);
+      }
+    };
+
     fetchOfficialDetails();
+    fetchCases();
   }, [user_id]);
 
   const fetchOfficialDetails = async () => {
@@ -352,15 +372,11 @@ const OfficialDetailsPage = () => {
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               <div>
                 <label className="block text-md text-gray-600 mb-2">Assigned Cases:</label>
-                <p className="text-gray-900 font-medium text-3xl">{official.assigned_cases || 0}</p>
-              </div>
-               <div>
-                <label className="block text-md text-gray-600 mb-2">Pending Cases:</label>
-                <p className="text-gray-900 font-medium text-3xl">{official.pending_cases || 0}</p>
+                <p className="text-gray-900 font-medium text-3xl">{active || 0}</p>
               </div>
               <div>
                 <label className="block text-md text-gray-600 mb-2">Cases Resolved:</label>
-                <p className="text-gray-900 font-medium text-3xl">{official.resolved_cases || 0}</p>
+                <p className="text-gray-900 font-medium text-3xl">{resolved || 0}</p>
               </div>
             </div>
           </div>
