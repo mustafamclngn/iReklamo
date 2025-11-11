@@ -200,12 +200,13 @@ useEffect(() => {
               ></div>
 
               {/* progress line */}
+              {/* to be changed if adding more detailed complaint logs including their values */}
               <div
                 className="absolute top-6 left-0 h-1 bg-green-500 transition-all duration-500"
                 style={{
                   width:
                     complaint?.status === "Pending"
-                      ? "0%"
+                      ? "18%"
                       : complaint?.status === "In-Progress"
                       ? "50%"
                       : complaint?.status === "Resolved"
