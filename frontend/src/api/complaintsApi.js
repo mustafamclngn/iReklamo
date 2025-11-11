@@ -31,104 +31,48 @@ const useComplaintsApi = () => {
     }
   };
 
-  const assignComplaints = async (complaint_id, assigned_official_id) => {
-    try {
-      const encodedComplaint = encodeURIComponent(complaint_id);
-      const encodedAssignee = encodeURIComponent(assigned_official_id);
-      const response = await axiosPrivate.get(`/api/complaints/assign/${encodedComplaint}/${encodedAssignee}`);
-      console.log("Fetching: ", response)
-      return response.data;
-    } catch (error) {
-      console.error('Error assigning complaint to officer', error);
-      throw error;
-    }
-  };
+const complaintsApi = {
+  getAllComplaints: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const response = await axiosPrivate.get(`/api/complaints/?${params}`);
+    return response.data;
+  },
 
-  const getAllComplaints = async (filters = {}) => {
-      try {
-        const params = new URLSearchParams(filters);
-        const response = await axiosPrivate.get(`/api/complaints/?${params}`);
-        console.log(response)
-        return response.data;
-      } catch (error) {
-        console.error('Error assigning complaint to officer', error);
-        throw error;
-      }
-  };
-
-  const getActiveCases = async (assigned_official_id) => {
-      try {
-        const response = await axiosPrivate.get(`/api/complaints/cases/active/${assigned_official_id}`);
-        console.log(response)
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching complaint', error);
-        throw error;
-      }
-  };
-
-  const getResolvedCases = async (assigned_official_id) => {
-      try {
-        const response = await axiosPrivate.get(`/api/complaints/cases/resolved/${assigned_official_id}`);
-        console.log(response)
-        return response.data;
-      } catch (error) {
-        console.error('Error assigning complaint', error);
-        throw error;
-      }
-  };
-
-  const getComplaintById = async (id) => {
+  getComplaintById: async (id) => {
     const response = await axiosPrivate.get(`/api/complaints/${id}`);
     return response.data;
-  };
+  },
 
-  const updateComplaint = async (id, data) => {
+  updateComplaint: async (id, data) => {
     const response = await axiosPrivate.put(`/api/complaints/${id}`, data);
     return response.data;
-  };
+  },
 
-  const getBarangays = async () => {
+  getBarangays: async () => {
     const response = await axiosPrivate.get('/api/complaints/barangays');
     return response.data;
-  };
+  },
 
-  const getBarangayComplaints = async (barangayName) => {
+  getBarangayComplaints: async (barangayName) => {
     const response = await axiosPrivate.get(`/api/complaints/barangay/${barangayName}`);
     return response.data;
-  };
+  },
 
-  const getAssignedComplaints = async (officialId) => {
+  getAssignedComplaints: async (officialId) => {
     const response = await axiosPrivate.get(`/api/complaints/assigned/${officialId}`);
     return response.data;
-  };
+  },
 
-  const getBarangayCaptainComplaints = async (userId) => {
+  // Role-based endpoints
+  getBarangayCaptainComplaints: async (userId) => {
     const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}`);
     return response.data;
-  };
+  },
 
-  const getBarangayOfficialComplaints = async (userId) => {
+  getBarangayOfficialComplaints: async (userId) => {
     const response = await axiosPrivate.get(`/api/complaints/barangay-official/${userId}`);
     return response.data;
-  };
-
-return {
-    complaintsByBarangayId,
-    StatusComplaintsByBarangayId,
-    assignComplaints,
-    getAllComplaints,
-    getComplaintById,
-    updateComplaint,
-    getBarangays,
-    getBarangayComplaints,
-    getAssignedComplaints,
-    getBarangayCaptainComplaints,
-    getBarangayOfficialComplaints,
-    getActiveCases,
-    getResolvedCases
-  };
-
+  },
 };
 
-export default useComplaintsApi;
+export default complaintsApi;
