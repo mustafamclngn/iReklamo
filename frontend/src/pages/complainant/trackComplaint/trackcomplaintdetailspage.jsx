@@ -60,7 +60,7 @@ useEffect(() => {
         {/* back button */}
         <button
           onClick={() => navigate("/home")}
-          className="w-[337px] h-[45px] bg-white hover:bg-[#E6E6E6] text-black rounded-lg flex items-center justify-center gap-x-3 text-[20px] font-medium mb-6 transition-colors"
+          className="w-[337px] h-[45px] bg-white hover:bg-[#E6E6E6] text-black rounded-lg flex items-center justify-center gap-x-3 text-[24px] font-small mb-6 transition-colors"
         >
           <i className="bi bi-arrow-left text-2xl"></i>
           Back to Home
