@@ -282,6 +282,21 @@ useEffect(() => {
             </div>
           </div>
         </div>
+        {/* footer */}
+        <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
+          <div className="flex items-start gap-3">
+            <i className="bi bi-megaphone-fill text-2xl text-red-600"></i>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                Need Help?
+              </h3>
+              <p className="text-gray-600 text-base">
+                For questions about your complaint, please don't hesitate to contact your barangay office or the assigned official, or reach us at:
+                <span className="text-blue-600"> iReklamo@email.com</span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
