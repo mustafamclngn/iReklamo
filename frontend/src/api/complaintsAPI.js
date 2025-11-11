@@ -1,4 +1,7 @@
 import { axiosPrivate } from './axios';
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 const complaintsApi = {
   getAllComplaints: async (filters = {}) => {
@@ -15,6 +18,19 @@ const complaintsApi = {
   updateComplaint: async (id, data) => {
     const response = await axiosPrivate.put(`/api/complaints/${id}`, data);
     return response.data;
+  },
+
+  // track complaint
+  trackComplaint: async (complaintCode) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/complaints/track/${complaintCode}`);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        return error.response.data;
+      }
+      throw error;
+    }
   },
 
   getBarangays: async () => {
