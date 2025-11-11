@@ -69,11 +69,10 @@ def get_all_complaints():
                 complaints.created_at,
                 complaints.updated_at,
                 barangays.name as barangay,
-                CASE
-                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
-                    THEN CONCAT(users.first_name, ' ', users.last_name)
-                    ELSE 'Unassigned'
-                END as "assignedOfficial"
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
@@ -295,7 +294,7 @@ def create_complaint():
                 data['specific_location'],     # specific_location
                 complainant_id,                # complainant_id FK
                 int(data.get('barangay')),     # barangay_id FK
-                1                              # assigned_official_id NULL
+                None                           # assigned_official_id NULL
             ))
             complaint_id = cursor.fetchone()['id']
 
@@ -354,11 +353,10 @@ def get_complaint(complaint_id):
                 complainants.contact_number as complainant_contact_number,
                 complainants.email as complainant_email,
                 -- Joined assigned official data
-                CASE
-                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
-                    THEN CONCAT(users.first_name, ' ', users.last_name)
-                    ELSE 'Unassigned'
-                END as assignedOfficial
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN complainants ON complaints.complainant_id = complainants.id
@@ -517,11 +515,10 @@ def get_barangay_captain_complaints(user_id):
                 complaints.created_at,
                 complaints.updated_at,
                 barangays.name as barangay,
-                CASE
-                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
-                    THEN CONCAT(users.first_name, ' ', users.last_name)
-                    ELSE 'Unassigned'
-                END as "assignedOfficial"
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
@@ -582,11 +579,10 @@ def get_barangay_official_complaints(user_id):
                 complaints.created_at,
                 complaints.updated_at,
                 barangays.name as barangay,
-                CASE
-                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
-                    THEN CONCAT(users.first_name, ' ', users.last_name)
-                    ELSE 'Unassigned'
-                END as "assignedOfficial"
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
