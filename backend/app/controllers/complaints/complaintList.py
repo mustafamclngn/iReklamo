@@ -27,7 +27,7 @@ def list_by_assignee(assignee):
             'error': str(e)
         }), 500
 
-def get_all_complaints():
+def get_all_unfiltered_complaints():
     try:
         barangay = request.args.get('barangay')
         status = request.args.get('status')

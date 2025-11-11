@@ -36,7 +36,7 @@ def get_all_officials():
 
         selector.special_col(columns)
 
-        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN roles ON users.role_id = roles.id LEFT JOIN barangays ON users.barangay_id = barangays.id LEFT JOIN barangays ON users.barangay_id = barangays.id"
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN roles ON users.role_id = roles.id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         if barangay:
             selector.search(search_mult={
@@ -86,6 +86,7 @@ def get_official_by_id(user_id):
             "users.email",
             "roles.name as role",
             "users.role_id",
+            "users.barangay_id",
             "barangays.name AS barangay_name",
             "users.position",
             "users.created_at",

@@ -12,7 +12,7 @@ user_bp = Blueprint('user', __name__, url_prefix='/api/user')
 def listUsers():
     return userList()
 
-@user_bp.route('/<int:user_id>/revoke-permissions', methods=['PATCH'])
+@user_bp.route('/<int:user_id>/revoke-permissions', methods=['PATCH', 'OPTIONS'])
 @verify_jwt
 @verify_roles(1)
 def revokeUserPermissions(user_id):

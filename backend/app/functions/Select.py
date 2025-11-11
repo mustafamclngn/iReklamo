@@ -28,9 +28,10 @@ class Select():
         self.limitquery = f"LIMIT {limit}"
         return self
     
-    def offset(self, offset):
-        self.offsetquery = f"OFFSET {offset*10}"
+    def offset(self, page, limit=10):
+        self.offsetquery = f"OFFSET {page * limit}"
         return self
+
 
     def group(self, group):
         self.groupquery = f"GROUP BY {group}"
@@ -40,8 +41,8 @@ class Select():
         self.tablequery += f" {join_type} {table} ON {on_condition}"
         return self
         
-    def count(self, count):
-        self.countquery = (f"COUNT {count}", "COUNT (*)")
+    def count(self, count="*"):
+        self.countquery = (f"COUNT ({count})")
         return self
     
     def sort(self, sort_column, sort_order):
@@ -56,8 +57,8 @@ class Select():
         self.columns = []
         for col in spec_col:
             # Handle both " AS " and " as " aliases
-            if " as " in col:
-                alias_part = col.split(" as ")[-1].strip()
+            if " as " in col.lower():
+                alias_part = col.lower().split(" as ")[-1].strip()
                 self.columns.append(alias_part.split(".")[-1])
             else:
                 self.columns.append(col.split(".")[-1])

@@ -1,4 +1,3 @@
-import axios from './axios';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 const useComplaintsApi = () => {
@@ -58,7 +57,62 @@ const useComplaintsApi = () => {
     }
   };
 
-  return { ongoingComplaints, complaintsByBarangayId, StatusComplaintsByBarangayId, assignComplaints }
+  const getAllComplaints = async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const response = await axiosPrivate.get(`/api/complaints/?${params}`);
+    return response.data;
+  };
+
+  const getComplaintById = async (id) => {
+    const response = await axiosPrivate.get(`/api/complaints/${id}`);
+    return response.data;
+  };
+
+  const updateComplaint = async (id, data) => {
+    const response = await axiosPrivate.put(`/api/complaints/${id}`, data);
+    return response.data;
+  };
+
+  const getBarangays = async () => {
+    const response = await axiosPrivate.get('/api/complaints/barangays');
+    return response.data;
+  };
+
+  const getBarangayComplaints = async (barangayName) => {
+    const response = await axiosPrivate.get(`/api/complaints/barangay/${barangayName}`);
+    return response.data;
+  };
+
+  const getAssignedComplaints = async (officialId) => {
+    const response = await axiosPrivate.get(`/api/complaints/assigned/${officialId}`);
+    return response.data;
+  };
+
+  const getBarangayCaptainComplaints = async (userId) => {
+    const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}`);
+    return response.data;
+  };
+
+  const getBarangayOfficialComplaints = async (userId) => {
+    const response = await axiosPrivate.get(`/api/complaints/barangay-official/${userId}`);
+    return response.data;
+  };
+
+return {
+    ongoingComplaints,
+    complaintsByBarangayId,
+    StatusComplaintsByBarangayId,
+    assignComplaints,
+    getAllComplaints,
+    getComplaintById,
+    updateComplaint,
+    getBarangays,
+    getBarangayComplaints,
+    getAssignedComplaints,
+    getBarangayCaptainComplaints,
+    getBarangayOfficialComplaints
+  };
+
 };
 
 export default useComplaintsApi;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ComplaintCardSuperAdmin from '../../components/cards/complaintCardSuperAdmin';
-import complaintsApi from '../../api/complaintsAPI';
+import useComplaintsApi from '../../api/complaintsApi'; 
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
@@ -12,6 +12,8 @@ const SA_ComplaintsPage = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const { getAllComplaints } = useComplaintsApi();
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
   const [filters, setFilters] = useState({
@@ -40,7 +42,7 @@ const SA_ComplaintsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await complaintsApi.getAllComplaints();
+      const response = await getAllComplaints();
       
       if (response.success) {
         setComplaints(response.data);

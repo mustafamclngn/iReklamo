@@ -8,7 +8,7 @@ from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
 
-from app.controllers.complaints.complaintList import list_by_assignee, get_all_complaints
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints
 from app.controllers.complaints.complaintAssignC import assign_complaint
 
 # Create blueprint
@@ -27,7 +27,7 @@ def generate_complaint_id(cursor):
 # LIST OF ALL COMPLAINTS
 @complaints_bp.route('/all_complaints', methods=['GET'])
 def get_complaints():
-    return get_all_complaints()
+    return get_all_unfiltered_complaints()
 
 
 # GET ALL COMPLAINTS WITH OPTIONAL FILTERS
@@ -605,26 +605,10 @@ def get_barangay_official_complaints(user_id):
         }), 500
 
 
-@complaints_bp.route('/user/<int:user_id>', methods=['GET'])
-def get_user_complaints(user_id):
-    """
-    Get complaints by a specific user
-    Note: This assumes complaints have a user_id field, but current schema doesn't.
-    This might need to be updated based on how complaints are associated with users
-    """
-    try:
-        # For now, return empty array since current schema doesn't link complaints to users directly
-        # This would need to be updated based on how complaints are associated with users
-        return jsonify({
-            'success': True,
-            'data': [],
-            'count': 0,
-            'message': 'User complaints endpoint - needs schema update to link complaints to users'
-        }), 200
+@complaints_bp.route('ongoing/<int:assignee>', methods=['GET'])
+def get_user_complaints(assignee):
+    return list_by_assignee(assignee)
 
-    except Exception as e:
-        print(f"Error fetching user complaints: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+@complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
+def perform_assignment(complaint_id, assigned_official_id):
+    return assign_complaint(complaint_id, assigned_official_id)
