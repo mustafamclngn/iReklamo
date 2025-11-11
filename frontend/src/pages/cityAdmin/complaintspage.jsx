@@ -4,6 +4,7 @@ import useComplaintsApi from '../../api/complaintsApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 
 const CA_ComplaintsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');

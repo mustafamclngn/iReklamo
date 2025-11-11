@@ -17,8 +17,8 @@ const SA_ComplaintsPage = () => {
   const { getAllComplaints } = useComplaintsApi();
 
   // modal states
-    const [isAssignOpen, setIsAssignOpen] =useState(false);
-    const [complaintData, setComplaintData] = useState(null);
+  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [complaintData, setComplaintData] = useState(null);
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
   const [filters, setFilters] = useState({
@@ -121,7 +121,7 @@ const SA_ComplaintsPage = () => {
 
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    console.log('Assign official to:', complaint);
+    console.log('Assign complaint to:', complaint);
     setComplaintData(complaint);
     setIsAssignOpen(true);
   };

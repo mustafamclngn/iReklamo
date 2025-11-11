@@ -5,6 +5,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 
 const BC_ComplaintsPage = () => {
   const { auth } = useAuth();

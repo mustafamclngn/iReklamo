@@ -5,6 +5,7 @@ import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import DeleteModal from '../../components/modals/DeleteUserModal';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
@@ -18,8 +19,9 @@ const OfficialDetailsPage = () => {
 
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
 
-  const { getAllOfficials, getOfficialsByBarangay, getOfficialById } = useOfficialsApi();
+  const { getOfficialById } = useOfficialsApi();
 
   const hasValidImage = official?.profile_picture && !imageError;
 
@@ -135,6 +137,11 @@ const OfficialDetailsPage = () => {
   const handleRevoke = () => {
     setIsDeleteOpen(true);
   };
+
+  // Assign 
+  const handleAssign = () => {
+    setIsAssignOpen(true);
+  };  
 
   // Close 
   const handleClose = (type) => {
@@ -312,12 +319,21 @@ const OfficialDetailsPage = () => {
           <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">Case Details</h2>
-              <button
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
-              >
-                <i className="bi bi-bookmark text-lg"></i>
-                Active Cases Handling
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={handleAssign}
+                  className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
+                  title="Assign official to complaint"
+                >
+                  <i className="bi bi-person-check text-xl"></i>
+                </button>
+                <button
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+                >
+                  <i className="bi bi-bookmark text-lg"></i>
+                  Active Cases Handling
+                </button>
+              </div>
             </div>
             <hr className="border-t border-gray-200 mt-4 mb-6" />
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
@@ -357,6 +373,14 @@ const OfficialDetailsPage = () => {
         deleteData={official}
         >
       </DeleteModal>
+
+      <AssignActionModal 
+        isOpen={isAssignOpen} 
+        onClose={() => setIsAssignOpen(false)}
+        Action="Assign Official"
+        assignDetails={official}
+        >
+      </AssignActionModal>
     </>
   );
 };
