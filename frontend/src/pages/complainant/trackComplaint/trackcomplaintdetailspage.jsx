@@ -291,8 +291,8 @@ useEffect(() => {
                 Need Help?
               </h3>
               <p className="text-gray-600 text-base">
-                For questions about your complaint, please don't hesitate to contact your barangay office or the assigned official, or reach us at:
-                <span className="text-blue-600"> iReklamo@email.com</span>
+                For questions about your complaint, please don't hesitate to contact your barangay office or the assigned official, or reach us through our official email:
+                <span className="text-blue-600"> IliganReklamo@email.com</span>
               </p>
             </div>
           </div>
