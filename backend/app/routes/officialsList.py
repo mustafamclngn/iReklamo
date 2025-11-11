@@ -21,8 +21,9 @@ def get_all_officials():
             "users.last_name",
             "users.email",
             "users.role_id",
-            "barangays.name AS barangay_name",
             "users.barangay_id",
+            "roles.name as role",
+            "barangays.name AS barangay_name",
             "users.position",
             "users.created_at",
             "user_info.contact_number",
@@ -32,10 +33,10 @@ def get_all_officials():
             "user_info.street",
             "user_info.profile_picture"
         ]
-        
+
         selector.special_col(columns)
-        
-        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN barangays ON users.barangay_id = barangays.id"
+
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN roles ON users.role_id = roles.id LEFT JOIN barangays ON users.barangay_id = barangays.id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         if barangay:
             selector.search(search_mult={
@@ -83,6 +84,7 @@ def get_official_by_id(user_id):
             "users.first_name",
             "users.last_name",
             "users.email",
+            "roles.name as role",
             "users.role_id",
             "barangays.name AS barangay_name",
             "users.position",
@@ -94,10 +96,9 @@ def get_official_by_id(user_id):
             "user_info.street",
             "user_info.profile_picture"
         ]
-        
+
         selector.special_col(columns)
-        
-        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN barangays ON users.barangay_id = barangays.id"
+        selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN roles ON users.role_id = roles.id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         result = selector.search("user_id", user_id, table="users").execute().retDict()
         

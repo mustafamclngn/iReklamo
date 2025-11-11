@@ -17,9 +17,19 @@ class User():
     # GETTERS
     # ========
     def getID(self, user_id: int):
+        # Query with JOINs to resolve foreign keys
         self.user = (
             self.selector
             .table(self.table)
+            .special_col([
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
+                "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
+                "barangays.name as barangay", "roles.name as role"
+            ])
+            .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
+            .join("LEFT JOIN", "roles", "users.role_id = roles.id")
+            .join("LEFT JOIN", "user_info", "users.user_id = user_info.user_id")
             .search(tag="user_id", key=user_id)
             .execute()
             .retDict()
@@ -27,19 +37,39 @@ class User():
         return self.user
 
     def getName(self, user_name: str):
+        # Query with JOINs to resolve foreign keys
         self.user = (
             self.selector
             .table(self.table)
+            .special_col([
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
+                "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
+                "barangays.name as barangay", "roles.name as role"
+            ])
+            .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
+            .join("LEFT JOIN", "roles", "users.role_id = roles.id")
+            .join("LEFT JOIN", "user_info", "users.user_id = user_info.user_id")
             .search(tag="user_name", key=user_name)
             .execute()
             .retDict()
         )
         return self.user
-    
+
     def getEmail(self, user_email: str):
+        # Query with JOINs to resolve foreign keys
         self.user = (
             self.selector
             .table(self.table)
+            .special_col([
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
+                "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
+                "barangays.name as barangay", "roles.name as role"
+            ])
+            .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
+            .join("LEFT JOIN", "roles", "users.role_id = roles.id")
+            .join("LEFT JOIN", "user_info", "users.user_id = user_info.user_id")
             .search(tag="email", key=user_email)
             .execute()
             .retDict()
