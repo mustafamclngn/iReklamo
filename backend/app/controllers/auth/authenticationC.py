@@ -98,7 +98,7 @@ def login_user():
             "last_name": user_data["last_name"],
             "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
             "contact_number": user_data.get("contact_number"),
-            "barangay": user_data.get("barangay")
+            "barangay_id": user_data.get("barangay_id")
         },
         "roles": roles,
         "accessToken": access_token

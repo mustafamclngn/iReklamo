@@ -11,7 +11,7 @@ from app.functions.Delete import Delete
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
 
-# FOR GENERATING TRACKING ID
+# FOR GENERATING TRACKING ID 
 def generate_complaint_id(cursor):
     today = datetime.now().strftime("%Y%m%d")  # YYYYMMDD
     # Count how many complaints exist today

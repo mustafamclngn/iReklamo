@@ -25,7 +25,7 @@ class User():
                 "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
                 "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
-                "barangays.name as barangay", "roles.name as role"
+                "barangays.name as barangay", "roles.name as role", "users.barangay_id",
             ])
             .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
             .join("LEFT JOIN", "roles", "users.role_id = roles.id")
@@ -45,7 +45,7 @@ class User():
                 "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
                 "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
-                "barangays.name as barangay", "roles.name as role"
+                "barangays.name as barangay", "roles.name as role", "users.barangay_id",
             ])
             .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
             .join("LEFT JOIN", "roles", "users.role_id = roles.id")
@@ -65,7 +65,7 @@ class User():
                 "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
                 "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
-                "barangays.name as barangay", "roles.name as role"
+                "barangays.name as barangay", "roles.name as role", "users.barangay_id",
             ])
             .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
             .join("LEFT JOIN", "roles", "users.role_id = roles.id")

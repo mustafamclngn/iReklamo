@@ -7,6 +7,7 @@ from app.routes.main import main_bp
 from app.routes.auth import auth_bp
 from app.routes.complaints import complaints_bp
 from app.routes.officialsList import officialsList_bp
+from app.routes.dashboard import dashboard_bp
 
 def create_app(config_name=None):
     """Application factory function"""
@@ -31,6 +32,7 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(complaints_bp)
     app.register_blueprint(officialsList_bp)
+    app.register_blueprint(dashboard_bp)
 
     # Add CORS headers manually for all routes
     @app.after_request
