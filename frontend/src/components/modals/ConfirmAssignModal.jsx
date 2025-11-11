@@ -7,6 +7,9 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaint, official }) => {
 
   if (!isOpen) return null;
 
+  console.log(complaint)
+  console.log(official)
+
   return (
     <>
       <div className="popup-overlay">

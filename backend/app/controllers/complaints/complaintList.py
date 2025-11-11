@@ -30,15 +30,19 @@ def list_by_assignee(assignee):
 def get_all_complaints():
     try:
         barangay = request.args.get('barangay')
+        status = request.args.get('status')
 
         selector = Select()
         selector\
                     .table("complaints")
         
-        if barangay:
-            selector.search({
-                "barangay_id": barangay
+        if barangay and status:
+            selector.search(search_mult={
+                "barangay_id":barangay,
+                "status":status
             })
+        elif barangay:
+            selector.search(tag="barangay_id", key=barangay)
 
         result = selector.sort("complaint_code", "DESC").execute().retDict()
 

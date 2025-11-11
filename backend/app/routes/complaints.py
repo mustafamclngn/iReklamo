@@ -6,6 +6,7 @@ from datetime import datetime
 from app.config import DB_CONFIG
 
 from app.controllers.complaints.complaintList import list_by_assignee, get_all_complaints
+from app.controllers.complaints.complaintAssignC import assign_complaint
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
@@ -153,5 +154,5 @@ def get_user_complaints(assignee):
     return list_by_assignee(assignee)
 
 @complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
-def assign_complaint(complaint_id, assign_official_id):
-    return assign_complaint(complaint_id, assign_official_id)
+def perform_assignment(complaint_id, assigned_official_id):
+    return assign_complaint(complaint_id, assigned_official_id)

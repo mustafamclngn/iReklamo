@@ -27,7 +27,23 @@ const useComplaintsApi = () => {
       console.error('Error fetching complaints by barangay ID:', error);
       throw error;
     }
-  }
+  };
+
+  const StatusComplaintsByBarangayId = async (barangay_id, status) => {
+    try {
+      const params = new URLSearchParams();
+
+      params.append('barangay', encodeURIComponent(barangay_id));
+      params.append('status', encodeURIComponent(status));
+
+      const response = await axiosPrivate.get(`/api/complaints/all_complaints?${params.toString()}`);
+      console.log("Fetching: ", response)
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching pending complaints by barangay ID:', error);
+      throw error;
+    }
+  };
 
   const assignComplaints = async (complaint_id, assigned_official_id) => {
     try {
@@ -42,7 +58,7 @@ const useComplaintsApi = () => {
     }
   };
 
-  return { ongoingComplaints, complaintsByBarangayId, assignComplaints }
+  return { ongoingComplaints, complaintsByBarangayId, StatusComplaintsByBarangayId, assignComplaints }
 };
 
 export default useComplaintsApi;

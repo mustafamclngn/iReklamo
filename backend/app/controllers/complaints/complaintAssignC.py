@@ -5,16 +5,20 @@ from app.functions.Update import Update
 def assign_complaint(complaint, assignee):
     try:
         updator = Update()
+        print(assignee)
+        print(complaint)
         updator\
             .table("complaints")\
             .set({
                 "assigned_official_id": assignee,
                 "status": "in-progress"
             })\
-            .where("id", complaint)
+            .where("id", complaint)\
+            .execute()
 
         return jsonify({
             'success': True,
+            'message': 'Successfully assigned complaint to official.'
         }), 200
 
     except Exception as e:
