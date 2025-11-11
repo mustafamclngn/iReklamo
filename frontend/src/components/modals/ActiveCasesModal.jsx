@@ -43,7 +43,7 @@ const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
                   <ol>
                     {assignedComplaints.map((complaint, index) => (
                       <li key={complaint.id}>
-                        <strong>{index + 1}</strong>. <em>{complaint.title}</em>
+                        <strong>{index + 1}</strong>. <em>{complaint.complaint_code}: {complaint.title}</em>
                       </li>
                     ))}
                   </ol>

@@ -57,6 +57,16 @@ const LogInPage = () => {
     // =============
     // State update
 
+    // persist state
+    const [persistChecked, setPersistChecked] = useState(
+        JSON.parse(localStorage.getItem("persist")) || false
+    );
+
+    useEffect(() => {
+        setPersist(persistChecked);
+        localStorage.setItem("persist", JSON.stringify(persistChecked));
+    }, [persistChecked, setPersist]);
+
     // user reference state
     useEffect(() => {
         userRef.current.focus();
@@ -75,8 +85,6 @@ const LogInPage = () => {
         try {
 
             const { role, user } = await login(identity, pwd)
-            setPersist(true);
-            localStorage.setItem("persist", true);
 
             setIdentity('');
             setPwd('');
@@ -189,6 +197,18 @@ const LogInPage = () => {
                 placeholder="Enter your password"
                 className="auth-input"
             />
+
+            {/* ========== */}
+            {/* Persist */}
+            <div className="remember_me">
+                <input
+                    type="checkbox"
+                    id="rememberMe"
+                    checked={persistChecked}
+                    onChange={(e) => setPersistChecked(e.target.checked)}
+                />
+                <label htmlFor="rememberMe">Remember me</label>
+            </div>
 
             {/* ========== */}
             {/* Button */}
