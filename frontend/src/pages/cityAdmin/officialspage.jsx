@@ -183,6 +183,8 @@ const CA_OfficialsPage = () => {
                     <CityAdminOfficialCard
                       key={official.user_id}
                       official={official}
+                      onViewDetails={handleViewDetails}
+                      onUserAction={handleUserAction}
                     />
                   ))}
                   {filteredOfficials.length === 0 && (

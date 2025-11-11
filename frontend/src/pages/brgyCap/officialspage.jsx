@@ -166,6 +166,8 @@ const BC_OfficialsPage = () => {
                     <BrgyCapOfficialCard
                       key={official.user_id}
                       official={official}
+                      onViewDetails={handleViewDetails}
+                      onUserAction={handleUserAction}
                     />
                   ))}
                   {filteredOfficials.length === 0 && (

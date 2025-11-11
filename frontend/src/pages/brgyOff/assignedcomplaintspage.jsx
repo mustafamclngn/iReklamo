@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ComplaintCardBrgyOff from '../../components/cards/complaintCardBrgyOff';
-import complaintsApi from '../../api/complaintsAPI';
+import useComplaintsApi from '../../api/complaintsApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
@@ -14,6 +14,8 @@ const BO_AssignedComplaintsPage = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const { getBarangayOfficialComplaints } = useComplaintsApi();
 
   // Barangay Official filters: Status and Priority only
   const [filters, setFilters] = useState({
@@ -43,7 +45,7 @@ const BO_AssignedComplaintsPage = () => {
       }
 
       // Use role-based endpoint for barangay official - gets only assigned complaints
-      const response = await complaintsApi.getBarangayOfficialComplaints(userId);
+      const response = await getBarangayOfficialComplaints(userId);
 
       if (response.success) {
         setComplaints(response.data);
