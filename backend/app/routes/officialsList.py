@@ -38,7 +38,7 @@ def get_all_officials():
         selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         if barangay:
-            selector.search({
+            selector.search(search_mult={
                 "barangay_id": barangay,
                 "role_id": 4
             })

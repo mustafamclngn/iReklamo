@@ -16,8 +16,8 @@ const useUserInfoApi = () => {
 
   const getBarangayById = async (brgy_id) => {
     try {
-      const encodedBarangayId = encodeURIComponent(brgy_id);
-      const response = await axios.get(`/api/user_info/barangay?barangay_id=${encodedBarangayId}`);
+      console.log("API received brgy_id for searhing: ",brgy_id);
+      const response = await axiosPrivate.get(`/api/user_info/barangay?barangay_id=${brgy_id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching barangay:', error);

@@ -5,13 +5,14 @@ import useOfficialsApi from '../../api/officialsApi';
 import useComplaintsApi from '../../api/complaintsApi';
 import useAuth from '../../hooks/useAuth';
 
-const AssignActionModal = ({ isOpen, onClose, Action }) => {
+const AssignActionModal = ({ isOpen, onClose, Action, assignDetails }) => {
 
   // ===========
   // User states
   const { auth } = useAuth();
-  const userRole = auth.role[0];
-  const userBrgy = auth.user.barangay_id;
+  const userRole = auth?.role[0];
+  const userBrgy = auth?.user?.barangay_id;
+  const [assignBrgy, setAssignBrgy] = useState();
 
   // ===========
   // Barangay states
@@ -31,27 +32,34 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState('');
 
-  if (!isOpen) return null;
-
   // ============
   // Fetching data
+
+  useEffect(() => {
+    console.log("Assgnbrgy: ", assignDetails?.barangay_id)
+    setAssignBrgy(assignDetails?.barangay_id);
+  }, [isOpen, assignDetails]);
 
   // Fetch barangays when modal opens
   useEffect(() => {
     const fetchBarangayList = async () => {
       try {
         const res = await getBarangays();
+        console.log("All brangays: ", res)
         setBarangays(res.data || []);
       } catch (err) {
         console.error("Error fetching barangays:", err);
       }
     };
 
-    const fetchBarangay = async () => {
+    const fetchBarangay = async (id) => {
       try {
-        const res = await getBarangayById(userBrgy);
-        setBarangays(res.barangay || []);
-        setSelectedBarangay(res.barangay.id || null)
+        const res = await getBarangayById(id);
+        const brgy = res.barangay || [];
+        setBarangays([brgy]);
+        console.log(res)
+        setSelectedBarangay(brgy.id)
+        console.log("selectedBrgy", selectedBarangay);
       } catch (err) {
         console.error("Error fetching barangay:", err);
       }
@@ -59,13 +67,14 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
 
     if (isOpen){
        if (userRole === 1 || userRole === 2) {
+        fetchBarangay(assignBrgy);
         fetchBarangayList();
       }
       else if (userRole === 3 || userRole === 4) {
-        fetchBarangay();
+        fetchBarangay(userBrgy);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, assignBrgy, assignDetails]);
 
   // Fetch barangay officials when barangay changes
   useEffect(() => {
@@ -97,13 +106,15 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
     fetchComplaints();
   }, [selectedBarangay]);
 
+  if (!isOpen) return null;
+
   // ==========
   // Submit Assign
   const handleSubmit = (e) => {
     e.preventDefault();
     const assign = async () => {
       try {
-         await assignComplaints(selectedComplaint, selectedOfficial);
+         await assignComplaints(selectedComplaint.id, selectedOfficial.id);
       } catch (err) {
         console.error("Error assigning complaint: ", err);
       }
@@ -132,7 +143,7 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
           onChange={(e) => setSelectedOfficial(e.target.value)}
           required
         >
-          <option value="">Select Official</option>
+          <option key="" value="">Select Official</option>
           {officials.length > 0 ? (
             officials.map((o) => (
               <option key={o.user_id} value={o.user_id}>
@@ -162,11 +173,11 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
           onChange={(e) => setSelectedComplaint(e.target.value)}
           required
         >
-          <option value="">Select Complaint</option>
+          <option key="" value="">Select Complaint</option>
           {complaints.length > 0 ? (
             complaints.map((c) => (
               <option key={c.complaint_id} value={c.complaint_id}>
-                {c.complaint_code}: {c.complaint_title}
+                {c.complaint_code}: {c.title}
               </option>
             ))
           ) : (
@@ -189,6 +200,7 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
             <select
               name="barangay"
               value={selectedBarangay}
+              key=""
               onChange={(e) => setSelectedBarangay(e.target.value)}
               required
               disabled = {userRole === 3 || userRole === 4}

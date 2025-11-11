@@ -14,7 +14,7 @@ const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  const { getAllOfficials, getOfficialsByBarangay, getOfficialsbyID } = useOfficialsApi();
+  const { getAllOfficials } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ const SA_OfficialsPage = () => {
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isAssignOpe, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [officialData, setOfficialData] = useState(null);
 
   // filter states
@@ -104,7 +104,8 @@ const SA_OfficialsPage = () => {
   // Assign Official to Complaint
   const handleUserAction = (official) => {
     console.log('User action for:', official);
-    // to be added pani (kani tong assign an official to a complaint)
+    setOfficialData(official);
+    setIsAssignOpen(true);
   };
 
   // Revoke Permissions
@@ -245,6 +246,13 @@ const SA_OfficialsPage = () => {
         deleteData={officialData}
         >
       </DeleteModal>
+      <AssignActionModal 
+        isOpen={isAssignOpen} 
+        onClose={() => setIsAssignOpen(false)}
+        Action="Assign Official"
+        assignDetails={officialData}
+        >
+      </AssignActionModal>
     </>
   );
 };

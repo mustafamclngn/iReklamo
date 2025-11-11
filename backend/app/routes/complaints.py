@@ -10,10 +10,6 @@ from app.controllers.complaints.complaintList import list_by_assignee, get_all_c
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
 
-CORS(complaints_bp)
-
-
-
 # FOR GENERATING TRACKING ID
 def generate_complaint_id(cursor):
     today = datetime.now().strftime("%Y%m%d")  # YYYYMMDD

@@ -59,7 +59,7 @@ class Select():
     def search(self, tag = None, key = None, table = None, search_mult = {}, search_mult_connect = " AND "):
         self.searchquery = ""
         self.params = []
-        integer_searches = ["user_id", "assigned_official_id", "barangay_id", "role_id"]
+        integer_searches = ["user_id", "assigned_official_id", "barangay_id", "role_id", "id"]
 
         if table is None:
             table = self.table_name
