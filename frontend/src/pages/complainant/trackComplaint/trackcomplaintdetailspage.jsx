@@ -11,25 +11,27 @@ const CU_TrackComplaintDetailsPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchComplaint = async () => {
-      try {
-        setLoading(true);
-        const response = await complaintsApi.trackComplaint(complaintCode);
-        if (response.success) {
-          setComplaint(response.data);
-        } else {
-          setError(response.message);
-        }
-      } catch (err) {
-        setError("Complaint not found.");
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchComplaint = async () => {
+    try {
+      setLoading(true);
+      const response = await complaintsApi.trackComplaint(complaintCode);
 
-    fetchComplaint();
-  }, [complaintCode]);
+      if (response.success && response.data) {
+        setComplaint(response.data);
+      } else {
+        navigate("/home");
+      }
+    } catch (err) {
+      navigate("/home");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchComplaint();
+}, [complaintCode, navigate]);
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
