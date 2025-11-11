@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import ActiveCasesModal from '../../components/modals/ActiveCasesModal';
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
@@ -20,6 +21,7 @@ const OfficialDetailsPage = () => {
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isViewCasesOpen, setIsViewCasesOpen] = useState(false);
 
   const { getOfficialById } = useOfficialsApi();
 
@@ -141,6 +143,11 @@ const OfficialDetailsPage = () => {
   // Assign 
   const handleAssign = () => {
     setIsAssignOpen(true);
+  };  
+
+  // View Active Cases 
+  const handleViewActiveCases = () => {
+    setIsViewCasesOpen(true);
   };  
 
   // Close 
@@ -320,15 +327,21 @@ const OfficialDetailsPage = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">Case Details</h2>
               <div className="flex items-center gap-3">
-                <button 
-                  onClick={handleAssign}
-                  className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
-                  title="Assign official to complaint"
-                >
-                  <i className="bi bi-person-check text-xl"></i>
-                </button>
+
+                {(auth?.role[0] === 1 || auth?.role[0] === 2 || auth?.role[0] === 3) && (
+                    <div className="flex justify-end mt-[3%]">
+                      <button 
+                        onClick={handleAssign}
+                        className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
+                        title="Assign official to complaint"
+                        >
+                        <i className="bi bi-person-check text-xl"></i>
+                      </button>
+                  </div>
+                )}
                 <button
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+                  onClick={handleViewActiveCases}
                 >
                   <i className="bi bi-bookmark text-lg"></i>
                   Active Cases Handling
@@ -381,6 +394,13 @@ const OfficialDetailsPage = () => {
         assignDetails={official}
         >
       </AssignActionModal>
+
+      <ActiveCasesModal 
+        isOpen={isViewCasesOpen} 
+        onClose={() => setIsViewCasesOpen(false)}
+        officialData={official}
+        >
+      </ActiveCasesModal>
     </>
   );
 };
