@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import complaintsApi from "../../../api/complaintsAPI";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import ErrorAlert from "../../../components/common/ErrorAlert";
+import HeroBanner from "../../../components/navheaders/heroBanner";
 
 const CU_TrackComplaintDetailsPage = () => {
   const { complaintCode } = useParams();
@@ -11,27 +12,26 @@ const CU_TrackComplaintDetailsPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchComplaint = async () => {
-    try {
-      setLoading(true);
-      const response = await complaintsApi.trackComplaint(complaintCode);
+  useEffect(() => {
+    const fetchComplaint = async () => {
+      try {
+        setLoading(true);
+        const response = await complaintsApi.trackComplaint(complaintCode);
 
-      if (response.success && response.data) {
-        setComplaint(response.data);
-      } else {
+        if (response.success && response.data) {
+          setComplaint(response.data);
+        } else {
+          navigate("/home");
+        }
+      } catch (err) {
         navigate("/home");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      navigate("/home");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchComplaint();
-}, [complaintCode, navigate]);
-
+    fetchComplaint();
+  }, [complaintCode, navigate]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -56,7 +56,12 @@ useEffect(() => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-[1591px] mx-auto px-8 py-8">
+      {/* Hero Banner */}
+      <div className="mb-8 pt-8 px-8">
+        <HeroBanner />
+      </div>
+
+      <div className="max-w-[1591px] mx-auto px-8 pb-8">
         {/* back button */}
         <button
           onClick={() => navigate("/home")}
@@ -183,6 +188,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
+
         {/* complaint status */}
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
           <div className="flex justify-between items-center mb-6">
@@ -200,7 +206,6 @@ useEffect(() => {
               ></div>
 
               {/* progress line */}
-              {/* to be changed if adding more detailed complaint logs including their values */}
               <div
                 className="absolute top-6 left-0 h-1 bg-green-500 transition-all duration-500"
                 style={{
@@ -282,6 +287,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
+
         {/* footer */}
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
           <div className="flex items-start gap-3">
