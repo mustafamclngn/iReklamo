@@ -183,7 +183,6 @@ useEffect(() => {
             </div>
           </div>
         </div>
-
         {/* complaint status */}
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
           <div className="flex justify-between items-center mb-6">
@@ -205,9 +204,9 @@ useEffect(() => {
                 className="absolute top-6 left-0 h-1 bg-green-500 transition-all duration-500"
                 style={{
                   width:
-                    complaint?.status === "Submitted"
+                    complaint?.status === "Pending"
                       ? "0%"
-                      : complaint?.status === "In Progress"
+                      : complaint?.status === "In-Progress"
                       ? "50%"
                       : complaint?.status === "Resolved"
                       ? "100%"
@@ -220,8 +219,8 @@ useEffect(() => {
               <div className="text-center flex-1 relative" style={{ zIndex: 2 }}>
                 <div
                   className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold ${
-                    complaint?.status === "Submitted" ||
-                    complaint?.status === "In Progress" ||
+                    complaint?.status === "Pending" ||
+                    complaint?.status === "In-Progress" ||
                     complaint?.status === "Resolved"
                       ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-500"
@@ -239,13 +238,13 @@ useEffect(() => {
               <div className="text-center flex-1 relative" style={{ zIndex: 2 }}>
                 <div
                   className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold ${
-                    complaint?.status === "In Progress" ||
+                    complaint?.status === "In-Progress" ||
                     complaint?.status === "Resolved"
                       ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {complaint?.status === "In Progress" ||
+                  {complaint?.status === "In-Progress" ||
                   complaint?.status === "Resolved"
                     ? "✓"
                     : ""}
@@ -254,7 +253,7 @@ useEffect(() => {
                   In Progress
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {complaint?.status === "In Progress" ||
+                  {complaint?.status === "In-Progress" ||
                   complaint?.status === "Resolved"
                     ? formatDate(complaint?.updated_at || complaint?.created_at)
                     : "Pending"}
@@ -279,22 +278,6 @@ useEffect(() => {
                     : "Pending"}
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* footer */}
-        <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
-          <div className="flex items-start gap-3">
-            <i className="bi bi-megaphone-fill text-2xl text-red-600"></i>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                Need Help?
-              </h3>
-              <p className="text-gray-600 text-base">
-                For questions about your complaint, please don't hesitate to contact your barangay office or the assigned official, or reach us at:
-                <span className="text-blue-600"> iReklamo@email.com</span>
-              </p>
             </div>
           </div>
         </div>
