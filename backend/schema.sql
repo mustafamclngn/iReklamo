@@ -20,11 +20,11 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     user_name VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    barangay_id INTEGER REFERENCES barangays(id), --> changes in: fetching data for view official
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    barangay_id INTEGER REFERENCES barangays(id) ON DELETE SET NULL, --> changes in: fetching data for view official
     position VARCHAR(100),
-    role_id INTEGER REFERENCES roles(id), --> changes in: fetching data for authorization
+    role_id INTEGER REFERENCES roles(id) ON DELETE SET NULL, --> changes in: fetching data for authorization
     user_password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -37,7 +37,7 @@ CREATE TABLE user_info (
     info_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     contact_number VARCHAR(20),
-    sex VARCHAR(10),
+    sex VARCHAR(10) CHECK (sex IN ('Male', 'Female', 'Other')), 
     birthdate DATE,
     purok VARCHAR(100),
     street VARCHAR(150),
@@ -81,8 +81,12 @@ CREATE TABLE IF NOT EXISTS complaints (
     description TEXT NOT NULL,
     full_address TEXT NOT NULL,
     specific_location VARCHAR(255),
-    status VARCHAR(50) DEFAULT 'pending',
-    priority VARCHAR(20) DEFAULT 'medium',
+    status VARCHAR(50) DEFAULT 'Pending' CHECK (
+        status IN ('Pending', 'In-Progress', 'Resolved')
+    ),
+    priority VARCHAR(20) DEFAULT 'Moderate' CHECK (
+        priority IN ('Low', 'Moderate', 'Urgent')
+    ),
     complainant_id INTEGER REFERENCES complainants(id),
     barangay_id INTEGER REFERENCES barangays(id),
     assigned_official_id INTEGER REFERENCES users(id),

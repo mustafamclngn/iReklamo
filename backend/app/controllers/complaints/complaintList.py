@@ -4,6 +4,7 @@ from app.functions.Select import Select
 def list_by_assignee(assignee):
     try:
         selector = Select()
+        print(assignee)
         result = selector\
                     .table("complaints")\
                     .search(search_mult={
@@ -11,7 +12,8 @@ def list_by_assignee(assignee):
                         "status": "in-progress"
                     })\
                     .execute().retDict()
-        print("backend reached")
+        
+        print(result)
 
         return jsonify({
             'success': True,

@@ -43,7 +43,7 @@ def get_all_officials():
                 "role_id": 4
             })
         else:
-            selector.search({
+            selector.search(search_mult={
                 "role_id": 3,
                 "role_id": 4
             }, search_mult_connect=" OR ")
