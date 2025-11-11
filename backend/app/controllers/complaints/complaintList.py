@@ -25,7 +25,7 @@ def list_by_assignee(assignee):
             'error': str(e)
         }), 500
 
-def get_complaints():
+def get_all_complaints():
     try:
         barangay = request.args.get('barangay')
 
@@ -41,15 +41,15 @@ def get_complaints():
         result = selector.sort("complaint_code", "DESC").execute().retDict()
 
         if result is None:
-            officials = []
+            complaints = []
         elif isinstance(result, dict):
-            officials = [result]
+            complaints = [result]
         else:
-            officials = result
+            complaints = result
 
         return jsonify({
             'success': True,
-            'data': result
+            'data': complaints
         }), 200
 
     except Exception as e:

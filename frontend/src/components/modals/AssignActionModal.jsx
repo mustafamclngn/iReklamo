@@ -27,16 +27,14 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
 
   // ===========
   // Complaint states
-  const { complaintsByBarangayId } = useComplaintsApi();
+  const { complaintsByBarangayId, assignComplaints } = useComplaintsApi();
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState('');
 
-  // ===========
-  // Component contents
-  let header = null;
-  let content = null;
-
   if (!isOpen) return null;
+
+  // ============
+  // Fetching data
 
   // Fetch barangays when modal opens
   useEffect(() => {
@@ -69,28 +67,57 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
     }
   }, [isOpen]);
 
+  // Fetch barangay officials when barangay changes
+  useEffect(() => {
+    const fetchOfficials = async () => {
+      if (Action !== 'Assign Complaint' || !selectedBarangay) return
+      try {
+        const res = await getOfficialsByBarangay(selectedBarangay);
+        setOfficials(res.data || []);
+      } catch (err) {
+        console.error("Error fetching officials:", err);
+      }
+    };
+
+    fetchOfficials();
+  }, [Action, selectedBarangay]);
+
+  // Fetch barangay complaints when barangay changes
+  useEffect(() => {
+    if (Action !== 'Assign Official' || !selectedBarangay) return
+    const fetchComplaints = async () => {
+      try {
+        const res = await complaintsByBarangayId(selectedBarangay);
+        setComplaints(res.data || []);
+      } catch (err) {
+        console.error("Error fetching complaints: ", err);
+      }
+    };
+
+    fetchComplaints();
+  }, [selectedBarangay]);
+
+  // ==========
+  // Submit Assign
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Selected barangay ID:", selectedBarangay);
+    const assign = async () => {
+      try {
+         await assignComplaints(selectedComplaint, selectedOfficial);
+      } catch (err) {
+        console.error("Error assigning complaint: ", err);
+      }
+    }
+    assign()
     onClose();
   };
 
-  if (Action === "Assign Complaint"){
-    // Fetch barangay officials when barangay changes
-    useEffect(() => {
-      const fetchOfficials = async () => {
-        try {
-          const res = await getOfficialsByBarangay(selectedBarangay);
-          setOfficials(res.data || []);
-        } catch (err) {
-          console.error("Error fetching officials:", err);
-        }
-      };
+  // ===========
+  // Component contents
+  let header = null;
+  let content = null;
 
-      if (selectedBarangay) {
-        fetchOfficials();
-      }
-    }, [selectedBarangay]);
+  if (Action === "Assign Complaint"){
 
     header = (
       <h2 className="title">Assign Complaint</h2>
@@ -121,22 +148,7 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
   }
 
   else if (Action === "Assign Official"){
-    // Fetch barangay complaints when barangay changes
-    useEffect(() => {
-      const fetchComplaints = async () => {
-        try {
-          const res = await complaintsByBarangayId(selectedBarangay);
-          setOfficials(res.data || []);
-        } catch (err) {
-          console.error("Error fetching complaints:", err);
-        }
-      };
-
-      if (selectedBarangay) {
-        fetchComplaints();
-      }
-    }, [selectedBarangay]);
-
+    
     header = (
       <h2 className="title">Assign Official</h2>
     )
@@ -154,7 +166,7 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
           {complaints.length > 0 ? (
             complaints.map((c) => (
               <option key={c.complaint_id} value={c.complaint_id}>
-                {c.complaint_code}: {o.complaint_title}
+                {c.complaint_code}: {c.complaint_title}
               </option>
             ))
           ) : (
@@ -197,7 +209,16 @@ const AssignActionModal = ({ isOpen, onClose, Action }) => {
           {content}
 
           <div className="popup-footer">
-            <button type="submit" className="okay-button" disabled = {!selectedBarangay || !selectedOfficial}>Assign</button>
+            <button 
+              type="submit" 
+              className="okay-button" 
+              disabled = {
+                !selectedBarangay ||
+                (Action === 'Assign Complaint' && !selectedOfficial) ||
+                (Action === 'Assign Official' && !selectedComplaint)
+              }>
+                Assign
+            </button>
             <button type="button" onClick={onClose} className="revoke-button">Cancel</button>
           </div>
         </form>

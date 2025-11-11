@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import useOfficialsApi from '../../api/officialsApi';
 import CreateAdmin from '../../components/modals/CreateAdmin';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 
 const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,6 +25,7 @@ const SA_OfficialsPage = () => {
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isAssignOpe, setIsAssignOpen] =useState(false);
   const [officialData, setOfficialData] = useState(null);
 
   // filter states
