@@ -10,7 +10,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [revokeType, setRevokeType] = useState('')
 
-  const { ongoingComplaints } = useComplaintsApi();
+  const { getActiveCases } = useComplaintsApi();
 
   const handleConfirmRevoke = (type) => {
     setRevokeType(type);
@@ -24,7 +24,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
     const fetchComplaints = async () => {
       try {
         console.log("Searching for complaints for user:", user_id)
-        const response = await ongoingComplaints(user_id)
+        const response = await getActiveCases(user_id)
         setAssignedComplaints(response.data || [])
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)

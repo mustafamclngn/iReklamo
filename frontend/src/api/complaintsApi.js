@@ -3,19 +3,6 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 const useComplaintsApi = () => {
   const axiosPrivate = useAxiosPrivate();
 
-  // Get all complaints in progress under an official
-  const ongoingComplaints = async (assigned_official_id) => {
-    try {
-      const encodedAssignee = encodeURIComponent(assigned_official_id);
-      const response = await axiosPrivate.get(`/api/complaints/ongoing/${encodedAssignee}`);
-      console.log("Fetching: ", response)
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching complaints by assignee ID:', error);
-      throw error;
-    }
-  };
-
   const complaintsByBarangayId = async (barangay_id) => {
     try {
       const encodedBarangay = encodeURIComponent(barangay_id);
@@ -127,7 +114,6 @@ const useComplaintsApi = () => {
   };
 
 return {
-    ongoingComplaints,
     complaintsByBarangayId,
     StatusComplaintsByBarangayId,
     assignComplaints,
