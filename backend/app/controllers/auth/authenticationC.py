@@ -122,6 +122,7 @@ def login_user():
     # create: refresh token
     refresh_token = jwt.encode(
         {
+            "role": role,
             "user_id": user_id,
             "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7)
@@ -203,7 +204,7 @@ def refresh_token():
         Config.JWT_SECRET_KEY,
         algorithm="HS256"
     )
-
+        
         return jsonify({
             "accessToken": new_access_token,
             "role": role,

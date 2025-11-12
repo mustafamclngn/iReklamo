@@ -60,16 +60,16 @@ function ComplaintCountCards({ role, barangayId, userId }) {
     });
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            console.log("Auth data not ready... waiting for AuthProvider.");
-            return;
-        }
+        // if (!auth?.user || !auth?.roles) {
+        //     console.log("Auth data not ready... waiting for AuthProvider.");
+        //     return;
+        // }
 
         console.log("Auth data is ready. auth.user is:", auth.user);
         
         const fetchCounts = async () => {
             try {
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay;
                 
                 const userId = auth.user.user_id; 
@@ -94,7 +94,7 @@ function ComplaintCountCards({ role, barangayId, userId }) {
 
         fetchCounts();
         
-    }, [auth.user, auth.roles]); 
+    }, [auth.user, auth.role]); 
 
     const cards = [
         { key: "Total", label: "Total Complaints", gradient: "from-[#0A2540] to-[#2563EB]" },
@@ -150,14 +150,11 @@ function ComplaintCountByCaseType() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return;
-        }
 
         const fetchBreakdown = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.id; 
 
@@ -178,7 +175,7 @@ function ComplaintCountByCaseType() {
 
         fetchBreakdown();
         
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     const maxValue = Math.max(0, ...caseData.map((d) => d.count));
 
@@ -226,14 +223,11 @@ const ComplaintPieChart = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
 
         const fetchPriorityData = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.id; // Or auth.user.user_id
 
@@ -254,7 +248,7 @@ const ComplaintPieChart = () => {
         };
 
         fetchPriorityData();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     if (loading) {
         return (
@@ -316,14 +310,10 @@ function RecentComplaintsList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
-
         const fetchRecent = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 
                 const barangayId = auth.user.barangay_id; 
                 const userId = auth.user.user_id;
@@ -339,10 +329,10 @@ function RecentComplaintsList() {
         };
 
         fetchRecent();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     const handleViewDetails = (complaintId) => {
-        navigate(`/brgyoff/complaints/${complaintId}`); 
+        navigate(`/cityadmin/complaints/${complaintId}`, { replace: true }); // <-- Adjust path as needed
     };
 
     return (

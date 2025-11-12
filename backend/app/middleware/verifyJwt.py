@@ -17,6 +17,7 @@ def verify_jwt(f):
         try:
             decoded = jwt.decode(token, Config.JWT_SECRET_KEY, algorithms=["HS256"])
             request.user = decoded
+
         except ExpiredSignatureError:
             return jsonify({"error": "Access token expired"}), 401
         except InvalidTokenError:

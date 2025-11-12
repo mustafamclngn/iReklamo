@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const BC_ComplaintsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const complaintsApi = useComplaintsApi();
   const itemsPerPage = 5;
 
   const location = useLocation();
@@ -49,6 +51,7 @@ const BC_ComplaintsPage = () => {
 
       // Use role-based endpoint for barangay captain - gets only their barangay complaints
       const response = await complaintsApi.getBarangayCaptainComplaints(userId);
+
 
       if (response.success) {
         setComplaints(response.data);

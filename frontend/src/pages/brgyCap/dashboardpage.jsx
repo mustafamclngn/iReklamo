@@ -62,40 +62,29 @@ function ComplaintCountCards({ role, barangayId, userId }) {
     });
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            console.log("Auth data not ready... waiting for AuthProvider.");
-            return;
-        }
 
-        console.log("Auth data is ready. auth.user is:", auth.user);
+        console.log("Auth data is ready. auth.user is:", auth);
         
         const fetchCounts = async () => {
             try {
-                const userRole = auth.roles[0];
-                const barangayId = auth.user.barangay_id;
-                const userId = auth.user.user_id; 
-
                 setLoading(true);
-                
-                console.log(`Fetching counts for: role=${userRole}, bgy_id=${barangayId}, user_id=${userId}`);
+                const userRole = auth.role[0];
+                const barangayId = auth.user.barangay_id;
+                const userId = auth.user.user_id;
 
                 const data = await dashboardAPI.getDashboardCounts(userRole, barangayId, userId);
-
-                if (data) {
-                    setCounts(data);
-                } else {
-                    console.error("No data received from API");
-                }
-            } catch (error) {
-                console.error("Failed to fetch dashboard counts:", error);
+                console.log("Dashboard Counts ", data )
+                setCounts(data);
+            } catch (err) {
+                console.error(err);
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
         };
 
         fetchCounts();
         
-    }, [auth.user, auth.roles]); 
+    }, [auth.user, auth.role]); 
 
     const cards = [
         { key: "Total", label: "Total Complaints", gradient: "from-[#0A2540] to-[#2563EB]" },
@@ -153,15 +142,11 @@ function UnassignedOfficialsList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // This component is for Admins/Captains, so we check their auth
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
 
         const fetchUnassignedOfficials = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 
                 // --- IMPORTANT ---
                 // We use the CAPTAIN's barangay_id to filter the list
@@ -178,7 +163,7 @@ function UnassignedOfficialsList() {
         };
 
         fetchUnassignedOfficials();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     const handleViewDetails = (officialId) => {
         // Update this path to your "view official" page
@@ -187,7 +172,7 @@ function UnassignedOfficialsList() {
 
     const handleViewAll = () => {
         // Update this path to your "all officials" list page
-        navigate(`/admin/officials`);
+        navigate(`/brgycap/officials`);
     };
 
     return (
@@ -260,14 +245,11 @@ function UrgentComplaintsList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
 
         const fetchUrgentComplaints = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 
                 // --- IMPORTANT ---
                 // Use the keys from your auth.user object!
@@ -287,7 +269,7 @@ function UrgentComplaintsList() {
         };
 
         fetchUrgentComplaints();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     // Navigate to the full complaints list, pre-filtered to "Urgent"
     const handleViewAllUrgent = () => {
@@ -300,7 +282,7 @@ function UrgentComplaintsList() {
 
     // Navigate to a specific complaint's details page
     const handleViewDetails = (complaintId) => {
-        navigate(`/brgyoff/complaints/${complaintId}`); // <-- Adjust path as needed
+        navigate(`/brgycap/complaints/${complaintId}`); // <-- Adjust path as needed
     };
 
     return (
@@ -356,6 +338,7 @@ function UrgentComplaintsList() {
                 <button 
                     className='bg-blue-500 border border-gray-300 w-full shadow rounded-md mt-5 py-1 text-white text-sm font-semibold items-center
                     hover:shadow-md hover:bg-blue-800 all transition ease-in-out duration-200'
+                    onClick={() => navigate('/bycap/complaints')}
                     >
                     View all Complaints
                 </button>
@@ -370,14 +353,11 @@ function ComplaintCountByCaseType() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return;
-        }
 
         const fetchBreakdown = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.id; 
 
@@ -398,7 +378,7 @@ function ComplaintCountByCaseType() {
 
         fetchBreakdown();
         
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     const maxValue = Math.max(0, ...caseData.map((d) => d.count));
 
@@ -446,14 +426,11 @@ const ComplaintPieChart = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
 
         const fetchPriorityData = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.id; // Or auth.user.user_id
 
@@ -474,7 +451,7 @@ const ComplaintPieChart = () => {
         };
 
         fetchPriorityData();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     if (loading) {
         return (

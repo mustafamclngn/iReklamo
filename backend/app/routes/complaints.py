@@ -395,25 +395,153 @@ def create_complaint():
         if 'conn' in locals() and conn:
             conn.close()
 
+
+
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
     """
-    Get a specific complaint by ID
-
-    TODO: Integrate with ComplaintController.get_complaint_by_id()
+    Get a specific complaint by ID with all related information
     """
-    return jsonify({"message": f"Get complaint {complaint_id} endpoint - implement with raw SQL"})
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.barangay_id,
+                complaints.assigned_official_id,
+                complaints.created_at,
+                complaints.updated_at,
+                barangays.name as barangay_name,
+                CONCAT(complainants.first_name, ' ', complainants.last_name) as complainant_name,
+                complainants.email as complainant_email,
+                complainants.contact_number as complainant_contact,
+                CASE
+                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
+                    THEN CONCAT(users.first_name, ' ', users.last_name)
+                    ELSE 'Unassigned'
+                END as assigned_official_name
+            FROM complaints
+            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
+            LEFT JOIN complainants ON complaints.complainant_id = complainants.id
+            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
+            WHERE complaints.id = %s
+        """
+
+        cursor.execute(query, (complaint_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if not result:
+            return jsonify({
+                'success': False,
+                'error': 'Complaint not found'
+            }), 404
+
+        complaint_data = dict(result)
+
+        return jsonify({
+            'success': True,
+            'data': complaint_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaint {complaint_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @complaints_bp.route('/<int:complaint_id>', methods=['PUT'])
 def update_complaint(complaint_id):
     """
     Update a complaint
-
-    Expected data: any subset of title, description, category, status, priority, location, image_url
-    TODO: Integrate with ComplaintController.update_complaint()
+    Expected data: any subset of title, case_type, description, status, priority, 
+                   full_address, specific_location, assigned_official_id
     """
-    return jsonify({"message": f"Update complaint {complaint_id} endpoint - implement with raw SQL"})
+    try:
+        data = request.get_json()
+        
+        # Check if complaint exists
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("SELECT id FROM complaints WHERE id = %s", (complaint_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'Complaint not found'
+            }), 404
+
+        # Build dynamic UPDATE query based on provided fields
+        allowed_fields = {
+            'title', 'case_type', 'description', 'status', 'priority',
+            'full_address', 'specific_location', 'assigned_official_id'
+        }
+        
+        updates = []
+        values = []
+        
+        for field in allowed_fields:
+            if field in data:
+                updates.append(f"{field} = %s")
+                values.append(data[field])
+        
+        if not updates:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'No valid fields to update'
+            }), 400
+        
+        # Add updated_at timestamp
+        updates.append("updated_at = NOW()")
+        
+        # Add complaint_id for WHERE clause
+        values.append(complaint_id)
+        
+        query = f"""
+            UPDATE complaints 
+            SET {', '.join(updates)}
+            WHERE id = %s
+            RETURNING id, complaint_code, title, status, updated_at
+        """
+        
+        cursor.execute(query, values)
+        updated_complaint = cursor.fetchone()
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'Complaint updated successfully',
+            'data': dict(updated_complaint)
+        }), 200
+
+    except Exception as e:
+        print(f"Error updating complaint {complaint_id}: {e}")
+        if 'conn' in locals() and conn:
+            conn.rollback()
+            conn.close()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @complaints_bp.route('/<int:complaint_id>', methods=['DELETE'])
 def delete_complaint(complaint_id):

@@ -1,3 +1,4 @@
+import axios from './axios';
 import { axiosPrivate } from './axios'; 
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
@@ -47,17 +48,21 @@ const useComplaintsApi = () => {
     }
   };
 
-  // track complaint
+  // track complaint (public endpoint - no auth required)
   const trackComplaint = async (complaintCode) => {
     try {
       console.log("Tracking complaint:", complaintCode)
       const response = await axios.get(`/api/complaints/track/${complaintCode}`);
       return response.data;
     } catch (error) {
+      console.error('Error tracking complaint:', error);
       if (error.response) {
         return error.response.data;
       }
-      throw error;
+      return {
+        success: false,
+        message: 'Unable to track complaint. Please try again later.'
+      };
     }
   };
 

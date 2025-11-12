@@ -34,13 +34,13 @@ def get_dashboard_counts():
         params = []
 
         # Apply filters based on role
-        if role == "brgy_cap" and barangay_id:
+        if role == "3" and barangay_id:
             conditions.append("barangay_id = %s")
             params.append(barangay_id)
-        elif role == "brgy_off" and user_id:
+        elif role == "4" and user_id:
             conditions.append("assigned_official_id = %s")
             params.append(user_id)
-        elif role in ["superadmin", "city_admin"]:
+        elif role in ["1", "2"]:
             pass
         else:
             pass
@@ -126,13 +126,13 @@ def get_case_type_breakdown():
         conditions = []
         params = []
 
-        if role == "brgy_cap" and barangay_id:
+        if role == "3" and barangay_id:
             conditions.append("barangay_id = %s")
             params.append(barangay_id)
-        elif role == "brgy_off" and user_id:
+        elif role == "4" and user_id:
             conditions.append("assigned_official_id = %s")
             params.append(user_id)
-        elif role in ["superadmin", "city_admin"]:
+        elif role in ["1", "2"]:
             pass
         else:
             pass
@@ -190,10 +190,10 @@ def get_priority_breakdown():
         conditions = []
         params = []
 
-        if role == "brgy_cap" and barangay_id:
+        if role == "3" and barangay_id:
             conditions.append("barangay_id = %s")
             params.append(barangay_id)
-        elif role == "brgy_off" and user_id: 
+        elif role == "4" and user_id: 
             conditions.append("assigned_official_id = %s")
             params.append(user_id)
         
@@ -253,10 +253,10 @@ def get_urgent_complaints():
         params = []
 
         # (Make sure to use 'brgy_off' to match your React app)
-        if role == "brgy_cap" and barangay_id:
+        if role == "3" and barangay_id:
             conditions.append("barangay_id = %s")
             params.append(barangay_id)
-        elif role == "brgy_off" and user_id:
+        elif role == "4" and user_id:
             conditions.append("assigned_official_id = %s")
             params.append(user_id)
         
@@ -311,10 +311,10 @@ def get_recent_complaints():
         # --- IMPORTANT ---
         # Make sure this matches your React app's role name!
         # (e.g., 'brgy_off' or 'brgy_official')
-        if role == "brgy_cap" and barangay_id:
+        if role == "3" and barangay_id:
             conditions.append("barangay_id = %s")
             params.append(barangay_id)
-        elif role == "brgy_off" and user_id:
+        elif role == "4" and user_id:
             conditions.append("assigned_official_id = %s")
             params.append(user_id)
         
@@ -372,10 +372,10 @@ def get_unassigned_officials():
 
         # 3. Add role-based filtering (who is *viewing* this)
         # Make sure 'brgy_cap' matches your app's role name!
-        if role == "brgy_cap" and barangay_id:
+        if role == "3" and barangay_id:
             conditions.append("barangay_id = %s")
             params.append(barangay_id)
-        elif role in ["superadmin", "city_admin"]:
+        elif role in ["1", "2"]:
             # No extra filter needed, they see all
             pass
         else:

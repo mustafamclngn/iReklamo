@@ -5,7 +5,7 @@ import complaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
-
+import useComplaintsApi from '../../api/complaintsAPI';
 const SA_ComplaintsPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,7 +14,7 @@ const SA_ComplaintsPage = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
+  const complaintsApi = useComplaintsApi();
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
 

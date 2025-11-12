@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { replace, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, TrendingUpIcon, NotebookPen, PencilLine, Eye, ScrollText } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Footer from '../../components/navheaders/footer.jsx';
 import useAuth from "../../hooks/useAuth.jsx";
 import dashboardAPI from '../../api/dashboardAPI';
+
 
 const CASE_TYPE_COLORS = {
     "Infrastructure & Utilities": "bg-red-500",
@@ -60,16 +61,12 @@ function ComplaintCountCards({ role, barangayId, userId }) {
     });
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            console.log("Auth data not ready... waiting for AuthProvider.");
-            return;
-        }
 
         console.log("Auth data is ready. auth.user is:", auth.user);
         
         const fetchCounts = async () => {
             try {
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.user_id; 
 
@@ -93,7 +90,7 @@ function ComplaintCountCards({ role, barangayId, userId }) {
 
         fetchCounts();
         
-    }, [auth.user, auth.roles]); 
+    }, [auth.user, auth.role]); 
 
     const cards = [
         { key: "Total", label: "Total Complaints", gradient: "from-[#0A2540] to-[#2563EB]" },
@@ -150,14 +147,11 @@ function ComplaintCountByCaseType() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return;
-        }
 
         const fetchBreakdown = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.id; 
 
@@ -178,7 +172,7 @@ function ComplaintCountByCaseType() {
 
         fetchBreakdown();
         
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     const maxValue = Math.max(0, ...caseData.map((d) => d.count));
 
@@ -226,14 +220,11 @@ const ComplaintPieChart = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
 
         const fetchPriorityData = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 const barangayId = auth.user.barangay_id;
                 const userId = auth.user.id; // Or auth.user.user_id
 
@@ -254,7 +245,7 @@ const ComplaintPieChart = () => {
         };
 
         fetchPriorityData();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     if (loading) {
         return (
@@ -315,14 +306,11 @@ function UrgentComplaintsList() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auth?.user || !auth?.roles) {
-            return; // Wait for auth
-        }
 
         const fetchUrgentComplaints = async () => {
             try {
                 setLoading(true);
-                const userRole = auth.roles[0];
+                const userRole = auth.role[0];
                 
                 // --- IMPORTANT ---
                 // Use the keys from your auth.user object!
@@ -342,7 +330,7 @@ function UrgentComplaintsList() {
         };
 
         fetchUrgentComplaints();
-    }, [auth.user, auth.roles]);
+    }, [auth.user, auth.role]);
 
     // Navigate to the full complaints list, pre-filtered to "Urgent"
     const handleViewAllUrgent = () => {
@@ -355,7 +343,7 @@ function UrgentComplaintsList() {
 
     // Navigate to a specific complaint's details page
     const handleViewDetails = (complaintId) => {
-        navigate(`/brgyoff/complaints/${complaintId}`); // <-- Adjust path as needed
+        navigate(`/brgyoff/assigned-complaints/${complaintId}`, { replace: true }); // <-- Adjust path as needed
     };
 
     return (
@@ -411,6 +399,7 @@ function UrgentComplaintsList() {
                 <button 
                     className='bg-blue-500 border border-gray-300 w-full shadow rounded-md mt-5 py-1 text-white text-sm font-semibold items-center
                     hover:shadow-md hover:bg-blue-800 all transition ease-in-out duration-200'
+                    onClick={() => navigate('/brgyoff/assigned-complaints')}
                     >
                     View all Complaints
                 </button>
