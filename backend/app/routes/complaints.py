@@ -202,6 +202,7 @@ def track_complaint(complaint_code):
     Track a complaint by its complaint_code (e.g., CMP-20241110-0001)
     This endpoint is public and doesn't require authentication
     """
+    print(complaint_code)
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
