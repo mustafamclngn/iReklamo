@@ -67,15 +67,15 @@ const ComplaintCardCityAdmin = ({
           </button>
 
           {/* View Details Button */}
-          <button 
+          <button
             onClick={() => onViewDetails(complaint)}
             className="px-4 py-2 bg-[#E3E3E3] text-black rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
           >
             View Details
           </button>
-          
+
           {/* Assign Official Icon Button */}
-          <button 
+          <button
             onClick={() => onAssignOfficial(complaint)}
             className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
             title="Assign official to complaint"

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ComplaintCardBrgyCap from '../../components/cards/complaintCardBrgyCap';
 import useComplaintsApi from '../../api/complaintsApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -8,6 +9,7 @@ import useAuth from '../../hooks/useAuth';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 
 const BC_ComplaintsPage = () => {
+  const navigate = useNavigate();
   const { auth } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [complaints, setComplaints] = useState([]);
@@ -99,9 +101,7 @@ const BC_ComplaintsPage = () => {
 
   // View Details
   const handleViewDetails = (complaint) => {
-    console.log('View details for:', complaint);
-    // Navigate to complaint details page
-    // navigate(`/barangaycaptain/complaints/${complaint.id}`);
+    navigate(`/brgycap/complaints/${complaint.id}`);
   };
 
   // Update Status
