@@ -1,5 +1,5 @@
 import './modal.css'
-import useComplaintsApi from '../../api/complaintsApi';
+import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
 
 const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {

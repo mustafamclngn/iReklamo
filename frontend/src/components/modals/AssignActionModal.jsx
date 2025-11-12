@@ -2,7 +2,7 @@ import './modal.css'
 import { useEffect, useState } from 'react'
 import useUserInfoApi from '../../api/userInfo'
 import useOfficialsApi from '../../api/officialsApi';
-import useComplaintsApi from '../../api/complaintsApi';
+import useComplaintsApi from '../../api/complaintsAPI';
 import useAuth from '../../hooks/useAuth';
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';

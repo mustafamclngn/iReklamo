@@ -7,7 +7,7 @@ import { getRoleBasePath } from '../../utils/roleUtils';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 import ActiveCasesModal from '../../components/modals/ActiveCasesModal';
-import useComplaintsApi from '../../api/complaintsApi';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();

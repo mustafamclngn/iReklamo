@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import complaintsApi from "../../../api/complaintsAPI";
+import useComplaintsApi from "../../../api/complaintsAPI";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import ErrorAlert from "../../../components/common/ErrorAlert";
 import HeroBanner from "../../../components/navheaders/heroBanner";
@@ -12,11 +12,13 @@ const CU_TrackComplaintDetailsPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const {trackComplaint} = useComplaintsApi();
+
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
         setLoading(true);
-        const response = await complaintsApi.trackComplaint(complaintCode);
+        const response = await trackComplaint(complaintCode);
 
         if (response.success && response.data) {
           setComplaint(response.data);

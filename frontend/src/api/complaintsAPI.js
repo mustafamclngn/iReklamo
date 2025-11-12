@@ -1,5 +1,7 @@
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 const useComplaintsApi = () => {
   const axiosPrivate = useAxiosPrivate();
 
@@ -40,6 +42,20 @@ const useComplaintsApi = () => {
       return response.data;
     } catch (error) {
       console.error('Error assigning complaint to officer', error);
+      throw error;
+    }
+  };
+
+  // track complaint
+  const trackComplaint = async (complaintCode) => {
+    try {
+      console.log("Tracking complaint:", complaintCode)
+      const response = await axios.get(`/api/complaints/track/${complaintCode}`);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        return error.response.data;
+      }
       throw error;
     }
   };
@@ -117,6 +133,7 @@ return {
     complaintsByBarangayId,
     StatusComplaintsByBarangayId,
     assignComplaints,
+    trackComplaint,
     getAllComplaints,
     getComplaintById,
     updateComplaint,
