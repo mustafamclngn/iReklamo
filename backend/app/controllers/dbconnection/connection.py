@@ -1,13 +1,20 @@
-from .dbconfig import DB_HOST, DB_DATABASE, DB_PASSWORD, DB_USER
+import os
 from psycopg2 import pool
+from dotenv import load_dotenv
 
-connection_pool =   pool.SimpleConnectionPool(
-                    1, 10,
-                    host=DB_HOST,
-                    database=DB_DATABASE,
-                    user=DB_USER,
-                    password=DB_PASSWORD
-                    )
+load_dotenv()
+
+DB_CONFIG = {
+    "host": os.getenv("DATABASE_HOST", "localhost"),
+    "port": int(os.getenv("DATABASE_PORT", 5432)),
+    "database": os.getenv("DATABASE_NAME"),
+    "user": os.getenv("DATABASE_USER"),
+    "password": os.getenv("DATABASE_PASSWORD")
+}
+
+connection_pool = pool.SimpleConnectionPool(
+    1, 10, **DB_CONFIG
+)
 
 def get_conn():
     return connection_pool.getconn()

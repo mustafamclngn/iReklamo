@@ -8,7 +8,7 @@ def init_extensions(app):
     raw = app.config.get('CORS_ORIGINS', '')
     origins = [o.strip() for o in raw.split(',') if o.strip()]
 
-    # Initialize CORS
+    # Initialize CORS with proper credentials support
     cors.init_app(
             app,
             resources={

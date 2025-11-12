@@ -28,10 +28,6 @@ def create_app(config_name=None):
     # Initialize extensions
     init_extensions(app)
 
-    
-    origins = getattr(Config, "CORS_ORIGINS", "").split(",")
-    CORS(app, origins=origins, supports_credentials=True)
-
     # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -39,6 +35,15 @@ def create_app(config_name=None):
     app.register_blueprint(user_bp)
     app.register_blueprint(officialsList_bp)
     app.register_blueprint(userinfo_bp)
+
+    # Add CORS headers manually for all routes
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
 
     # Serve static files (profile pictures)
     STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')

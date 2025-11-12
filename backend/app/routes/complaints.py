@@ -6,13 +6,12 @@ from datetime import datetime
 from app.config import DB_CONFIG
 
 from app.controllers.complaints.complaintList import list_by_assignee
+from app.functions.Select import Select
+from app.functions.Update import Update
+from app.functions.Delete import Delete
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
-
-CORS(complaints_bp)
-
-
 
 # FOR GENERATING TRACKING ID
 def generate_complaint_id(cursor):
@@ -39,6 +38,94 @@ def get_complaints():
     return jsonify(results)
 
 
+# GET ALL COMPLAINTS WITH OPTIONAL FILTERS
+@complaints_bp.route('/', methods=['GET'])
+def get_all_complaints():
+    """
+    Get all complaints with optional filters: ?barangay=X&status=Y&priority=Z
+    """
+    try:
+        # Get query parameters
+        barangay_filter = request.args.get('barangay')
+        status_filter = request.args.get('status')
+        priority_filter = request.args.get('priority')
+
+        # Use raw SQL with proper JOINs to resolve foreign keys
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Build the query with JOINs
+        query = """
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.barangay_id,
+                complaints.assigned_official_id,
+                complaints.created_at,
+                complaints.updated_at,
+                barangays.name as barangay,
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
+            FROM complaints
+            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
+            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
+        """
+
+        # Add WHERE conditions based on filters
+        conditions = []
+        params = []
+
+        if barangay_filter:
+            conditions.append("barangays.name = %s")
+            params.append(barangay_filter)
+
+        if status_filter:
+            conditions.append("complaints.status = %s")
+            params.append(status_filter)
+
+        if priority_filter:
+            conditions.append("complaints.priority = %s")
+            params.append(priority_filter)
+
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        query += " ORDER BY complaints.created_at DESC"
+
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        # Convert RealDictCursor results to list of dicts
+        formatted_results = []
+        for row in results:
+            complaint_dict = dict(row)
+            formatted_results.append(complaint_dict)
+
+        return jsonify({
+            'success': True,
+            'data': formatted_results,
+            'count': len(formatted_results)
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 # LIST OF ALL BARANGAYS
 @complaints_bp.route('/barangays', methods=['GET'])
 def get_barangays():
@@ -59,6 +146,165 @@ def get_barangays():
         return jsonify(rows)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# GET COMPLAINTS BY BARANGAY NAME
+@complaints_bp.route('/barangay/<string:barangay_name>', methods=['GET'])
+def get_complaints_by_barangay(barangay_name):
+    """
+    Get complaints for a specific barangay by name
+    """
+    try:
+        # Use raw SQL for join query
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        cursor.execute("""
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.barangay_id,
+                complaints.assigned_official_id,
+                complaints.created_at,
+                complaints.updated_at,
+                barangays.name as barangay_name
+            FROM complaints
+            INNER JOIN barangays ON complaints.barangay_id = barangays.id
+            WHERE barangays.name = %s
+            ORDER BY complaints.created_at DESC;
+        """, (barangay_name,))
+
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'data': results,
+            'count': len(results),
+            'barangay': barangay_name
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints for barangay {barangay_name}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@complaints_bp.route('/track/<string:complaint_code>', methods=['GET'])
+def track_complaint(complaint_code):
+    """
+    Track a complaint by its complaint_code (e.g., CMP-20241110-0001)
+    This endpoint is public and doesn't require authentication
+    """
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.created_at,
+                complaints.updated_at,
+                barangays.name as barangay_name,
+                CONCAT(complainants.first_name, ' ', complainants.last_name) as complainant_name,
+                CASE
+                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
+                    THEN CONCAT(users.first_name, ' ', users.last_name)
+                    ELSE NULL
+                END as assigned_official
+            FROM complaints
+            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
+            LEFT JOIN complainants ON complaints.complainant_id = complainants.id
+            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
+            WHERE complaints.complaint_code = %s
+        """
+
+        cursor.execute(query, (complaint_code,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if not result:
+            return jsonify({
+                'success': False,
+                'message': 'Complaint not found. Please check your Complaint ID and try again.'
+            }), 404
+
+        complaint_data = dict(result)
+
+        return jsonify({
+            'success': True,
+            'data': complaint_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error tracking complaint: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while tracking your complaint.'
+        }), 500
+
+
+# GET COMPLAINTS ASSIGNED TO AN OFFICIAL
+@complaints_bp.route('/assigned/<int:official_id>', methods=['GET'])
+def get_assigned_complaints(official_id):
+    """
+    Get complaints assigned to a specific official
+    """
+    try:
+        # Define columns to select
+        columns = [
+            "complaints.id",
+            "complaints.complaint_code",
+            "complaints.title",
+            "complaints.case_type",
+            "complaints.description",
+            "complaints.full_address",
+            "complaints.specific_location",
+            "complaints.status",
+            "complaints.priority",
+            "complaints.barangay_id",
+            "complaints.assigned_official_id",
+            "complaints.created_at",
+            "complaints.updated_at"
+        ]
+
+        selector = Select().table("complaints").special_col(columns)
+        selector.search("assigned_official_id", official_id)
+        selector.sort("created_at", "DESC")
+
+        results = selector.execute().retData()
+
+        return jsonify({
+            'success': True,
+            'data': results,
+            'count': len(results),
+            'official_id': official_id
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching assigned complaints for official {official_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 
@@ -112,7 +358,7 @@ def create_complaint():
                 data['specific_location'],     # specific_location
                 complainant_id,                # complainant_id FK
                 int(data.get('barangay')),     # barangay_id FK
-                1                              # assigned_official_id NULL
+                None                           # assigned_official_id NULL
             ))
             complaint_id = cursor.fetchone()['id']
 
@@ -156,10 +402,202 @@ def update_complaint(complaint_id):
 def delete_complaint(complaint_id):
     """
     Delete a complaint by ID
-
-    TODO: Integrate with ComplaintController.delete_complaint()
     """
-    return jsonify({"message": f"Delete complaint {complaint_id} endpoint - implement with raw SQL"})
+    try:
+        # Check if complaint exists
+        selector = Select().table("complaints").search("id", complaint_id).execute().retDict()
+        if not selector:
+            return jsonify({
+                'success': False,
+                'error': 'Complaint not found'
+            }), 404
+
+        deleter = Delete().table("complaints").where("id", complaint_id).execute()
+
+        return jsonify({
+            'success': True,
+            'message': 'Complaint deleted successfully'
+        }), 200
+
+    except Exception as e:
+        print(f"Error deleting complaint: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+
+
+
+
+# ROLE-BASED COMPLAINTS ENDPOINTS
+
+@complaints_bp.route('/barangay-captain/<int:user_id>', methods=['GET'])
+def get_barangay_captain_complaints(user_id):
+    """
+    Get complaints for a barangay captain - only complaints from their barangay
+    """
+    try:
+        # Get user's barangay_id from users table
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # First get the user's barangay_id
+        cursor.execute("SELECT barangay_id FROM users WHERE user_id = %s", (user_id,))
+        user_result = cursor.fetchone()
+
+        if not user_result or not user_result['barangay_id']:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'User not found or not assigned to a barangay'
+            }), 404
+
+        user_barangay_id = user_result['barangay_id']
+
+        # Get complaints for this barangay with official names resolved
+        query = """
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.barangay_id,
+                complaints.assigned_official_id,
+                complaints.created_at,
+                complaints.updated_at,
+                barangays.name as barangay,
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
+            FROM complaints
+            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
+            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
+            WHERE complaints.barangay_id = %s
+            ORDER BY complaints.created_at DESC
+        """
+
+        cursor.execute(query, (user_barangay_id,))
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        # Convert RealDictCursor results to list of dicts
+        formatted_results = []
+        for row in results:
+            complaint_dict = dict(row)
+            formatted_results.append(complaint_dict)
+
+        return jsonify({
+            'success': True,
+            'data': formatted_results,
+            'count': len(formatted_results),
+            'barangay_id': user_barangay_id
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching barangay captain complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@complaints_bp.route('/barangay-official/<int:user_id>', methods=['GET'])
+def get_barangay_official_complaints(user_id):
+    """
+    Get complaints assigned to a barangay official (WHERE complaints.assigned_official_id = user_id)
+    """
+    try:
+        # Get complaints assigned to this official with barangay and official names resolved
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Get complaints assigned to this specific official
+        query = """
+            SELECT
+                complaints.id,
+                complaints.complaint_code,
+                complaints.title,
+                complaints.case_type,
+                complaints.description,
+                complaints.full_address,
+                complaints.specific_location,
+                complaints.status,
+                complaints.priority,
+                complaints.barangay_id,
+                complaints.assigned_official_id,
+                complaints.created_at,
+                complaints.updated_at,
+                barangays.name as barangay,
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
+            FROM complaints
+            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
+            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
+            WHERE complaints.assigned_official_id = %s
+            ORDER BY complaints.created_at DESC
+        """
+
+        cursor.execute(query, (user_id,))
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        # Convert RealDictCursor results to list of dicts
+        formatted_results = []
+        for row in results:
+            complaint_dict = dict(row)
+            formatted_results.append(complaint_dict)
+
+        return jsonify({
+            'success': True,
+            'data': formatted_results,
+            'count': len(formatted_results),
+            'official_id': user_id
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching barangay official complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@complaints_bp.route('/user/<int:user_id>', methods=['GET'])
+def get_user_complaints(user_id):
+    """
+    Get complaints by a specific user
+    Note: This assumes complaints have a user_id field, but current schema doesn't.
+    This might need to be updated based on how complaints are associated with users
+    """
+    try:
+        # For now, return empty array since current schema doesn't link complaints to users directly
+        # This would need to be updated based on how complaints are associated with users
+        return jsonify({
+            'success': True,
+            'data': [],
+            'count': 0,
+            'message': 'User complaints endpoint - needs schema update to link complaints to users'
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching user complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @complaints_bp.route('ongoing/<int:assignee>', methods=['GET'])
 def get_user_complaints(assignee):
