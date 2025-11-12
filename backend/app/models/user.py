@@ -22,8 +22,8 @@ class User():
             self.selector
             .table(self.table)
             .special_col([
-                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
-                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.role_id",
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.role_id",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.barangay_id",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
                 "barangays.name as barangay", "roles.name as role"
             ])
@@ -42,8 +42,8 @@ class User():
             self.selector
             .table(self.table)
             .special_col([
-                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.barangay_id",
-                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.role_id",
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.role_id",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.barangay_id",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
                 "barangays.name as barangay", "roles.name as role"
             ])
@@ -62,8 +62,8 @@ class User():
             self.selector
             .table(self.table)
             .special_col([
-                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.barangay_id",
-                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.role_id",
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.role_id",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.barangay_id",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
                 "barangays.name as barangay", "roles.name as role"
             ])

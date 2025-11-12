@@ -36,15 +36,6 @@ def create_app(config_name=None):
     app.register_blueprint(officialsList_bp)
     app.register_blueprint(userinfo_bp)
 
-    # # Add CORS headers manually for all routes
-    # Uncomment if preflight requests are SOMEHOW (please check your auth changes if any) rejected by cors
-    # @app.after_request
-    # def after_request(response):
-    #     response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-    #     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
-    #     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    #     response.headers.add('Access-Control-Allow-Credentials', 'true')
-    #     return response
 
     # Serve static files (profile pictures)
     STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
