@@ -38,8 +38,8 @@ const OfficialDetailsPage = () => {
         const activeCases = await getActiveCases(user_id);
         const resolvedCases = await getResolvedCases(user_id);
 
-        setActive(activeCases?.data?.length || 0);
-        setResolved(resolvedCases?.data?.length || 0);
+        setActive(activeCases?.complaints?.length || 0);
+        setResolved(resolvedCases?.complaints?.length || 0);
       } catch (error) {
         console.error("Error fetching case data:", error);
         setActive(0);
@@ -349,15 +349,13 @@ const OfficialDetailsPage = () => {
               <div className="flex items-center gap-3">
 
                 {(auth?.role[0] === 1 || auth?.role[0] === 2 || auth?.role[0] === 3) && (
-                    <div className="flex justify-end mt-[3%]">
-                      <button 
+                      <button
+                        className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
                         onClick={handleAssign}
-                        className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
-                        title="Assign official to complaint"
-                        >
-                        <i className="bi bi-person-check text-xl"></i>
+                        title='Assign Official to Complaint'>
+                        <i className="bi bi-person-check text-lg"></i>
+                        Assign Complaint
                       </button>
-                  </div>
                 )}
                 <button
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"

@@ -42,7 +42,7 @@ def activeCases_official(assignee):
 
         return jsonify({
             'success': True,
-            'data': result
+            'complaints': result
         }), 200
 
     except Exception as e:
@@ -67,7 +67,7 @@ def resolvedCases_official(assignee):
 
         return jsonify({
             'success': True,
-            'data': result
+            'complaints': result
         }), 200
 
     except Exception as e:

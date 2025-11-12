@@ -16,7 +16,8 @@ const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
       try {
         console.log("Searching for complaints for user:", user_id)
         const response = await getActiveCases(user_id)
-        setAssignedComplaints(response.data || [])
+        setAssignedComplaints(response?.complaints || [])
+        console.log("Fetched ongoing complaints: ", assignedComplaints)
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)
         setAssignedComplaints([])

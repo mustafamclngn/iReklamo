@@ -50,7 +50,7 @@ const useComplaintsApi = () => {
   const trackComplaint = async (complaintCode) => {
     try {
       console.log("Tracking complaint:", complaintCode)
-      const response = await axios.get(`/api/complaints/track/${complaintCode}`);
+      const response = await axios.get(`${API_BASE_URL}/api/complaints/track/${complaintCode}`);
       return response.data;
     } catch (error) {
       if (error.response) {

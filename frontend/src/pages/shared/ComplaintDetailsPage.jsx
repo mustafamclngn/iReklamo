@@ -162,23 +162,17 @@ const ComplaintDetailsPage = () => {
                 <i className="bi bi-card-text text-[#43B174] text-2xl"></i>
                 <h2 className="text-2xl font-semibold text-gray-900">Complaint Details</h2>
               </div>
-              {canEdit && (
-                <button className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium">
-                  <i className="bi bi-pencil-square text-lg"></i>
-                  Edit Details
-                </button>
-              )}
             </div>
             <hr className="border-t border-gray-200 mt-4 mb-6" />
             <div className="space-y-6">
               <div>
                 <label className="block text-md text-gray-600 mb-2">Description:</label>
-                <p className="text-gray-900 font-medium text-lg leading-relaxed">{complaint.description}</p>
+                <p className="text-gray-900 font-medium text-lg leading-relaxed">{complaint.description || "N/A"}</p>
               </div>
               <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                 <div>
                   <label className="block text-md text-gray-600 mb-2">Case Type:</label>
-                  <p className="text-gray-900 font-medium text-lg">{complaint.case_type}</p>
+                  <p className="text-gray-900 font-medium text-lg">{complaint.case_type || "N/A"}</p>
                 </div>
                 <div>
                   <label className="block text-md text-gray-600 mb-2">Date Filed:</label>
@@ -193,12 +187,6 @@ const ComplaintDetailsPage = () => {
                 <i className="bi bi-person-badge text-[#1F7A8C] text-2xl"></i>
                 <h3 className="text-xl font-semibold text-gray-900">Complainant Information</h3>
               </div>
-              {canEdit && (
-                <button className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-base flex items-center gap-2 font-medium">
-                  <i className="bi bi-pencil-square text-base"></i>
-                  Edit Complainant
-                </button>
-              )}
             </div>
             {isAnonymous && (
               <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-200">
@@ -227,34 +215,26 @@ const ComplaintDetailsPage = () => {
                 <i className="bi bi-geo-alt-fill text-red-600 text-2xl"></i>
                 <h2 className="text-2xl font-semibold text-gray-900">Location Information</h2>
               </div>
-              {canEdit && (
-                <button className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium">
-                  <i className="bi bi-pencil-square text-lg"></i>
-                  Edit Location
-                </button>
-              )}
             </div>
             <hr className="border-t border-gray-200 mt-4 mb-6" />
             <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               <div>
                 <label className="block text-md text-gray-600 mb-2">Full Address:</label>
-                <p className="text-gray-900 font-medium text-lg">{complaint.full_address}</p>
+                <p className="text-gray-900 font-medium text-lg">{complaint.full_address || "N/A"}</p>
               </div>
-              {complaint.specific_location && (
-                <div>
-                  <label className="block text-md text-gray-600 mb-2">Specific Location:</label>
-                  <p className="text-gray-900 font-medium text-lg">{complaint.specific_location}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-1 gap-x-8 gap-y-6">
-                <div>
-                  <label className="block text-md text-gray-600 mb-2">Barangay:</label>
-                  <p className="text-gray-900 font-medium text-lg">{complaint.barangay}</p>
-                </div>
+              <div>
+                <label className="block text-md text-gray-600 mb-2">Barangay:</label>
+                <p className="text-gray-900 font-medium text-lg">{complaint.barangay || "N/A"}</p>
               </div>
             </div>
+            <div>
+              <label className="block text-md text-gray-600 mb-2">Specific Location:</label>
+              <p className="text-gray-900 font-medium text-lg">{complaint.specific_location || "N/A"}</p>
+            </div>
           </div>
-          {/* Assignment Details with Status, and Priority */}
+        </div>
+          {/* Assignment Details */}
           <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-2">
@@ -291,14 +271,12 @@ const ComplaintDetailsPage = () => {
                 </p>
               </div>
               <div>
-                <div className="flex gap-4 mt-1 mb-3"></div>
                 <label className="block text-md text-gray-600 mb-2">Current Status:</label>
                 <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: statusColors[complaint.status] }}>
                   {complaint.status}
                 </span>
               </div>
               <div>
-                <div className="flex gap-4 mt-1 mb-3"></div>
                 <label className="block text-md text-gray-600 mb-2">Priority Level:</label>
                 <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
                   {complaint.priority}
