@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import { useLocation } from 'react-router-dom';
-=======
-import { useNavigate } from 'react-router-dom';
->>>>>>> origin/main
+import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardCityAdmin from '../../components/cards/complaintCardCityAdmin';
 import complaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';

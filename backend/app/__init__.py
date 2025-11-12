@@ -8,11 +8,8 @@ from app.routes.auth import auth_bp
 from app.routes.complaints import complaints_bp
 from app.routes.users import user_bp
 from app.routes.officialsList import officialsList_bp
-<<<<<<< HEAD
 from app.routes.dashboard import dashboard_bp
-=======
 from app.routes.user_info import userinfo_bp
->>>>>>> origin/main
 
 def create_app(config_name=None):
     """Application factory function"""
