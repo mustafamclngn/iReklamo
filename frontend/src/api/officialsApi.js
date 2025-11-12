@@ -1,39 +1,44 @@
-import axios from './axios';
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-export const officialsApi = {
-  // Get officials by barangay
-  getOfficialsByBarangay: async (barangay) => {
+const useOfficialsApi = () => {
+  const axiosPrivate = useAxiosPrivate();
+
+  // Get all officials under a barangay
+  const getOfficialsByBarangay = async (barangay) => {
     try {
       const encodedBarangay = encodeURIComponent(barangay);
-      const response = await axios.get(`/api/officials?barangay=${encodedBarangay}`);
+      const response = await axiosPrivate.get(`/api/officials?barangay=${encodedBarangay}`);
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error('Error fetching officials by barangay:', error);
       throw error;
     }
-  },
+  };
 
   // Get all officials
-  getAllOfficials: async () => {
+  const getAllOfficials = async () => {
     try {
-      const response = await axios.get('/api/officials');
+      const response = await axiosPrivate.get('/api/officials');
       return response.data;
     } catch (error) {
       console.error('Error fetching all officials:', error);
       throw error;
     }
-  },
+  };
 
   // Get single official by ID
-  getOfficialById: async (userId) => {
+  const getOfficialById = async (userId) => {
     try {
-      const response = await axios.get(`/api/officials/${userId}`);
+      const response = await axiosPrivate.get(`/api/officials/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching official by ID:', error);
       throw error;
     }
-  }
+  };
+
+  return { getAllOfficials, getOfficialsByBarangay, getOfficialById, }
 };
 
-export default officialsApi;
+export default useOfficialsApi;

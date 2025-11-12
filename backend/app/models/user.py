@@ -22,8 +22,8 @@ class User():
             self.selector
             .table(self.table)
             .special_col([
-                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
-                "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.role_id",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.barangay_id",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
                 "barangays.name as barangay", "roles.name as role"
             ])
@@ -42,8 +42,8 @@ class User():
             self.selector
             .table(self.table)
             .special_col([
-                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
-                "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.role_id",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.barangay_id",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
                 "barangays.name as barangay", "roles.name as role"
             ])
@@ -62,8 +62,8 @@ class User():
             self.selector
             .table(self.table)
             .special_col([
-                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name",
-                "user_info.contact_number", "users.position", "users.user_password", "users.created_at",
+                "users.user_id", "users.user_name", "users.email", "users.first_name", "users.last_name", "users.role_id",
+                "user_info.contact_number", "users.position", "users.user_password", "users.created_at", "users.barangay_id",
                 "users.updated_at", "users.refresh_token", "users.token_version", "user_info.sex", "user_info.birthdate",
                 "barangays.name as barangay", "roles.name as role"
             ])
@@ -132,19 +132,19 @@ class User():
         self.user["barangay"] = value
 
     @property
-    def user_role(self):
-        return self.user.get("role")  # FIXED: database column is "role" not "user_role"
+    def role_id(self):
+        return self.user.get("role_id")  # FIXED: database column is "role" not "user_role"
 
-    @user_role.setter
-    def user_role(self, value):
-        self.user["role"] = value  # FIXED: database column is "role" not "user_role"
+    @role_id.setter
+    def role_id(self, value):
+        self.user["role_id"] = value  # FIXED: database column is "role" not "user_role"
 
     @property
-    def user_position(self):
+    def position(self):
         return self.user.get("position")  # FIXED: database column is "position" not "user_position"
 
-    @user_position.setter
-    def user_position(self, value):
+    @position.setter
+    def position(self, value):
         self.user["position"] = value  # FIXED: database column is "position" not "user_position"
 
     @property

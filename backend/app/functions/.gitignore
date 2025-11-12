@@ -1,1 +1,5 @@
 test_password.py
+test_complaints.py
+test_role.py
+test_barangay.py
+test_userinfo.py

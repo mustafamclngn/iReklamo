@@ -4,6 +4,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 from app.config import DB_CONFIG
+
+from app.controllers.complaints.complaintList import list_by_assignee
 from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
@@ -376,130 +378,25 @@ def create_complaint():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-
-
-
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
     """
-    Get a specific complaint by ID with joined data
+    Get a specific complaint by ID
+
+    TODO: Integrate with ComplaintController.get_complaint_by_id()
     """
-    try:
-        # Use raw SQL with JOINs to get complete complaint data
-        conn = psycopg2.connect(**DB_CONFIG)
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-        query = """
-            SELECT
-                complaints.id,
-                complaints.complaint_code,
-                complaints.title,
-                complaints.case_type,
-                complaints.description,
-                complaints.full_address,
-                complaints.specific_location,
-                complaints.status,
-                complaints.priority,
-                complaints.barangay_id,
-                complaints.assigned_official_id,
-                complaints.created_at,
-                complaints.updated_at,
-                complaints.complainant_id,
-                -- Joined barangay data
-                barangays.name as barangay,
-                -- Joined complainant data
-                complainants.first_name as complainant_first_name,
-                complainants.last_name as complainant_last_name,
-                complainants.sex as complainant_sex,
-                complainants.age as complainant_age,
-                complainants.contact_number as complainant_contact_number,
-                complainants.email as complainant_email,
-                -- Joined assigned official data
-                COALESCE(
-                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
-                    'Unassigned'
-                ) as "assignedOfficial"
-            FROM complaints
-            LEFT JOIN barangays ON complaints.barangay_id = barangays.id
-            LEFT JOIN complainants ON complaints.complainant_id = complainants.id
-            LEFT JOIN users ON complaints.assigned_official_id = users.user_id
-            WHERE complaints.id = %s
-        """
-
-        cursor.execute(query, (complaint_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if not result:
-            return jsonify({
-                'success': False,
-                'error': 'Complaint not found'
-            }), 404
-
-        # Convert RealDictCursor result to regular dict
-        complaint_data = dict(result)
-
-        return jsonify({
-            'success': True,
-            'data': complaint_data
-        }), 200
-
-    except Exception as e:
-        print(f"Error fetching complaint: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
+    return jsonify({"message": f"Get complaint {complaint_id} endpoint - implement with raw SQL"})
 
 
 @complaints_bp.route('/<int:complaint_id>', methods=['PUT'])
 def update_complaint(complaint_id):
     """
     Update a complaint
+
+    Expected data: any subset of title, description, category, status, priority, location, image_url
+    TODO: Integrate with ComplaintController.update_complaint()
     """
-    try:
-        data = request.get_json()
-
-        # Check if complaint exists
-        selector = Select().table("complaints").search("id", complaint_id).execute().retDict()
-        if not selector:
-            return jsonify({
-                'success': False,
-                'error': 'Complaint not found'
-            }), 404
-
-        # Update allowed fields
-        allowed_fields = [
-            'title', 'case_type', 'description', 'full_address', 'specific_location',
-            'status', 'priority', 'assigned_official_id'
-        ]
-
-        update_data = {}
-        for field in allowed_fields:
-            if field in data:
-                update_data[field] = data[field]
-
-        if update_data:
-            updater = Update().table("complaints").set(update_data).where("id", complaint_id).execute()
-
-        return jsonify({
-            'success': True,
-            'message': 'Complaint updated successfully'
-        }), 200
-
-    except Exception as e:
-        print(f"Error updating complaint: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-
-
+    return jsonify({"message": f"Update complaint {complaint_id} endpoint - implement with raw SQL"})
 
 @complaints_bp.route('/<int:complaint_id>', methods=['DELETE'])
 def delete_complaint(complaint_id):
@@ -528,11 +425,6 @@ def delete_complaint(complaint_id):
             'success': False,
             'error': str(e)
         }), 500
-
-
-
-
-
 
 # ROLE-BASED COMPLAINTS ENDPOINTS
 
@@ -677,27 +569,6 @@ def get_barangay_official_complaints(user_id):
             'error': str(e)
         }), 500
 
-
-@complaints_bp.route('/user/<int:user_id>', methods=['GET'])
-def get_user_complaints(user_id):
-    """
-    Get complaints by a specific user
-    Note: This assumes complaints have a user_id field, but current schema doesn't.
-    This might need to be updated based on how complaints are associated with users
-    """
-    try:
-        # For now, return empty array since current schema doesn't link complaints to users directly
-        # This would need to be updated based on how complaints are associated with users
-        return jsonify({
-            'success': True,
-            'data': [],
-            'count': 0,
-            'message': 'User complaints endpoint - needs schema update to link complaints to users'
-        }), 200
-
-    except Exception as e:
-        print(f"Error fetching user complaints: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+@complaints_bp.route('ongoing/<int:assignee>', methods=['GET'])
+def get_user_complaints(assignee):
+    return list_by_assignee(assignee)

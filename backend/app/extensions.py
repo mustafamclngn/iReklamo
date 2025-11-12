@@ -10,9 +10,14 @@ def init_extensions(app):
 
     # Initialize CORS with proper credentials support
     cors.init_app(
-        app,
-        origins=origins or ["http://localhost:5173"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"],
-        supports_credentials=True
+            app,
+            resources={
+                r"/api/*": {
+                    "origins": origins or ["http://localhost:5173"],
+                    "credentials": "true",
+                    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+                    "allow_headers": ["Content-Type", "Authorization"],
+                    "supports_credentials": "True",  
+                }
+            },
     )

@@ -36,9 +36,9 @@ const SuperAdminOfficialCard = ({ official, onViewDetails, onUserAction, onRevok
             <p className="text-gray-600 mb-1">
               <span className="font-medium">Email:</span> {official.email}
             </p>
-            {official.barangay && (
+            {official.barangay_name && (
               <p className="text-gray-600 mb-1">
-                <span className="font-medium">Barangay:</span> {official.barangay}
+                <span className="font-medium">Barangay:</span> {official.barangay_name}
               </p>
             )}
             {official.position && (
