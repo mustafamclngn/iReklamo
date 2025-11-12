@@ -21,11 +21,12 @@ const BC_ComplaintsPage = () => {
 
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
+  const defaultPriority = location.state?.defaultPriority || 'all';
 
   // Barangay Captain filters: Status and Priority (NO Barangay filter)
   const [filters, setFilters] = useState({
     status: defaultStatus,
-    priority: 'all'
+    priority: defaultPriority
   });
 
   // Define filter options

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import BrgyCapOfficialCard from '../../components/cards/offcardBrgyCap';
 import useOfficialsApi from '../../api/officialsApi';
 import useAuth from '../../hooks/useAuth';
@@ -20,6 +21,15 @@ const BC_OfficialsPage = () => {
 
   // filter state
   const [positionFilter, setPositionFilter] = useState('all');
+  const [assignmentFilter, setAssignmentFilter] = useState('all');
+
+  // get default assignment filter from navigation state
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.defaultAssignment) {
+      setAssignmentFilter(location.state.defaultAssignment);
+    }
+  }, [location.state]);
 
   // get all positions for filter
   const uniquePositions = [...new Set(officials.map(o => o.position).filter(Boolean))];
@@ -73,7 +83,14 @@ const BC_OfficialsPage = () => {
       positionFilter === 'all' || 
       official.position === positionFilter;
     
-    return matchesSearch && matchesPosition;
+    // assignment status (check if official has assigned complaints)
+    const hasAssignedComplaints = official.assigned_complaints_count > 0;
+    const matchesAssignment = 
+      assignmentFilter === 'all' ||
+      (assignmentFilter === 'unassigned' && hasAssignedComplaints) ||
+      (assignmentFilter === 'assigned' && !hasAssignedComplaints);
+    
+    return matchesSearch && matchesPosition && matchesAssignment;
   });
 
   // pagination logic
@@ -89,7 +106,7 @@ const BC_OfficialsPage = () => {
   // reset when on new search
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, positionFilter]);
+  }, [searchTerm, positionFilter, assignmentFilter]);
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -128,6 +145,17 @@ const BC_OfficialsPage = () => {
               {uniquePositions.map(position => (
                 <option key={position} value={position}>{position}</option>
               ))}
+            </select>
+
+            {/* assignment status dropdown */}
+            <select
+              value={assignmentFilter}
+              onChange={(e) => setAssignmentFilter(e.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#578fe0] bg-white text-gray-700 cursor-pointer hover:border-gray-400 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3cpath%20d%3D%22M1%201.5L6%206.5L11%201.5%22%20stroke%3D%22%23666666%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3c%2Fsvg%3E')] bg-[length:12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
+            >
+              <option value="all">All Officials</option>
+              <option value="assigned">Assigned</option>
+              <option value="unassigned">Unassigned</option>
             </select>
           </div>
 

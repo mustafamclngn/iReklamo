@@ -171,8 +171,10 @@ function UnassignedOfficialsList() {
     };
 
     const handleViewAll = () => {
-        // Update this path to your "all officials" list page
-        navigate(`/brgycap/officials`);
+        // Navigate to officials page with unassigned filter
+        navigate('/brgycap/officials', {
+            state: { defaultAssignment: 'unassigned' }
+        });
     };
 
     return (
@@ -231,7 +233,7 @@ function UnassignedOfficialsList() {
                 className='bg-blue-500 border border-gray-300 w-full shadow rounded-md mt-5 py-1 text-white text-sm font-semibold items-center
                 hover:shadow-md hover:bg-blue-800 all transition ease-in-out duration-200'
             >
-                View all Officials
+                View all Unassigned Officials
             </button>
         </div>
     )
@@ -273,7 +275,7 @@ function UrgentComplaintsList() {
 
     // Navigate to the full complaints list, pre-filtered to "Urgent"
     const handleViewAllUrgent = () => {
-        navigate('/brgyoff/complaints', { // <-- Make sure this path is correct for brgy official
+        navigate('/brgycap/complaints', { // <-- Make sure this path is correct for brgy official
             state: { 
                 defaultPriority: 'Urgent' // You'll need to implement this on your complaints page
             }
@@ -338,9 +340,9 @@ function UrgentComplaintsList() {
                 <button 
                     className='bg-blue-500 border border-gray-300 w-full shadow rounded-md mt-5 py-1 text-white text-sm font-semibold items-center
                     hover:shadow-md hover:bg-blue-800 all transition ease-in-out duration-200'
-                    onClick={() => navigate('/bycap/complaints')}
+                    onClick={() => handleViewAllUrgent()}
                     >
-                    View all Complaints
+                    View all Urgent Complaints
                 </button>
             </div>
         </div>
