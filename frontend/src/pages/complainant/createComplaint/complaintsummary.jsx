@@ -86,30 +86,28 @@ export default function CU_ComplaintSummaryPage() {
 
             if (!res.ok) {
                 console.error('Server error response:', resData);
-                // Prefer readable message fields, fallback to stringified body
                 const msg = resData.message || resData.error || JSON.stringify(resData) || 'Unknown error';
                 alert(`Failed to submit: ${msg}`);
                 return;
             }
 
-            // Extract complaint id returned by backend
+            //start change
             const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
             const complainantId = resData.complainant_id || resData.complainantId || null;
+            
+            // The backend now does all the work of generating the code
+            const complaintCode = resData.complaint_code || resData.complaintCode; // <-- Read the code
 
-            // Build a user-facing tracking code in the format CMP-YYYYMMDD-NNNN
-            // where NNNN is the complaint id padded to 4 digits
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const datePart = `${yyyy}${mm}${dd}`;
-            const seqPart = complaintId ? String(complaintId).padStart(4, '0') : '0000';
-            const complaintCode = `CMP-${datePart}-${seqPart}`;
+            // Add a check in case the backend fails to send the code
+            if (!complaintCode) {
+                console.error("Submission successful, but backend did not return a 'complaint_code'.", resData);
+                alert("Submission successful, but failed to retrieve tracking code. Please contact support.");
+                return;
+            }
 
-            // Reset form and close modal, then navigate passing tracking info in location state
             updateFormData(initialFormData);
             setShowModal(false);
-            navigate("/file-complaint/completionmessage", { state: { complaintCode, complaintId, complainantId } });
+            navigate("/file-complaint/completionmessage", { state: { complaintCode } });
         } catch (error) {
             console.error('Error submitting complaint:', error);
             alert('An unexpected error occurred while submitting the complaint. Please try again.');
@@ -342,4 +340,6 @@ export default function CU_ComplaintSummaryPage() {
         </div>
     )
 }
+
+
 
