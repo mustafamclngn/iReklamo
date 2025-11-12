@@ -9,7 +9,7 @@ def list_by_assignee(assignee):
                     .table("complaints")\
                     .search(search_mult={
                         "assigned_official_id": assignee,
-                        "status": "In Progress"
+                        "status": "In-Progress"
                     })\
                     .execute().retDict()
         
@@ -34,7 +34,7 @@ def activeCases_official(assignee):
                     .table("complaints")\
                     .search(search_mult={
                         "assigned_official_id": assignee,
-                        "status": "In Progress"
+                        "status": "In-Progress"
                     })\
                     .execute().retDict()
         

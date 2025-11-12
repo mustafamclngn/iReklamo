@@ -11,7 +11,7 @@ def assign_complaint(complaint, assignee):
             .table("complaints")\
             .set({
                 "assigned_official_id": assignee,
-                "status": "In Progress"
+                "status": "In-Progress"
             })\
             .where("id", complaint)\
             .execute()

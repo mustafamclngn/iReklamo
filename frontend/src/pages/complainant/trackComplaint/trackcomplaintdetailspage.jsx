@@ -258,7 +258,7 @@ const CU_TrackComplaintDetailsPage = () => {
                     : ""}
                 </div>
                 <p className="text-sm font-bold text-gray-800 mt-3">
-                  In Progress
+                  In-Progress
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {complaint?.status === "In-Progress" ||
