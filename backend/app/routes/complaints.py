@@ -426,11 +426,6 @@ def delete_complaint(complaint_id):
             'error': str(e)
         }), 500
 
-
-
-
-
-
 # ROLE-BASED COMPLAINTS ENDPOINTS
 
 @complaints_bp.route('/barangay-captain/<int:user_id>', methods=['GET'])
@@ -569,31 +564,6 @@ def get_barangay_official_complaints(user_id):
 
     except Exception as e:
         print(f"Error fetching barangay official complaints: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-@complaints_bp.route('/user/<int:user_id>', methods=['GET'])
-def get_user_complaints(user_id):
-    """
-    Get complaints by a specific user
-    Note: This assumes complaints have a user_id field, but current schema doesn't.
-    This might need to be updated based on how complaints are associated with users
-    """
-    try:
-        # For now, return empty array since current schema doesn't link complaints to users directly
-        # This would need to be updated based on how complaints are associated with users
-        return jsonify({
-            'success': True,
-            'data': [],
-            'count': 0,
-            'message': 'User complaints endpoint - needs schema update to link complaints to users'
-        }), 200
-
-    except Exception as e:
-        print(f"Error fetching user complaints: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

@@ -20,7 +20,7 @@ def get_all_officials():
             "users.first_name",
             "users.last_name",
             "users.email",
-            "user.role_id",
+            "users.role_id",
             "users.barangay_id",
             "roles.name as role",
             "barangays.name as barangay_name",
