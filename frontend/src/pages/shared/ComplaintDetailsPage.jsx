@@ -67,12 +67,14 @@ const ComplaintDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
 
+  const [refresh, setRefresh] = useState(false);
+
   // Assign 
   const handleAssign = () => {
     setIsAssignOpen(true);
   };  
 
-  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, isAssignOpen]);
+  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh]);
   const fetchComplaintDetails = async () => {
     setLoading(true);
     if (!complaint_id || isNaN(Number(complaint_id))) {
@@ -296,7 +298,7 @@ const ComplaintDetailsPage = () => {
       </div>
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
         Action="Assign Complaint"
         assignDetails={complaint}
         >

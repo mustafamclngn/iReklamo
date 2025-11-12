@@ -28,6 +28,8 @@ const OfficialDetailsPage = () => {
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isViewCasesOpen, setIsViewCasesOpen] = useState(false);
 
+  const [refresh, setRefresh] = useState(false);
+
   const { getOfficialById } = useOfficialsApi();
 
   const hasValidImage = official?.profile_picture && !imageError;
@@ -49,7 +51,7 @@ const OfficialDetailsPage = () => {
 
     fetchOfficialDetails();
     fetchCases();
-  }, [user_id, isDeleteOpen, isAssignOpen]);
+  }, [user_id, refresh]);
 
   const fetchOfficialDetails = async () => {
     try {
@@ -176,6 +178,7 @@ const OfficialDetailsPage = () => {
     if (type === "Account") {
       handleBack(); 
     }
+    setRefresh(prev => !prev);
   };
 
 
@@ -403,7 +406,7 @@ const OfficialDetailsPage = () => {
 
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Official"
         assignDetails={official}
         >
