@@ -43,7 +43,7 @@ const BC_OfficialsPage = () => {
       setLoading(false);
       setError('User barangay not found. Please log in again.');
     }
-  }, [userBarangay]);
+  }, [userBarangay, isAssignOpen]);
 
   const fetchOfficials = async () => {
     try {

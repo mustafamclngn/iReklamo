@@ -37,7 +37,7 @@ const CA_OfficialsPage = () => {
   // fetch officials
   useEffect(() => {
     fetchOfficials();
-  }, []);
+  }, [isAssignOpen]);
 
   const fetchOfficials = async () => {
     try {

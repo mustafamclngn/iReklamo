@@ -43,7 +43,7 @@ const SA_ComplaintsPage = () => {
   // Fetch complaints
   useEffect(() => {
     fetchComplaints();
-  }, []);
+  }, [isAssignOpen]);
 
   const fetchComplaints = async () => {
     try {

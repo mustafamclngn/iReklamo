@@ -37,7 +37,7 @@ const BC_ComplaintsPage = () => {
   // Fetch complaints - filtered by barangay captain's barangay on backend
   useEffect(() => {
     fetchComplaints();
-  }, []);
+  }, [isAssignOpen]);
 
   const fetchComplaints = async () => {
     try {

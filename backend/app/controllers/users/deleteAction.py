@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from psycopg2 import IntegrityError
 from app.models.user import User
+from app.functions.Update import Update
 
 # ========================== 
 # USER DELETE
@@ -12,12 +13,25 @@ def delete_user(user_id):
         existing_user = user.getID(user_id)
 
         if existing_user:
-            updates = {
+
+            # update complaints
+            complaint_updates = {
+                "status": "Pending",
+                "assigned_official_id": None
+            }
+
+            complaint_update = Update()
+
+            complaint_update.table("complaints")\
+                                    .set(complaint_updates)\
+                                    .execute()
+            
+            user_updates = {
                 "refresh_token": None,
                 "token_version": existing_user.get("token_version", 0) + 1
             }
 
-            user.edit(user_id, updates)
+            user.edit(user_id, user_updates)
 
         user.delete(user_id)
         return jsonify({"message": "Account revoked successfully"}), 201

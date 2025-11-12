@@ -41,7 +41,7 @@ const SA_OfficialsPage = () => {
   // Fetch officials
   useEffect(() => {
     fetchOfficials();
-  }, []);
+  }, [isDeleteOpen, isCreateOpen, isAssignOpen]);
 
   const fetchOfficials = async () => {
     try {

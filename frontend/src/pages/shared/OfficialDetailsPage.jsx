@@ -49,7 +49,7 @@ const OfficialDetailsPage = () => {
 
     fetchOfficialDetails();
     fetchCases();
-  }, [user_id]);
+  }, [user_id, isDeleteOpen, isAssignOpen]);
 
   const fetchOfficialDetails = async () => {
     try {
