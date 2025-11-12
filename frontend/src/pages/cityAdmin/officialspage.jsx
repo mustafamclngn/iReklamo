@@ -5,9 +5,15 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 
+
+import useOfficialsApi from '../../api/officialsApi';
+
 const CA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+
+  const { getAllOfficials, getOfficialsByBarangay, getOfficialsbyID } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +38,7 @@ const CA_OfficialsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await officialsApi.getAllOfficials();
+      const response = await getAllOfficials();
       
       if (response.success) {
         setOfficials(response.data);
@@ -53,7 +59,7 @@ const CA_OfficialsPage = () => {
       ...prev,
       [filterType]: value
     }));
-  };
+  }; 
 
   // filter
   const filteredOfficials = officials.filter(official => {

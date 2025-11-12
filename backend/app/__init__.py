@@ -6,8 +6,13 @@ from app.extensions import init_extensions
 from app.routes.main import main_bp
 from app.routes.auth import auth_bp
 from app.routes.complaints import complaints_bp
+from app.routes.users import user_bp
 from app.routes.officialsList import officialsList_bp
+<<<<<<< HEAD
 from app.routes.dashboard import dashboard_bp
+=======
+from app.routes.user_info import userinfo_bp
+>>>>>>> origin/main
 
 def create_app(config_name=None):
     """Application factory function"""
@@ -31,14 +36,16 @@ def create_app(config_name=None):
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(complaints_bp)
+    app.register_blueprint(user_bp)
     app.register_blueprint(officialsList_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(userinfo_bp)
 
     # Add CORS headers manually for all routes
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response

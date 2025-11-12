@@ -1,61 +1,59 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
+import axios from "../api/axios";
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
-    // Initialize auth from localStorage on mount (only if persist is true)
-    const [auth, setAuth] = useState(() => {
-        const persistValue = localStorage.getItem("persist");
-        const shouldPersist = persistValue ? JSON.parse(persistValue) : false;
-        
-        if (shouldPersist) {
-            try {
-                const storedAuth = localStorage.getItem("auth");
-                if (storedAuth) {
-                    const parsedAuth = JSON.parse(storedAuth);
-                    console.log("Auth loaded from localStorage:", parsedAuth);
-                    return parsedAuth;
-                }
-            } catch (error) {
-                console.error("Error parsing stored auth:", error);
-            }
+  const [auth, setAuth] = useState({});
+  const [persist, setPersist] = useState(
+    JSON.parse(localStorage.getItem("persist")) || false
+  );
+  const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshAccessToken = async () => {
+      try {
+        if (!persist) {
+          setLoading(false);
+          return;
         }
-        return {};
-    });
 
-    const [persist, setPersist] = useState(() => {
-        try {
-            const stored = localStorage.getItem("persist");
-            return stored ? JSON.parse(stored) : false;
-        } catch (error) {
-            console.error("Error parsing persist value:", error);
-            return false;
-        }
-    });
+        const response = await axios.get("/api/auth/refresh", {
+          withCredentials: true,
+        });
+        if (!mountedRef.current) return;
 
-    // Save auth to localStorage whenever it changes (only if persist is true)
-    useEffect(() => {
-        if (persist) {
-            if (auth && Object.keys(auth).length > 0) {
-                localStorage.setItem("auth", JSON.stringify(auth));
-                console.log("Auth saved to localStorage:", auth);
-            }
-        } else {
-            // If persist is false, remove auth from localStorage
-            localStorage.removeItem("auth");
-        }
-    }, [auth, persist]);
+        const { accessToken, role, user } = response.data;
+        setAuth({ accessToken, role, user });
+        console.log("Access token refreshed:", role);
+      } catch (error) {
+        if (!mountedRef.current) return;
+        console.error("Failed to refresh access token:", error);
+        setAuth({});
+      } finally {
+        if (mountedRef.current) setLoading(false);
+      }
+    };
 
-    // Save persist preference to localStorage
-    useEffect(() => {
-        localStorage.setItem("persist", JSON.stringify(persist));
-    }, [persist]);
+    refreshAccessToken();
+  }, [persist]);
 
-    return (
-        <AuthContext.Provider value={{ auth, setAuth, persist, setPersist }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  useEffect(() => {
+    localStorage.setItem("persist", JSON.stringify(persist));
+  }, [persist]);
+
+  return (
+    <AuthContext.Provider value={{ auth, setAuth, persist, setPersist, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthContext;

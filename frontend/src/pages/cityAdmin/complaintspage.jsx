@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { useLocation } from 'react-router-dom';
+=======
+import { useNavigate } from 'react-router-dom';
+>>>>>>> origin/main
 import ComplaintCardCityAdmin from '../../components/cards/complaintCardCityAdmin';
 import complaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -7,6 +11,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 
 const CA_ComplaintsPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,9 +104,7 @@ const CA_ComplaintsPage = () => {
 
   // View Details
   const handleViewDetails = (complaint) => {
-    console.log('View details for:', complaint);
-    // Navigate to complaint details page
-    // navigate(`/cityadmin/complaints/${complaint.id}`);
+    navigate(`/cityadmin/complaints/${complaint.id}`);
   };
 
   // Update Status

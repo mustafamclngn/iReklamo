@@ -12,12 +12,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 // Hooks and context
 import { useRef, useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth.jsx";
+import useLogin from "../../hooks/useLogin.jsx"; 
 import { Link, useNavigate, useLocation } from "react-router-dom";
-
-// =============
-// Endpoints
-import axios from "../../api/axios";
-const LOGIN_URL = "/api/auth/login"
 
 // ==========
 // IMPORTS
@@ -31,8 +27,8 @@ const LogInPage = () => {
 
     // =============
     // Authorization Context
-    const { setAuth, setPersist } = useAuth();
-
+    const { auth, setPersist } = useAuth();
+    const login = useLogin();
 
     // =============
     // Navigation
@@ -77,46 +73,30 @@ const LogInPage = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post(
-                LOGIN_URL,
-                JSON.stringify({ identity, pwd }),
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
-                }
-            );
 
-            const accessToken = response?.data?.accessToken;
-            const roles = response?.data?.roles;
-            const user = response?.data?.user; 
-
-            setAuth({ 
-                user, 
-                roles, 
-                accessToken 
-            });
-
+            const { role, user } = await login(identity, pwd)
             setPersist(true);
             localStorage.setItem("persist", true);
 
             setIdentity('');
             setPwd('');
 
-            // redirect path after login
+            // redirect path after login    
             let redirectPath = "/";
 
-            const userRole = roles?.[0];
+            const userRole = role?.[0];
+            console.log(auth);
             switch (userRole) {
-                case "super_admin":
+                case 1: 
                     redirectPath = "/superadmin/dashboard";
                     break;
-                case "city_admin":
+                case 2:
                     redirectPath = "/cityadmin/dashboard";
                     break;
-                case "brgy_cap":
+                case 3:
                     redirectPath = "/brgycap/dashboard";
                     break;
-                case "brgy_off":
+                case 4:
                     redirectPath = "/brgyoff/dashboard";
                     break;
                 default:
@@ -203,6 +183,7 @@ const LogInPage = () => {
             <input
                 type="password"
                 id="password"
+                autoComplete="off"
                 onChange={(e) => setPwd(e.target.value)}
                 required
                 placeholder="Enter your password"

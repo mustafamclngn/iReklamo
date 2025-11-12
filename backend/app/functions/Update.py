@@ -45,6 +45,7 @@ class Update():
                     self.wherequery
                     ]).strip()
         print(self.query)
+        print(self.params)
 
         conn = None
         try:

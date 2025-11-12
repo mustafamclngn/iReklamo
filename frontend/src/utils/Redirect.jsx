@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "./hooks/useAuth";
+import useAuth from "../hooks/useAuth";
 
 const RedirectFallback = () => {
   const { auth } = useAuth();
@@ -12,23 +12,19 @@ const RedirectFallback = () => {
       return;
     }
 
-    const role = auth?.roles?.[0];
-
+    const role = auth?.role?.[0];
     switch (role) {
-      case "super_admin":
+      case 1:
         navigate("/superadmin/dashboard", { replace: true });
         break;
-      case "city_admin":
+      case 2:
         navigate("/cityadmin/dashboard", { replace: true });
         break;
-      case "brgy_cap":
+      case 3:
         navigate("/brgycap/dashboard", { replace: true });
         break;
-      case "brgy_off":
+      case 4:
         navigate("/brgyoff/dashboard", { replace: true });
-        break;
-      case "user":
-        navigate("/home", { replace: true });
         break;
       default:
         navigate("/home", { replace: true });
