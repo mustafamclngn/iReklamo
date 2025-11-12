@@ -16,6 +16,8 @@ const SA_ComplaintsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const [refresh, setRefresh] = useState(false);
+
   const { getAllComplaints } = useComplaintsApi();
 
   // modal states
@@ -43,7 +45,7 @@ const SA_ComplaintsPage = () => {
   // Fetch complaints
   useEffect(() => {
     fetchComplaints();
-  }, [isAssignOpen]);
+  }, [refresh]);
 
   const fetchComplaints = async () => {
     try {
@@ -251,7 +253,7 @@ const SA_ComplaintsPage = () => {
       </div>
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >

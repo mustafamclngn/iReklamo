@@ -24,6 +24,7 @@ def delete_user(user_id):
 
             complaint_update.table("complaints")\
                                     .set(complaint_updates)\
+                                    .where(whereCol="assigned_official_id", whereVal=user_id)\
                                     .execute()
             
             user_updates = {

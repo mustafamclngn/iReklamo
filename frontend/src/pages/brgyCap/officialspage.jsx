@@ -22,6 +22,8 @@ const BC_OfficialsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const [refresh, setRefresh] = useState(false);
+
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [officialData, setOfficialData] = useState(null);
@@ -43,7 +45,7 @@ const BC_OfficialsPage = () => {
       setLoading(false);
       setError('User barangay not found. Please log in again.');
     }
-  }, [userBarangay, isAssignOpen]);
+  }, [userBarangay, refresh]);
 
   const fetchOfficials = async () => {
     try {
@@ -197,7 +199,7 @@ const BC_OfficialsPage = () => {
       </div>
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Official"
         assignDetails={officialData}
         >

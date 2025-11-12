@@ -23,6 +23,7 @@ const BC_ComplaintsPage = () => {
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [complaintData, setComplaintData] = useState(null);
+  const [refresh, setRefresh] = useState(false);
 
   // Barangay Captain filters: Status and Priority (NO Barangay filter)
   const [filters, setFilters] = useState({
@@ -37,7 +38,7 @@ const BC_ComplaintsPage = () => {
   // Fetch complaints - filtered by barangay captain's barangay on backend
   useEffect(() => {
     fetchComplaints();
-  }, [isAssignOpen]);
+  }, [refresh]);
 
   const fetchComplaints = async () => {
     try {
@@ -237,7 +238,7 @@ const BC_ComplaintsPage = () => {
       </div>
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >

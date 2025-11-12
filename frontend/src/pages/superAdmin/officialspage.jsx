@@ -22,6 +22,8 @@ const SA_OfficialsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const [refresh, setRefresh] = useState(false);
+
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -41,7 +43,7 @@ const SA_OfficialsPage = () => {
   // Fetch officials
   useEffect(() => {
     fetchOfficials();
-  }, [isDeleteOpen, isCreateOpen, isAssignOpen]);
+  }, [refresh]);
 
   const fetchOfficials = async () => {
     try {
@@ -237,18 +239,18 @@ const SA_OfficialsPage = () => {
       </div>
       <CreateAdmin 
         isOpen={isCreateOpen} 
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => {setIsCreateOpen(false); setRefresh(prev => !prev);}}
         >
       </CreateAdmin>
       <DeleteModal 
         isOpen={isDeleteOpen} 
-        onClose={() => setIsDeleteOpen(false)}
+        onClose={() => {setIsDeleteOpen(false); setRefresh(prev => !prev);}}
         deleteData={officialData}
         >
       </DeleteModal>
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Official"
         assignDetails={officialData}
         >

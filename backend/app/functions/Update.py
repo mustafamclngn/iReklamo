@@ -23,9 +23,13 @@ class Update():
         clauses = []
 
         for key, val in set.items():
-            self.params.append(f"{val}")
-            clauses.append(f"{key} = %s")
-            self.setquery = "SET " + ", ".join(clauses)
+            if val is None:
+                clauses.append(f"{key} = NULL")
+            else:
+                self.params.append(f"{val}")
+                clauses.append(f"{key} = %s")
+                
+        self.setquery = "SET " + ", ".join(clauses)
 
         return self
 

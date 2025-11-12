@@ -25,7 +25,8 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
       try {
         console.log("Searching for complaints for user:", user_id)
         const response = await getActiveCases(user_id)
-        setAssignedComplaints(response.data || [])
+        setAssignedComplaints(response?.complaints || [])
+        console.log("Active Cases: ", assignedComplaints)
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)
         setAssignedComplaints([])

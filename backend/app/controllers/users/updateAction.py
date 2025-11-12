@@ -43,8 +43,9 @@ def revoke_permissions(user_id):
     complaint_update = Update()
 
     complaint_update.table("complaints")\
-                            .set(complaint_updates)\
-                            .execute()
+                                .set(complaint_updates)\
+                                .where(whereCol="assigned_official_id", whereVal=user_id)\
+                                .execute()
     
     user_updates = {
         "role_id":5,

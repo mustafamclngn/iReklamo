@@ -20,6 +20,8 @@ const CA_OfficialsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const [refresh, setRefresh] =useState(false);
+
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [officialData, setOfficialData] = useState(null);
@@ -214,7 +216,7 @@ const CA_OfficialsPage = () => {
       </div>
       <AssignActionModal 
         isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         assignDetails={officialData}
         Action="Assign Official"
         >
