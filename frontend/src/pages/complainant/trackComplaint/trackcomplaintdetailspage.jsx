@@ -11,6 +11,7 @@ const CU_TrackComplaintDetailsPage = () => {
   const [complaint, setComplaint] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const complaintsApi = useComplaintsApi();
 
   const {trackComplaint} = useComplaintsApi();
 
@@ -23,16 +24,21 @@ const CU_TrackComplaintDetailsPage = () => {
         if (response.success && response.data) {
           setComplaint(response.data);
         } else {
-          navigate("/home");
+          setError(response.message || "Complaint not found");
+          setTimeout(() => navigate("/track-complaint"), 3000);
         }
       } catch (err) {
-        navigate("/home");
+        console.error("Error fetching complaint:", err);
+        setError("Unable to load complaint details");
+        setTimeout(() => navigate("/track-complaint"), 3000);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchComplaint();
+    if (complaintCode) {
+      fetchComplaint();
+    }
   }, [complaintCode, navigate]);
 
   const formatDate = (dateString) => {

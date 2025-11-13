@@ -1,1 +1,6 @@
-*.env
+#env stuff
+.env
+
+#for adding sample data
+addusers.py
+addcomplaints.py

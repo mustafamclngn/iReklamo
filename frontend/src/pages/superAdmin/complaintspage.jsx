@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardSuperAdmin from '../../components/cards/complaintCardSuperAdmin';
 import useComplaintsApi from '../../api/complaintsAPI'; 
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -23,11 +23,14 @@ const SA_ComplaintsPage = () => {
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [complaintData, setComplaintData] = useState(null);
+  const complaintsApi = useComplaintsApi();
+  const location = useLocation();
+  const defaultStatus = location.state?.defaultStatus || 'all';
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
   const [filters, setFilters] = useState({
     barangay: 'all',
-    status: 'all',
+    status: defaultStatus,
     priority: 'all'
   });
 
@@ -46,6 +49,13 @@ const SA_ComplaintsPage = () => {
   useEffect(() => {
     fetchComplaints();
   }, [refresh]);
+
+  useEffect(() => {
+    return () => {
+      // Clear location state on unmount
+      window.history.replaceState({}, document.title)
+    };
+  }, []);
 
   const fetchComplaints = async () => {
     try {

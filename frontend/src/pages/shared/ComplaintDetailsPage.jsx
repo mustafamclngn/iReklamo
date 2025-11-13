@@ -96,8 +96,8 @@ const ComplaintDetailsPage = () => {
 
 
   // Complainant info logic
-  const isAnonymous =
-    complaint.is_anonymous || complaint.complainant?.is_anonymous || false;
+  // should set to complaint.is_anonymous
+  const isAnonymous = false;
 
   const isAssignedToYou =
     complaint.assigned_official_id === auth?.id ||

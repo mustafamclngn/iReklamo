@@ -8,6 +8,7 @@ from app.routes.auth import auth_bp
 from app.routes.complaints import complaints_bp
 from app.routes.users import user_bp
 from app.routes.officialsList import officialsList_bp
+from app.routes.dashboard import dashboard_bp
 from app.routes.user_info import userinfo_bp
 
 def create_app(config_name=None):
@@ -34,6 +35,7 @@ def create_app(config_name=None):
     app.register_blueprint(complaints_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(officialsList_bp)
+    app.register_blueprint(dashboard_bp)
     app.register_blueprint(userinfo_bp)
 
 

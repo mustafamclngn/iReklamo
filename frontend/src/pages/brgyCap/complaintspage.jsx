@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardBrgyCap from '../../components/cards/complaintCardBrgyCap';
 import useComplaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -16,6 +16,7 @@ const BC_ComplaintsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const complaintsApi = useComplaintsApi();
   const itemsPerPage = 5;
 
   const { getBarangayCaptainComplaints } = useComplaintsApi();
@@ -25,10 +26,14 @@ const BC_ComplaintsPage = () => {
   const [complaintData, setComplaintData] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
+  const location = useLocation();
+  const defaultStatus = location.state?.defaultStatus || 'all';
+  const defaultPriority = location.state?.defaultPriority || 'all';
+
   // Barangay Captain filters: Status and Priority (NO Barangay filter)
   const [filters, setFilters] = useState({
-    status: 'all',
-    priority: 'all'
+    status: defaultStatus,
+    priority: defaultPriority
   });
 
   // Define filter options

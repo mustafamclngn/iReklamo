@@ -7,6 +7,7 @@ const CU_TrackComplaintPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const complaintsApi = useComplaintsApi();
 
   const {trackComplaint} = useComplaintsApi();
 

@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS complaints (
     status VARCHAR(50) DEFAULT 'Pending' CHECK (
         status IN ('Pending', 'In-Progress', 'Resolved')
     ),
-    priority VARCHAR(20) DEFAULT 'Moderate CHECK (
+    priority VARCHAR(20) DEFAULT 'Moderate' CHECK (
         priority IN ('Low', 'Moderate', 'Urgent')
     ),
     complainant_id INTEGER REFERENCES complainants(id) ON DELETE SET NULL,
