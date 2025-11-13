@@ -1,7 +1,5 @@
 import axios from './axios';
-import { axiosPrivate } from './axios'; 
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import axios from './axios';
 
 const useComplaintsApi = () => {
   const axiosPrivate = useAxiosPrivate();

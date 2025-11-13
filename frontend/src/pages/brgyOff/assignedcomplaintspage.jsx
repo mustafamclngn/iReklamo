@@ -6,7 +6,6 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import useComplaintsApi from '../../api/complaintsAPI';
 
 const BO_AssignedComplaintsPage = () => {
   const navigate = useNavigate();
