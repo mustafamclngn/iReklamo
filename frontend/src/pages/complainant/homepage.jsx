@@ -143,18 +143,22 @@ function CityPrograms() {
 function Feedback() {
     return (
         <section className="w-full text-white my-10 items-center flex justify-center">
-            <div className="w-[1591px] mx-10 px-10 py-10 bg-gradient-to-r from-[#378591] to-[#1b4f57] flex justify-between items-center rounded-2xl">
-                <div>
-                    <h1 className="text-2xl font-extrabold">
+            <div className="w-[1591px] mx-10 px-16 py-20 bg-gradient-to-r from-[#5ba3ad] to-[#488f97] flex justify-between items-center rounded-3xl relative overflow-hidden">
+                {/* Background watermark text */}
+                <div className="absolute right-0 bottom-0 text-white text-[120px] font-black opacity-30 leading-none pr-8 pb-4">
+                    Iligan City
+                </div>
+                
+                <div className="relative z-10">
+                    <h1 className="text-5xl font-bold mb-2">
                         We would like to hear from you
                     </h1>
-                    <p>
-                        Send us your feedback, comments and suggestions to help improve our
-                        services
+                    <p className="text-xl">
+                        Send us your feedback, comments and suggestions to help improve our services
                     </p>
                 </div>
-                <button>
-                    <CircleArrowRight size={40} color="white" />
+                <button className="relative z-10 bg-white rounded-full p-3 hover:scale-110 transition-transform">
+                    <CircleArrowRight size={32} color="#5ba3ad" />
                 </button>
             </div>
         </section>

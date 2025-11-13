@@ -7,7 +7,7 @@ const ComplainantNavBar = () => {
   const links = ["Know Iligan", "For Residents", "For Businesses", "For Visitors", "Transparency", "News", "Events"];
 
   return (
-    <nav className="bg-white py-6 font-[Inter] font-black shadow mb-5">
+    <nav className="bg-white py-6 font-[Inter] font-black">
       <div className="max-w-[1591px] mx-auto px-8 flex justify-between items-center">
         <IliganLogo />
 

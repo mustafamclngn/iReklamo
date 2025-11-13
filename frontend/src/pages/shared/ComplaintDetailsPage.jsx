@@ -8,12 +8,16 @@ import AssignActionModal from '../../components/modals/AssignActionModal';
 
 
 const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
+  if (!dateString) return "N/A";
   const date = new Date(dateString);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 };
 
 const getDaysSinceFiled = (dateString) => {
@@ -44,6 +48,18 @@ const maskPhone = (phone) => {
   const digits = phone.replace(/\D/g, '');
   if (digits.length < 4) return '****';
   return phone.replace(/\d(?=\d{4})/g, '*');
+};
+
+const formatPhone = (num) => {
+  if (!num) return 'N/A';
+  const digits = num.replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('09')) {
+    return `+63 ${digits.slice(1, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  return num;
 };
 
 const statusColors = {
@@ -97,11 +113,12 @@ const ComplaintDetailsPage = () => {
 
   // Complainant info logic
   // should set to complaint.is_anonymous
-  const isAnonymous = false;
+  const isAnonymous =
+    complaint?.is_anonymous || complaint?.complainant?.is_anonymous || false;
 
   const isAssignedToYou =
-    complaint.assigned_official_id === auth?.id ||
-    complaint.assignedOfficialId === auth?.id ||
+    complaint?.assigned_official_id === auth?.id ||
+    complaint?.assignedOfficialId === auth?.id ||
     false;
 
   const canViewPII =
@@ -120,7 +137,7 @@ const ComplaintDetailsPage = () => {
   const rawEmail = complainant.email || complaint.complainant_email || '';
   const rawPhone = complainant.phone || complaint.complainant_phone || '';
   const displayEmail = canViewPII ? (rawEmail || 'N/A') : maskEmail(rawEmail);
-  const displayPhone = canViewPII ? (rawPhone || 'N/A') : maskPhone(rawPhone);
+  const displayPhone = canViewPII ? (formatPhone(rawPhone) || 'N/A') : maskPhone(rawPhone);
 
   return (
     <>
@@ -138,173 +155,168 @@ const ComplaintDetailsPage = () => {
             <i className="bi bi-arrow-left text-xl"></i>
             Back to Complaints
           </button>
-          {/* Main Complaint Summary */}
-          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
-            <div className="flex items-center gap-6">
-              <div className="flex-1">
-                <h1 className="text-2xl font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                  {complaint.complaint_code}
-                  <button
-                    className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
-                    onClick={() => navigator.clipboard.writeText(complaint.complaint_code)}
+          
+                    {/* main complaint summary */}
+                    <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                          Complaint Details
+                        </h2>
+                      </div>
+                      <hr className="border-t border-gray-200 mt-4 mb-6" />
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Complaint ID:</label>
+                          <p className="text-gray-900 font-medium text-lg flex items-center gap-2">
+                            {complaint.complaint_code}
+                            <button
+                              className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
+                              onClick={() => navigator.clipboard.writeText(complaint.complaint_code)}
+                            >
+                              Copy ID
+                            </button>
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Complaint Title:</label>
+                          <p className="text-gray-900 font-medium text-lg">{complaint.title}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Case Type:</label>
+                          <p className="text-gray-900 font-medium text-lg">{complaint.case_type}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Date Filed:</label>
+                          <p className="text-gray-900 font-medium text-lg">{formatDate(complaint.created_at)}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Description:</label>
+                          <p className="text-gray-900 font-medium text-lg leading-relaxed">{complaint.description || "N/A"}</p>
+                        </div>
+                      </div>
+                    </div>
+          
+                    {/* complainant information */}
+                    <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                          Complainant Information
+                        </h2>
+                      </div>
+                      <hr className="border-t border-gray-200 mt-4 mb-6" />
+                      {isAnonymous && (
+                        <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-200">
+                          This complaint is filed as Anonymous; contact details are hidden by design.
+                        </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Name:</label>
+                          <p className="text-gray-900 font-medium text-lg">{displayName}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Email:</label>
+                          <p className="text-gray-900 font-medium text-lg">{displayEmail}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Phone:</label>
+                          <p className="text-gray-900 font-medium text-lg">{displayPhone}</p>
+                        </div>
+                      </div>
+                    </div>
+          
+                    {/* complaint location */}
+                    <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                          Complaint Location
+                        </h2>
+                      </div>
+                      <hr className="border-t border-gray-200 mt-4 mb-6" />
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Barangay:</label>
+                          <p className="text-gray-900 font-medium text-lg">{complaint.barangay || "N/A"}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Specific Location:</label>
+                          <p className="text-gray-900 font-medium text-lg">{complaint.specific_location || "N/A"}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-md text-gray-600 mb-2">Full Address:</label>
+                          <p className="text-gray-900 font-medium text-lg">{complaint.full_address || "N/A"}</p>
+                        </div>
+                      </div>
+                    </div>
+          
+                    {/* complaint status */}
+                    <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
+                      <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                          Complaint Status
+                        </h2>
+                        {canEdit && (
+                          <div className="flex gap-4">
+                            <button
+                              className="px-4 py-2 font-medium transition-colors rounded-lg text-white whitespace-nowrap text-lg flex items-center gap-2 hover:opacity-90"
+                              style={{
+                                backgroundColor: statusColors[complaint.status] || "#AEAEAE",
+                              }}
+                              title="Click to change status"
+                            >
+                              {complaint.status}
+                              <i className="bi bi-chevron-down text-base"></i>
+                            </button>
+                            <button
+                              className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
+                              onClick={handleAssign}>
+                              <i className="bi bi-person-check text-lg"></i>
+                              Assign Official
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <hr className="border-t border-gray-200 mb-6" />
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Assigned Official:</label>
+                          <p className="text-gray-900 font-medium text-lg">
+                            {complaint.assignedOfficial || <span className="text-red-600">Unassigned</span>}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Current Status:</label>
+                          <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: statusColors[complaint.status] }}>
+                            {complaint.status}
+                          </span>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Priority Level:</label>
+                          <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
+                            {complaint.priority}
+                          </span>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Last Updated:</label>
+                          <p className="text-gray-900 font-medium text-lg">{formatDate(complaint.updated_at)}</p>
+                        </div>
+                        <div>
+                          <label className="block text-md text-gray-600 mb-2">Days Since Filed:</label>
+                          <p className="text-gray-900 font-medium text-lg">{getDaysSinceFiled(complaint.created_at)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <AssignActionModal 
+                  isOpen={isAssignOpen} 
+                  onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+                  Action="Assign Complaint"
+                  assignDetails={complaint}
                   >
-                    Copy ID
-                  </button>
-                </h1>
-                <p className="text-gray-600 font-medium mb-1 text-lg"><span className="font-medium">Title:</span> {complaint.title}</p>
-                <p className="text-gray-600 text-lg"><span className="font-medium">Barangay:</span> {complaint.barangay}, Iligan City +9200</p>
-                <p className="text-gray-600 text-lg">Case Type: {complaint.case_type}</p>
-              </div>
-            </div>
-          </div>
-          {/* Complaint Details */}
-          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <i className="bi bi-card-text text-[#43B174] text-2xl"></i>
-                <h2 className="text-2xl font-semibold text-gray-900">Complaint Details</h2>
-              </div>
-            </div>
-            <hr className="border-t border-gray-200 mt-4 mb-6" />
-            <div className="space-y-6">
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Description:</label>
-                <p className="text-gray-900 font-medium text-lg leading-relaxed">{complaint.description || "N/A"}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                <div>
-                  <label className="block text-md text-gray-600 mb-2">Case Type:</label>
-                  <p className="text-gray-900 font-medium text-lg">{complaint.case_type || "N/A"}</p>
-                </div>
-                <div>
-                  <label className="block text-md text-gray-600 mb-2">Date Filed:</label>
-                  <p className="text-gray-900 font-medium text-lg">{formatDate(complaint.created_at)}</p>
-                </div>
-              </div>
-            </div>
-            {/* --- UPDATED: Complainant Info Section --- */}
-            <hr className="border-t border-gray-200 mt-6 mb-6" />
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <i className="bi bi-person-badge text-[#1F7A8C] text-2xl"></i>
-                <h3 className="text-xl font-semibold text-gray-900">Complainant Information</h3>
-              </div>
-            </div>
-            {isAnonymous && (
-              <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-200">
-                This complaint is filed as Anonymous; contact details are hidden by design.
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Name:</label>
-                <p className="text-gray-900 font-medium text-lg">{displayName}</p>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Email:</label>
-                <p className="text-gray-900 font-medium text-lg">{displayEmail}</p>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Phone:</label>
-                <p className="text-gray-900 font-medium text-lg">{displayPhone}</p>
-              </div>
-            </div>
-          </div>
-          {/* Location Information */}
-          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <i className="bi bi-geo-alt-fill text-red-600 text-2xl"></i>
-                <h2 className="text-2xl font-semibold text-gray-900">Location Information</h2>
-              </div>
-            </div>
-            <hr className="border-t border-gray-200 mt-4 mb-6" />
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Full Address:</label>
-                <p className="text-gray-900 font-medium text-lg">{complaint.full_address || "N/A"}</p>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Barangay:</label>
-                <p className="text-gray-900 font-medium text-lg">{complaint.barangay || "N/A"}</p>
-              </div>
-            </div>
-            <div>
-              <label className="block text-md text-gray-600 mb-2">Specific Location:</label>
-              <p className="text-gray-900 font-medium text-lg">{complaint.specific_location || "N/A"}</p>
-            </div>
-          </div>
-        </div>
-          {/* Assignment Details */}
-          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <i className="bi bi-person-check text-[#FB8500] text-2xl"></i>
-                <h2 className="text-2xl font-semibold text-gray-900">Assignment Details</h2>
-              </div>
-              {canEdit && (
-                <div className="flex gap-4">
-                  <button
-                    className="px-4 py-2 font-medium transition-colors rounded-lg text-white whitespace-nowrap text-lg flex items-center gap-2 hover:opacity-90"
-                    style={{
-                      backgroundColor: statusColors[complaint.status] || "#AEAEAE",
-                    }}
-                    title="Click to change status"
-                  >
-                    {complaint.status}
-                    <i className="bi bi-chevron-down text-base"></i>
-                  </button>
-                  <button
-                    className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
-                    onClick={handleAssign}>
-                    <i className="bi bi-person-check text-lg"></i>
-                    Assign Official
-                  </button>
-                </div>
-              )}
-            </div>
-            <hr className="border-t border-gray-200 mb-2" />
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Assigned Official:</label>
-                <p className="text-gray-900 font-medium text-lg">
-                  {complaint.assignedOfficial || <span className="text-red-600">Unassigned</span>}
-                </p>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Current Status:</label>
-                <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: statusColors[complaint.status] }}>
-                  {complaint.status}
-                </span>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Priority Level:</label>
-                <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
-                  {complaint.priority}
-                </span>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Last Updated:</label>
-                <p className="text-gray-900 font-medium text-lg">{formatDate(complaint.updated_at)}</p>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Days Since Filed:</label>
-                <p className="text-gray-900 font-medium text-lg">{getDaysSinceFiled(complaint.created_at)}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <AssignActionModal 
-        isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-        Action="Assign Complaint"
-        assignDetails={complaint}
-        >
-      </AssignActionModal>
-    </>
-  );
-};
-
-export default ComplaintDetailsPage;
+                </AssignActionModal>
+              </>
+            );
+          };
+          
+          export default ComplaintDetailsPage;

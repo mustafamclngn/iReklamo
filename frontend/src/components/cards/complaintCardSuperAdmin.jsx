@@ -1,8 +1,8 @@
 import React from 'react';
 
 const statusColors = {
-  Pending: "#FFB300",
-  "In-Progress": "#FFD600",
+  Pending: "#ff6a00ff",
+  "In-Progress": "#ffd000ff",
   Resolved: "#43B174",
 };
 

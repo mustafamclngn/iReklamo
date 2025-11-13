@@ -42,14 +42,17 @@ const HeroBannerHome = () => {
   const handleActionChange = (e) => {
     const value = e.target.value;
     if (value) {
-      // navigate to complainant info when choosing file-complaint (shorthand used elsewhere)
       if (value === "file-complaint") {
         navigate('/file-complaint/complainantinfo');
       } else {
         navigate(`/${value}`);
       }
+
+      // scroll to top when navigating
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
+
 
   return (
     <div className="bg-white pt-0 pb-8">
