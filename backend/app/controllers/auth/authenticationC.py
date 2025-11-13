@@ -55,7 +55,8 @@ def register_user():
         "barangay_id": int(barangay),
         "position": position,
         "role_id": int(role),
-        "user_password": random_pwd
+        "user_password": generate_password_hash("admin123")
+        # "user_password": random_pwd # Uncomment for randomized password, email notification system
     })
 
     return jsonify({
