@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../contexts/formcontext';
-import { ScrollText, SquarePen, UserCircle, CircleCheck, CircleCheckBig, ArrowLeft, Home } from 'lucide-react';
+import { ScrollText, SquarePen, UserCircle, CircleCheckBig, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function CU_ComplaintSummaryPage() {
@@ -95,9 +95,6 @@ export default function CU_ComplaintSummaryPage() {
             const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
             const complainantId = resData.complainant_id || resData.complainantId || null;
             
-            // The backend now does all the work of generating the code
-            const complaintCode = resData.complaint_code || resData.complaintCode; // <-- Read the code
-
             // Add a check in case the backend fails to send the code
             if (!complaintCode) {
                 console.error("Submission successful, but backend did not return a 'complaint_code'.", resData);
@@ -105,9 +102,20 @@ export default function CU_ComplaintSummaryPage() {
                 return;
             }
 
+            // Build a user-facing tracking code in the format CMP-YYYYMMDD-NNNN
+            // where NNNN is the complaint id padded to 4 digits
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const datePart = `${yyyy}${mm}${dd}`;
+            const seqPart = complaintId ? String(complaintId).padStart(4, '0') : '0000';
+            const complaintCode = `CMP-${datePart}-${seqPart}`;
+
+            // Reset form and close modal, then navigate passing tracking info in location state
             updateFormData(initialFormData);
             setShowModal(false);
-            navigate("/file-complaint/completionmessage", { state: { complaintCode } });
+            navigate("/file-complaint/completionmessage", { state: { complaintCode, complaintId, complainantId } });
         } catch (error) {
             console.error('Error submitting complaint:', error);
             alert('An unexpected error occurred while submitting the complaint. Please try again.');
@@ -119,43 +127,30 @@ export default function CU_ComplaintSummaryPage() {
 
     return (
         <div>
-            {/* BREADCRUMB */}
-            <div className='w-full pb-3'>
-                <div className="flex flex-row mx-auto items-center place-items-center max-w-[1500px] w-[80%] mb-5 gap-3 text-sm text-gray-400">
-                    <button> <Home size={17}/> </button>
-                    <h1>/</h1>
-                    <button>Complaints</button>
-                    <h1>/</h1>
-                    <button>File a Complaint</button>
-                    <h1>/</h1>
-                    <button className='font-medium text-gray-500'>Complaint Summary</button>
-                </div>
-            </div>
-            
             <div className='flex flex-col items-center place-content-between bg-white'>
                 {/* PROGRESS BAR */}
-                <div className='w-full flex justify-center'>
-                    <div className="mx-auto max-w-[1500px] w-[80%] mb-5">
+                <div className='w-full flex justify-center mb-8'>
+                    <div className="mx-auto max-w-[1500px] w-[80%]">
                         {/* <h1 className='font-bold text-xl text-blue-400 pb-3 ml-40'>Create Complaint</h1> */}
                         <div>
-                            <div className='flex flex-row justify-between place-items-center gap-3 mx-40'>
-                                <CircleCheckBig size={28} color='#60A5FA' />
-                                <div className='flex-grow h-[2.4px] bg-[#60A5FA]'></div>
-                                <CircleCheckBig size={28} color='#60A5FA' />
-                                <div className='flex-grow h-[2.4px] bg-[#60A5FA]'></div>
-                                <CircleCheck size={28} color='#60A5FA' />
+                            <div className='flex flex-row justify-between place-items-center gap-3'>
+                                <CircleCheckBig size={32} color='#60A5FA' />
+                                <div className='flex-grow h-[3px] bg-[#60A5FA]'></div>
+                                <CircleCheckBig size={32} color='#60A5FA' />
+                                <div className='flex-grow h-[3px] bg-[#60A5FA]'></div>
+                                <CircleCheckBig size={32} color='#60A5FA' />
                             </div>
-                            <div className='flex flex-row justify-between place-items-center gap-3 mx-[78px] mt-1'>
-                                <div className='flex flex-col items-center justify-center w-48'>
-                                    <h1 className='font-bold leading-none'>STEP 1</h1>
+                            <div className='flex flex-row justify-between place-items-center mt-3'>
+                                <div className='flex flex-col items-center justify-center flex-1'>
+                                    <h1 className='font-bold leading-none text-base'>STEP 1</h1>
                                     <p className='text-sm text-gray-500'>Provide complainant info</p>
                                 </div>
-                                <div className='flex flex-col items-center justify-center w-48'>
-                                    <h1 className='font-bold leading-none'>STEP 2</h1>
+                                <div className='flex flex-col items-center justify-center flex-1'>
+                                    <h1 className='font-bold leading-none text-base'>STEP 2</h1>
                                     <p className='text-sm text-gray-500'>Provide complaint details</p>
                                 </div>
-                                <div className='flex flex-col items-center justify-center w-48'>
-                                    <h1 className='font-bold leading-none'>STEP 3</h1>
+                                <div className='flex flex-col items-center justify-center flex-1'>
+                                    <h1 className='font-bold leading-none text-base'>STEP 3</h1>
                                     <p className='text-sm text-gray-500'>Review and Submit</p>
                                 </div>
                             </div>
@@ -163,109 +158,115 @@ export default function CU_ComplaintSummaryPage() {
                     </div>
                 </div>
                 <div className='w-full flex justify-center'>
-                    <div className="border-2 border-gray-200 mx-auto max-w-[1500px] w-[80%] px-10 py-5 rounded-lg mb-5 shadow-md">
-                        <div className="flex flex-row gap-1 border-b-2 border-gray-200 pb-2">
-                            <h1 className="font-bold text-blue-400 text-2xl">Step 3:</h1>
-                            <h1 className="font-medium text-black text-2xl">Complaint Summary</h1>
+                    <div className="border-2 border-gray-200 mx-auto max-w-[1500px] w-[80%] px-16 py-10 rounded-lg mb-5 shadow-md">
+                        <div className="flex flex-row gap-1 border-b-2 border-gray-200 pb-3 mb-8">
+                            <h1 className="font-bold text-blue-400 text-3xl">Step 3:</h1>
+                            <h1 className="font-medium text-black text-3xl">Complaint Summary</h1>
                         </div>
                         {/* COMPLAINANT INFO */}
-                        <div className='w-full flex justify-center'>
-                            <div className="mx-auto max-w-[1500px] w-[100%] mb-5 p-5">
-                                <div className='flex flex-row justify-between items-center'>
-                                    <div className='flex flex-row items-center gap-4 mb-3'>
-                                        <UserCircle size={24} color='#808080' />
-                                        <h2 className="text-xl font-medium">Complainant Information</h2>
+                        <div className='w-full mb-8'>
+                            <div className='flex flex-row justify-between items-center mb-4'>
+                                    <div className='flex flex-row items-center gap-4'>
+                                        <UserCircle size={28} color='#808080' />
+                                        <h2 className="text-xl font-semibold">Complainant Information</h2>
                                     </div>
-                                    <div className='flex flex-row items-center gap-2 mb-3 border-2 rounded-md px-2 py-1 hover:bg-gray-100 cursor-pointer transition'>
+                                    <div className='flex flex-row items-center gap-2 border-2 rounded-md px-3 py-1.5 hover:bg-gray-100 cursor-pointer transition'>
                                         <button
-                                            className="text-sm text-[#5d5d5dff] font-bold"
+                                            className="text-base text-[#5d5d5dff] font-bold"
                                             onClick={() => navigate("/file-complaint/complainantinfo")}
                                         >
                                             Edit
                                         </button>
-                                        <SquarePen size={16} color='#5d5d5dff' />
+                                        <SquarePen size={18} color='#5d5d5dff' />
                                     </div>
                                 </div>
-                                {/* DETAILS HERE */}
-                                <div className='flex flex-row justify-between ml-10 mr-52'>
-                                    <div className='flex flex-row justify-between gap-12'>
-                                        <div className='text-[#808080] w-32'>
-                                            <h1>First name</h1>
-                                            <h1>Last name</h1>
-                                            <h1>Sex</h1>
-                                            <h1>Age</h1>
-                                        </div>
-                                        <div className='font-medium'>
-                                            <h1>{formData.first_name || "Not provided"}</h1>
-                                            <h1>{formData.last_name || "Not provided"}</h1>
-                                            <h1>{formData.sex || "Not provided"}</h1>
-                                            <h1>{formData.age || "Not provided"}</h1>
-                                        </div>
+
+
+                                {/* info */}
+                            <div className='grid grid-cols-2 gap-x-20 ml-12 text-base'>
+                                <div className='flex flex-col gap-2'>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>First name</span>
+                                        <span className='font-medium'>{formData.first_name || "Not provided"}</span>
                                     </div>
-                                    <div className='flex flex-row justify-between gap-12'>
-                                        <div className='text-[#808080] w-32'>
-                                            <h1>Contact Number</h1>
-                                            <h1>Barangay</h1>
-                                            <h1>Email Address</h1>
-                                        </div>
-                                        <div className='font-medium'>
-                                            <h1>{formData.contact_number}</h1>
-                                            <h1>{barangayName || "Loading..."}</h1>
-                                            <h1>{formData.email}</h1>
-                                        </div>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Last name</span>
+                                        <span className='font-medium'>{formData.last_name || "Not provided"}</span>
+                                    </div>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Sex</span>
+                                        <span className='font-medium'>{formData.sex || "Not provided"}</span>
+                                    </div>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Age</span>
+                                        <span className='font-medium'>{formData.age || "Not provided"}</span>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Contact Number</span>
+                                        <span className='font-medium'>{formData.contact_number}</span>
+                                    </div>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Barangay</span>
+                                        <span className='font-medium'>{barangayName || "Loading..."}</span>
+                                    </div>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Email Address</span>
+                                        <span className='font-medium'>{formData.email}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         {/* COMPLAINT DETAILS */}
-                        <div className='w-full flex justify-center'>
-                            <div className="mx-auto max-w-[1500px] w-[100%] mb-5 p-5">
-                                <div className='flex flex-row justify-between items-center'>
-                                    <div className='flex flex-row items-center gap-5 mb-3'>
-                                        <ScrollText size={24} color='#808080' />
-                                        <h2 className="text-xl font-medium">Complaint Details</h2>
-                                    </div>
-                                    <div className='flex flex-row items-center gap-2 mb-3 border-2 rounded-md px-2 py-1 hover:bg-gray-100 cursor-pointer transition'>
-                                        <button
-                                            className="text-sm text-[#5d5d5dff] font-bold"
-                                            onClick={() => navigate("/file-complaint/complaintdetails")}
-                                        >
-                                            Edit
-                                        </button>
-                                        <SquarePen size={16} color='#5d5d5dff' />
-                                    </div>
+                        <div className='w-full mb-8'>
+                            <div className='flex flex-row justify-between items-center mb-4'>
+                                <div className='flex flex-row items-center gap-5'>
+                                    <ScrollText size={28} color='#808080' />
+                                    <h2 className="text-xl font-semibold">Complaint Details</h2>
                                 </div>
-                                {/* DETAILS HERE */}
-                                <div className='flex flex-col ml-11'>
-            
-                                    <div className='flex flex-row'>
-                                        <h1 className='w-44 text-[#808080]'>Complaint Title</h1>
-                                        <p className='w-10/12 font-medium'>{formData.complaint_title}</p>
-                                    </div>
-                                    <div className='flex flex-row'>
-                                        <h1 className='w-44 text-[#808080]'>Case Type</h1>
-                                        <p className='w-10/12 font-medium'>{formData.case_type}</p>
-                                    </div>
-                                    <div className='flex flex-row'>
-                                        <h1 className='w-44 text-[#808080]'>Description</h1>
-                                        <p className='w-10/12 font-medium'>{formData.description}</p>
-                                    </div>
-                                    <div className='flex flex-row'>
-                                        <h1 className='w-44 text-[#808080]'>Full Address</h1>
-                                        <p className='w-10/12 font-medium'>{formData.full_address}</p>
-                                    </div>
-                                    <div className='flex flex-row'>
-                                        <h1 className='w-44 text-[#808080]'>Specific Location</h1>
-                                        <p className='w-10/12 font-medium'>{formData.specific_location || "Not provided"}</p>
-                                    </div>
+                                <div className='flex flex-row items-center gap-2 border-2 rounded-md px-3 py-1.5 hover:bg-gray-100 cursor-pointer transition'>
+                                    <button
+                                        className="text-base text-[#5d5d5dff] font-bold"
+                                        onClick={() => navigate("/file-complaint/complaintdetails")}
+                                    >
+                                        Edit
+                                    </button>
+                                    <SquarePen size={18} color='#5d5d5dff' />
+                                </div>
+                            </div>
+
+                            {/* details */}
+                            <div className='flex flex-col ml-14 gap-2 text-base'>
+                                <div className='flex flex-row'>
+                                    <span className='text-gray-600 w-48'>Complaint Title</span>
+                                    <span className='flex-1 font-medium'>{formData.complaint_title}</span>
+                                </div>
+                                <div className='flex flex-row'>
+                                    <span className='text-gray-600 w-48'>Case Type</span>
+                                    <span className='flex-1 font-medium'>{formData.case_type}</span>
+                                </div>
+                                <div className='flex flex-row'>
+                                    <span className='text-gray-600 w-48'>Description</span>
+                                    <span className='flex-1 font-medium'>{formData.description}</span>
+                                </div>
+                                <div className='flex flex-row'>
+                                    <span className='text-gray-600 w-48'>Full Address</span>
+                                    <span className='flex-1 font-medium'>{formData.full_address}</span>
+                                </div>
+                                <div className='flex flex-row'>
+                                    <span className='text-gray-600 w-48'>Specific Location</span>
+                                    <span className='flex-1 font-medium'>{formData.specific_location || "Not provided"}</span>
                                 </div>
                             </div>
                         </div>
-                        {/* next button */}
-                        <div className="flex flex-row justify-between text-white px-5">
+
+                        {/* buttons */}
+                        <div className="flex flex-row justify-between text-white px-5 mt-8">
                             <button
                                 onClick={() => navigate("/file-complaint/complaintdetails")}
-                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-gray-400 rounded-lg font-bold py-1 px-5 mb-3"
+                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-gray-400 rounded-lg font-bold py-2 px-6 mb-3 text-base"
                             >
                                 <ArrowLeft size={20} />
                                 Back
@@ -273,7 +274,7 @@ export default function CU_ComplaintSummaryPage() {
             
                             <button
                                 onClick={() => setShowModal(true)}
-                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-1 px-5 mb-3"
+                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-2 px-6 mb-3 text-base"
                             >
                                 Submit
                             </button>
@@ -281,7 +282,7 @@ export default function CU_ComplaintSummaryPage() {
                     </div>
                 </div>
             
-                {/*  confirmation modal */}
+                {/* confirmation modal */}
                 {showModal && (
                     <div className="fixed inset-0 flex items-center justify-center bg-grey-900 bg-opacity-20 backdrop-blur-sm z-40">
                         <div className="bg-white rounded-xl shadow-xl p-8 w-[550px] text-center">

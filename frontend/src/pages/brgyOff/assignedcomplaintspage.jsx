@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardBrgyOff from '../../components/cards/complaintCardBrgyOff';
-import complaintsApi from '../../api/complaintsAPI';
+import useComplaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import useComplaintsApi from '../../api/complaintsAPI';
 
 const BO_AssignedComplaintsPage = () => {
   const navigate = useNavigate();
@@ -19,6 +18,8 @@ const BO_AssignedComplaintsPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const { getBarangayOfficialComplaints } = useComplaintsApi();
 
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
@@ -51,7 +52,7 @@ const BO_AssignedComplaintsPage = () => {
       }
 
       // Use role-based endpoint for barangay official - gets only assigned complaints
-      const response = await complaintsApi.getBarangayOfficialComplaints(userId);
+      const response = await getBarangayOfficialComplaints(userId);
 
       if (response.success) {
         setComplaints(response.data);

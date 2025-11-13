@@ -1,5 +1,5 @@
 import './modal.css'
-import complaintsApi from '../../api/complaintsApi'
+import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
 import ConfirmDelete from './ConfirmDelete'
 
@@ -10,19 +10,23 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [revokeType, setRevokeType] = useState('')
 
+  const { getActiveCases } = useComplaintsApi();
+
   const handleConfirmRevoke = (type) => {
     setRevokeType(type);
     setIsConfirmOpen(true);
   };
 
   useEffect(() => {
+
     if (!isOpen || !user_id) return
 
     const fetchComplaints = async () => {
       try {
         console.log("Searching for complaints for user:", user_id)
-        const response = await complaintsApi.ongoingComplaintsAssignee(user_id)
-        setAssignedComplaints(response.data || [])
+        const response = await getActiveCases(user_id)
+        setAssignedComplaints(response?.complaints || [])
+        console.log("Active Cases: ", assignedComplaints)
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)
         setAssignedComplaints([])

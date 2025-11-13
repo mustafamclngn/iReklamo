@@ -4,11 +4,12 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 from app.config import DB_CONFIG
-
-from app.controllers.complaints.complaintList import list_by_assignee
 from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
+
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
+from app.controllers.complaints.complaintAssignC import assign_complaint
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
@@ -26,29 +27,21 @@ def generate_complaint_id(cursor):
 # LIST OF ALL COMPLAINTS
 @complaints_bp.route('/all_complaints', methods=['GET'])
 def get_complaints():
-    conn = psycopg2.connect(**DB_CONFIG)
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-    cursor.execute("SELECT * FROM complaints;")
-
-    results = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    return jsonify(results)
+    return get_all_unfiltered_complaints()
 
 
 # GET ALL COMPLAINTS WITH OPTIONAL FILTERS
 @complaints_bp.route('/', methods=['GET'])
 def get_all_complaints():
     """
-    Get all complaints with optional filters: ?barangay=X&status=Y&priority=Z
+    Get all complaints with optional filters: ?barangay=X&status=Y&priority=Z&assigned_official_id=W
     """
     try:
         # Get query parameters
         barangay_filter = request.args.get('barangay')
         status_filter = request.args.get('status')
         priority_filter = request.args.get('priority')
+        assigned_filter = request.args.get('assigned_official_id')
 
         # Use raw SQL with proper JOINs to resolve foreign keys
         conn = psycopg2.connect(**DB_CONFIG)
@@ -95,6 +88,10 @@ def get_all_complaints():
         if priority_filter:
             conditions.append("complaints.priority = %s")
             params.append(priority_filter)
+
+        if assigned_filter:
+            conditions.append("complaints.assigned_official_id = %s")
+            params.append(assigned_filter)
 
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
@@ -205,6 +202,7 @@ def track_complaint(complaint_code):
     Track a complaint by its complaint_code (e.g., CMP-20241110-0001)
     This endpoint is public and doesn't require authentication
     """
+    print(complaint_code)
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -400,9 +398,10 @@ def create_complaint():
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
     """
-    Get a specific complaint by ID with all related information
+    Get a specific complaint by ID with joined data
     """
     try:
+        # Use raw SQL with JOINs to get complete complaint data
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -421,15 +420,21 @@ def get_complaint(complaint_id):
                 complaints.assigned_official_id,
                 complaints.created_at,
                 complaints.updated_at,
-                barangays.name as barangay_name,
-                CONCAT(complainants.first_name, ' ', complainants.last_name) as complainant_name,
+                complaints.complainant_id,
+                -- Joined barangay data
+                barangays.name as barangay,
+                -- Joined complainant data
+                complainants.first_name as complainant_first_name,
+                complainants.last_name as complainant_last_name,
+                complainants.sex as complainant_sex,
+                complainants.age as complainant_age,
+                complainants.contact_number as complainant_contact_number,
                 complainants.email as complainant_email,
-                complainants.contact_number as complainant_contact,
-                CASE
-                    WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
-                    THEN CONCAT(users.first_name, ' ', users.last_name)
-                    ELSE 'Unassigned'
-                END as assigned_official_name
+                -- Joined assigned official data
+                COALESCE(
+                    NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
+                    'Unassigned'
+                ) as "assignedOfficial"
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN complainants ON complaints.complainant_id = complainants.id
@@ -448,6 +453,7 @@ def get_complaint(complaint_id):
                 'error': 'Complaint not found'
             }), 404
 
+        # Convert RealDictCursor result to regular dict
         complaint_data = dict(result)
 
         return jsonify({
@@ -456,7 +462,7 @@ def get_complaint(complaint_id):
         }), 200
 
     except Exception as e:
-        print(f"Error fetching complaint {complaint_id}: {e}")
+        print(f"Error fetching complaint: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -467,77 +473,39 @@ def get_complaint(complaint_id):
 def update_complaint(complaint_id):
     """
     Update a complaint
-    Expected data: any subset of title, case_type, description, status, priority, 
-                   full_address, specific_location, assigned_official_id
     """
     try:
         data = request.get_json()
-        
+
         # Check if complaint exists
-        conn = psycopg2.connect(**DB_CONFIG)
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-        
-        cursor.execute("SELECT id FROM complaints WHERE id = %s", (complaint_id,))
-        if not cursor.fetchone():
-            cursor.close()
-            conn.close()
+        selector = Select().table("complaints").search("id", complaint_id).execute().retDict()
+        if not selector:
             return jsonify({
                 'success': False,
                 'error': 'Complaint not found'
             }), 404
 
-        # Build dynamic UPDATE query based on provided fields
-        allowed_fields = {
-            'title', 'case_type', 'description', 'status', 'priority',
-            'full_address', 'specific_location', 'assigned_official_id'
-        }
-        
-        updates = []
-        values = []
-        
+        # Update allowed fields
+        allowed_fields = [
+            'title', 'case_type', 'description', 'full_address', 'specific_location',
+            'status', 'priority', 'assigned_official_id'
+        ]
+
+        update_data = {}
         for field in allowed_fields:
             if field in data:
-                updates.append(f"{field} = %s")
-                values.append(data[field])
-        
-        if not updates:
-            cursor.close()
-            conn.close()
-            return jsonify({
-                'success': False,
-                'error': 'No valid fields to update'
-            }), 400
-        
-        # Add updated_at timestamp
-        updates.append("updated_at = NOW()")
-        
-        # Add complaint_id for WHERE clause
-        values.append(complaint_id)
-        
-        query = f"""
-            UPDATE complaints 
-            SET {', '.join(updates)}
-            WHERE id = %s
-            RETURNING id, complaint_code, title, status, updated_at
-        """
-        
-        cursor.execute(query, values)
-        updated_complaint = cursor.fetchone()
-        conn.commit()
-        cursor.close()
-        conn.close()
+                update_data[field] = data[field]
+
+        if update_data:
+            updater = Update().table("complaints").set(update_data).where("id", complaint_id).execute()
 
         return jsonify({
             'success': True,
-            'message': 'Complaint updated successfully',
-            'data': dict(updated_complaint)
+            'message': 'Complaint updated successfully'
         }), 200
 
     except Exception as e:
-        print(f"Error updating complaint {complaint_id}: {e}")
-        if 'conn' in locals() and conn:
-            conn.rollback()
-            conn.close()
+        print(f"Error updating complaint: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -570,6 +538,11 @@ def delete_complaint(complaint_id):
             'success': False,
             'error': str(e)
         }), 500
+
+
+
+
+
 
 # ROLE-BASED COMPLAINTS ENDPOINTS
 
@@ -714,6 +687,19 @@ def get_barangay_official_complaints(user_id):
             'error': str(e)
         }), 500
 
+
 @complaints_bp.route('ongoing/<int:assignee>', methods=['GET'])
 def get_user_complaints(assignee):
     return list_by_assignee(assignee)
+
+@complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
+def perform_assignment(complaint_id, assigned_official_id):
+    return assign_complaint(complaint_id, assigned_official_id)
+
+@complaints_bp.route('cases/active/<int:assigned_official_id>')
+def get_active_cases(assigned_official_id):
+    return activeCases_official(assigned_official_id)
+
+@complaints_bp.route('cases/resolved/<int:assigned_official_id>')
+def get_resolved_cases(assigned_official_id):
+    return resolvedCases_official(assigned_official_id)

@@ -38,9 +38,6 @@ CREATE TABLE IF NOT EXISTS users (
     position VARCHAR(100),
     role_id INTEGER REFERENCES roles(id) ON DELETE SET NULL,
     user_password TEXT NOT NULL,
-    profile_picture VARCHAR(250),
-    sex VARCHAR(10),
-    birthdate DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -9,7 +9,7 @@ def list_by_assignee(assignee):
                     .table("complaints")\
                     .search(search_mult={
                         "assigned_official_id": assignee,
-                        "status": "in-progress"
+                        "status": "In-Progress"
                     })\
                     .execute().retDict()
         
@@ -26,3 +26,92 @@ def list_by_assignee(assignee):
             'success': False,
             'error': str(e)
         }), 500
+    
+def activeCases_official(assignee):
+    try:
+        selector = Select()
+        result = selector\
+                    .table("complaints")\
+                    .search(search_mult={
+                        "assigned_official_id": assignee,
+                        "status": "In-Progress"
+                    })\
+                    .execute().retDict()
+        
+        print(result)
+
+        return jsonify({
+            'success': True,
+            'complaints': result
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+def resolvedCases_official(assignee):
+    try:
+        selector = Select()
+        result = selector\
+                    .table("complaints")\
+                    .search(search_mult={
+                        "assigned_official_id": assignee,
+                        "status": "Resolved"
+                    })\
+                    .execute().retDict()
+        
+        print(result)
+
+        return jsonify({
+            'success': True,
+            'complaints': result
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+def get_all_unfiltered_complaints():
+    try:
+        barangay = request.args.get('barangay')
+        status = request.args.get('status')
+
+        selector = Select()
+        selector\
+                    .table("complaints")
+        
+        if barangay and status:
+            selector.search(search_mult={
+                "barangay_id":barangay,
+                "status":status
+            })
+        elif barangay:
+            selector.search(tag="barangay_id", key=barangay)
+
+        result = selector.sort("complaint_code", "DESC").execute().retDict()
+
+        if result is None:
+            complaints = []
+        elif isinstance(result, dict):
+            complaints = [result]
+        else:
+            complaints = result
+
+        return jsonify({
+            'success': True,
+            'data': complaints
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching complaints: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+    

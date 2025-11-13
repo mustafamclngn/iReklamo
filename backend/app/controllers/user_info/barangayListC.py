@@ -24,3 +24,28 @@ def brgy_list():
             'success': False,
             'error': str(e)
         }), 500
+    
+def brgy(id):
+    try:
+        selector = Select()
+        
+        result = selector\
+                    .table("barangays")\
+                    .search(tag="id", key=id)\
+                    .execute()\
+                    .retDict()
+        
+        print(result)
+
+
+        return jsonify({
+            'success': True,
+            'barangay': result
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching barangays: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

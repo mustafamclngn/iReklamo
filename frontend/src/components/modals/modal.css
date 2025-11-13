@@ -20,7 +20,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: auto;
   clip-path: inset(0 round 10px);
 }
 
@@ -33,7 +33,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: auto;
   clip-path: inset(0 round 10px);
 }
 
@@ -115,7 +115,7 @@
   background-color: #4CAF50; 
   color: white;
   font-weight: bold;
-  border: 2px solid #000;
+  border: none;
   padding: 8px 20px;
   margin-left: 5px;
   border-radius: 6px;
@@ -131,7 +131,7 @@
   background-color: #af4c4c; 
   color: white;
   font-weight: bold;
-  border: 2px solid #000;
+  border: none;
   padding: 8px 20px;
   margin-left: 5px;
   border-radius: 6px;
@@ -146,7 +146,7 @@
 .okay-button:disabled {
   background-color: #99fd80;        
   color: #777;                   
-  border-color: #999;           
+  border-color: none;           
   cursor: not-allowed;           
   transform: none;              
   opacity: 0.7;                 
@@ -160,7 +160,7 @@
 .revoke-button:disabled {
   background-color: #fd8080;        
   color: #777;                   
-  border-color: #999;           
+  border-color: none;           
   cursor: not-allowed;           
   transform: none;              
   opacity: 0.7;                 

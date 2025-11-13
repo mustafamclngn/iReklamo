@@ -9,6 +9,8 @@ const CU_TrackComplaintPage = () => {
   const navigate = useNavigate();
   const complaintsApi = useComplaintsApi();
 
+  const {trackComplaint} = useComplaintsApi();
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -27,7 +29,7 @@ const CU_TrackComplaintPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await complaintsApi.trackComplaint(complaintId.trim());
+      const response = await trackComplaint(complaintId.trim());
 
       if (response.success && response.data) {
         navigate(`/track/${complaintId.trim()}`);

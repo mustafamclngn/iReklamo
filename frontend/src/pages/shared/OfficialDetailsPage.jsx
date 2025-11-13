@@ -5,27 +5,53 @@ import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import DeleteModal from '../../components/modals/DeleteUserModal';
+import AssignActionModal from '../../components/modals/AssignActionModal';
+import ActiveCasesModal from '../../components/modals/ActiveCasesModal';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
+  const { getActiveCases, getResolvedCases } = useComplaintsApi();
   
   const [official, setOfficial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState(false);
 
+  const [active, setActive] = useState();
+  const [resolved, setResolved] = useState();
+  
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isViewCasesOpen, setIsViewCasesOpen] = useState(false);
 
-  const { getAllOfficials, getOfficialsByBarangay, getOfficialById } = useOfficialsApi();
+  const [refresh, setRefresh] = useState(false);
+
+  const { getOfficialById } = useOfficialsApi();
 
   const hasValidImage = official?.profile_picture && !imageError;
 
   useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const activeCases = await getActiveCases(user_id);
+        const resolvedCases = await getResolvedCases(user_id);
+
+        setActive(activeCases?.complaints?.length || 0);
+        setResolved(resolvedCases?.complaints?.length || 0);
+      } catch (error) {
+        console.error("Error fetching case data:", error);
+        setActive(0);
+        setResolved(0);
+      }
+    };
+
     fetchOfficialDetails();
-  }, [user_id]);
+    fetchCases();
+  }, [user_id, refresh]);
 
   const fetchOfficialDetails = async () => {
     try {
@@ -136,12 +162,23 @@ const OfficialDetailsPage = () => {
     setIsDeleteOpen(true);
   };
 
+  // Assign 
+  const handleAssign = () => {
+    setIsAssignOpen(true);
+  };  
+
+  // View Active Cases 
+  const handleViewActiveCases = () => {
+    setIsViewCasesOpen(true);
+  };  
+
   // Close 
   const handleClose = (type) => {
     setIsDeleteOpen(false);
     if (type === "Account") {
       handleBack(); 
     }
+    setRefresh(prev => !prev);
   };
 
 
@@ -312,26 +349,35 @@ const OfficialDetailsPage = () => {
           <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">Case Details</h2>
-              <button
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
-              >
-                <i className="bi bi-bookmark text-lg"></i>
-                Active Cases Handling
-              </button>
+              <div className="flex items-center gap-3">
+
+                {(auth?.role[0] === 1 || auth?.role[0] === 2 || auth?.role[0] === 3) && (
+                      <button
+                        className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
+                        onClick={handleAssign}
+                        title='Assign Official to Complaint'>
+                        <i className="bi bi-person-check text-lg"></i>
+                        Assign Complaint
+                      </button>
+                )}
+                <button
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+                  onClick={handleViewActiveCases}
+                >
+                  <i className="bi bi-bookmark text-lg"></i>
+                  Active Cases Handling
+                </button>
+              </div>
             </div>
             <hr className="border-t border-gray-200 mt-4 mb-6" />
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               <div>
                 <label className="block text-md text-gray-600 mb-2">Assigned Cases:</label>
-                <p className="text-gray-900 font-medium text-3xl">{official.assigned_cases || 0}</p>
-              </div>
-               <div>
-                <label className="block text-md text-gray-600 mb-2">Pending Cases:</label>
-                <p className="text-gray-900 font-medium text-3xl">{official.pending_cases || 0}</p>
+                <p className="text-gray-900 font-medium text-3xl">{active || 0}</p>
               </div>
               <div>
                 <label className="block text-md text-gray-600 mb-2">Cases Resolved:</label>
-                <p className="text-gray-900 font-medium text-3xl">{official.resolved_cases || 0}</p>
+                <p className="text-gray-900 font-medium text-3xl">{resolved || 0}</p>
               </div>
             </div>
           </div>
@@ -357,6 +403,21 @@ const OfficialDetailsPage = () => {
         deleteData={official}
         >
       </DeleteModal>
+
+      <AssignActionModal 
+        isOpen={isAssignOpen} 
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        Action="Assign Official"
+        assignDetails={official}
+        >
+      </AssignActionModal>
+
+      <ActiveCasesModal 
+        isOpen={isViewCasesOpen} 
+        onClose={() => setIsViewCasesOpen(false)}
+        officialData={official}
+        >
+      </ActiveCasesModal>
     </>
   );
 };

@@ -40,7 +40,7 @@ const useOfficialsApi = () => {
     }
   };
 
-  return { getAllOfficials, getOfficialsByBarangay, getOfficialById, }
+  return { getAllOfficials, getOfficialsByBarangay, getOfficialById }
 };
 
 export default useOfficialsApi;

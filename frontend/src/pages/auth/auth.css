@@ -95,6 +95,10 @@
   pointer-events: none; 
 }
 
+.remember_me {
+  margin: 9px auto;
+}
+
 
 /* Error and Validation */
 .valid {

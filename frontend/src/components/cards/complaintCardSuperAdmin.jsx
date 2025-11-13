@@ -1,8 +1,8 @@
 import React from 'react';
 
 const statusColors = {
-  Pending: "#FFB300",
-  "In-Progress": "#FFD600",
+  Pending: "#ff6a00ff",
+  "In-Progress": "#ffd000ff",
   Resolved: "#43B174",
 };
 
@@ -57,7 +57,7 @@ const ComplaintCardSuperAdmin = ({
           {/* Status Badge */}
           <button
             onClick={() => onStatusUpdate(complaint)}
-            className="px-4 py-2 font-medium transition-colors rounded-lg text-white whitespace-nowrap"
+            className="px-4 py-2 font-medium transition-colors rounded-lg text-white whitespace-nowrap  min-w-[120px]"
             style={{
               backgroundColor: statusColors[complaint.status] || "#AEAEAE",
             }}

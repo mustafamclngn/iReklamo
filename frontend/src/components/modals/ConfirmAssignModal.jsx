@@ -1,0 +1,78 @@
+import './modal.css'
+import { useState } from 'react'
+
+const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaint, official }) => {
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  if (!isOpen) return null;
+
+  console.log(complaint)
+  console.log(official)
+
+  return (
+    <>
+      <div className="popup-overlay">
+        <div className="confirm-content">
+          <button onClick={onClose} className="popup-close">✕</button>
+          <h2 className="title">Confirm Complaint Assignment</h2>
+          <form className="form">
+            
+            <div className="form-group">
+              <label>
+                You are about to assign the complaint:
+              </label>
+              <div className="user-summary">
+                <p><strong>Complaint Code:</strong> {complaint.complaint_code}</p>
+                <p><strong>Complaint Title:</strong> {complaint.title}</p>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>
+                You are about to assign official:
+              </label>
+              <div className="user-summary">
+                <p><strong>Official Position:</strong> {official.position}</p>
+                <p><strong>Official Name:</strong> {official.first_name} {official.last_name}</p>
+              </div>
+            </div>
+
+            <div className="form-group checkbox-group">
+              <input
+                type="checkbox"
+                id="confirmCheckbox"
+                checked={isChecked}
+                onChange={(e) => setIsChecked(e.target.checked)}
+              />
+              <label htmlFor="confirmCheckbox">
+                I hereby confirm, by the management responsibilities bestowed upon me, 
+                to approve of this assignment.
+              </label>
+            </div>
+
+            <div className="popup-footer">
+              <button
+                type="button"
+                className="okay-button"
+                onClick={onConfirm}
+                disabled={!isChecked}
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                className="revoke-button"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default ConfirmAssign;

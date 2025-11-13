@@ -1,8 +1,5 @@
 import axios from './axios';
-import { axiosPrivate } from './axios'; 
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 const useComplaintsApi = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -52,7 +49,8 @@ const useComplaintsApi = () => {
   const trackComplaint = async (complaintCode) => {
     try {
       console.log("Tracking complaint:", complaintCode)
-      const response = await axios.get(`/api/complaints/track/${complaintCode}`);
+      const response = await axios.get(`/api/complaints/track/${complaintCode}`, { withCredentials: true });
+      console.log("Tracked: ", response.data)
       return response.data;
     } catch (error) {
       console.error('Error tracking complaint:', error);

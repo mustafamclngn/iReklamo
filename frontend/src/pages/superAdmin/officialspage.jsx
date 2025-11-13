@@ -8,12 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/modals/DeleteUserModal';
 import useOfficialsApi from '../../api/officialsApi';
 import CreateAdmin from '../../components/modals/CreateAdmin';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 
 const SA_OfficialsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  const { getAllOfficials, getOfficialsByBarangay, getOfficialsbyID } = useOfficialsApi();
+  const { getAllOfficials } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -21,9 +22,12 @@ const SA_OfficialsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const [refresh, setRefresh] = useState(false);
+
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [officialData, setOfficialData] = useState(null);
 
   // filter states
@@ -39,7 +43,7 @@ const SA_OfficialsPage = () => {
   // Fetch officials
   useEffect(() => {
     fetchOfficials();
-  }, []);
+  }, [refresh]);
 
   const fetchOfficials = async () => {
     try {
@@ -102,7 +106,8 @@ const SA_OfficialsPage = () => {
   // Assign Official to Complaint
   const handleUserAction = (official) => {
     console.log('User action for:', official);
-    // to be added pani (kani tong assign an official to a complaint)
+    setOfficialData(official);
+    setIsAssignOpen(true);
   };
 
   // Revoke Permissions
@@ -234,15 +239,22 @@ const SA_OfficialsPage = () => {
       </div>
       <CreateAdmin 
         isOpen={isCreateOpen} 
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => {setIsCreateOpen(false); setRefresh(prev => !prev);}}
         >
       </CreateAdmin>
       <DeleteModal 
         isOpen={isDeleteOpen} 
-        onClose={() => setIsDeleteOpen(false)}
+        onClose={() => {setIsDeleteOpen(false); setRefresh(prev => !prev);}}
         deleteData={officialData}
         >
       </DeleteModal>
+      <AssignActionModal 
+        isOpen={isAssignOpen} 
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        Action="Assign Official"
+        assignDetails={officialData}
+        >
+      </AssignActionModal>
     </>
   );
 };

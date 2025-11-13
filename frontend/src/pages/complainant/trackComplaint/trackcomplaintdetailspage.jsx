@@ -13,11 +13,13 @@ const CU_TrackComplaintDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const complaintsApi = useComplaintsApi();
 
+  const {trackComplaint} = useComplaintsApi();
+
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
         setLoading(true);
-        const response = await complaintsApi.trackComplaint(complaintCode);
+        const response = await trackComplaint(complaintCode);
 
         if (response.success && response.data) {
           setComplaint(response.data);
@@ -262,7 +264,7 @@ const CU_TrackComplaintDetailsPage = () => {
                     : ""}
                 </div>
                 <p className="text-sm font-bold text-gray-800 mt-3">
-                  In Progress
+                  In-Progress
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {complaint?.status === "In-Progress" ||
