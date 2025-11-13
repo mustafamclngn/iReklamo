@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardBrgyCap from '../../components/cards/complaintCardBrgyCap';
 import complaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -15,12 +16,17 @@ const BC_ComplaintsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const complaintsApi = useComplaintsApi();
   const itemsPerPage = 5;
+
+  const location = useLocation();
+  const defaultStatus = location.state?.defaultStatus || 'all';
+  const defaultPriority = location.state?.defaultPriority || 'all';
 
   // Barangay Captain filters: Status and Priority (NO Barangay filter)
   const [filters, setFilters] = useState({
-    status: 'all',
-    priority: 'all'
+    status: defaultStatus,
+    priority: defaultPriority
   });
 
   // Define filter options
@@ -46,6 +52,7 @@ const BC_ComplaintsPage = () => {
 
       // Use role-based endpoint for barangay captain - gets only their barangay complaints
       const response = await complaintsApi.getBarangayCaptainComplaints(userId);
+
 
       if (response.success) {
         setComplaints(response.data);

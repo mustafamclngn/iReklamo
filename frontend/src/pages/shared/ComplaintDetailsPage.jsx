@@ -4,6 +4,7 @@ import complaintsApi from '../../api/complaintsAPI';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 
 const formatDate = (dateString) => {
@@ -63,7 +64,7 @@ const ComplaintDetailsPage = () => {
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const complaintsApi = useComplaintsApi();
   useEffect(() => { fetchComplaintDetails(); }, [complaint_id]);
   const fetchComplaintDetails = async () => {
     setLoading(true);
@@ -73,8 +74,10 @@ const ComplaintDetailsPage = () => {
       return;
     }
     const response = await complaintsApi.getComplaintById(complaint_id);
-    if (response.success && response.data) setComplaint(response.data);
-    else navigate(`${getRoleBasePath(auth)}/complaints`, { replace: true });
+    if (response.success && response.data) {
+      setComplaint(response.data);
+      console.log("complaint details:", complaint)
+    }
     setLoading(false);
   };
 
@@ -86,8 +89,8 @@ const ComplaintDetailsPage = () => {
 
 
   // Complainant info logic
-  const isAnonymous =
-    complaint.is_anonymous || complaint.complainant?.is_anonymous || false;
+  // should set to complaint.is_anonymous
+  const isAnonymous = false;
 
   const isAssignedToYou =
     complaint.assigned_official_id === auth?.id ||

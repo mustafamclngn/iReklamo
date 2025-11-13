@@ -38,13 +38,9 @@ CREATE TABLE IF NOT EXISTS users (
     position VARCHAR(100),
     role_id INTEGER REFERENCES roles(id) ON DELETE SET NULL,
     user_password TEXT NOT NULL,
-<<<<<<< HEAD
     profile_picture VARCHAR(250),
     sex VARCHAR(10),
     birthdate DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-=======
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -87,7 +83,7 @@ CREATE TABLE IF NOT EXISTS complaints (
     status VARCHAR(50) DEFAULT 'Pending' CHECK (
         status IN ('Pending', 'In-Progress', 'Resolved')
     ),
-    priority VARCHAR(20) DEFAULT 'Moderate CHECK (
+    priority VARCHAR(20) DEFAULT 'Moderate' CHECK (
         priority IN ('Low', 'Moderate', 'Urgent')
     ),
     complainant_id INTEGER REFERENCES complainants(id) ON DELETE SET NULL,

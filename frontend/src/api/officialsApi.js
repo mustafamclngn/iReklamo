@@ -1,8 +1,10 @@
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAuth from "../hooks/useAuth";
+
 
 const useOfficialsApi = () => {
   const axiosPrivate = useAxiosPrivate();
-
+  
   // Get all officials under a barangay
   const getOfficialsByBarangay = async (barangay) => {
     try {

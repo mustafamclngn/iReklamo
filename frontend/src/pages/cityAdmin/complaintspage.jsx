@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardCityAdmin from '../../components/cards/complaintCardCityAdmin';
 import complaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -12,13 +13,17 @@ const CA_ComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const complaintsApi = useComplaintsApi();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const location = useLocation();
+  const defaultStatus = location.state?.defaultStatus || 'all';
 
   // UPDATED: 3 filters - Barangay, Status, Priority
   const [filters, setFilters] = useState({
     barangay: 'all',
-    status: 'all',
+    status: defaultStatus,
     priority: 'all'
   });
 

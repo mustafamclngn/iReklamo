@@ -122,6 +122,7 @@ def login_user():
     # create: refresh token
     refresh_token = jwt.encode(
         {
+            "role": role,
             "user_id": user_id,
             "token_version":token_version,
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7)
@@ -151,6 +152,7 @@ def login_user():
             "first_name": user_data["first_name"],
             "last_name": user_data["last_name"],
             "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
+            "contact_number": user_data.get("contact_number"),
             "barangay_id": user_data.get("barangay_id")
         },
         }))
@@ -202,7 +204,7 @@ def refresh_token():
         Config.JWT_SECRET_KEY,
         algorithm="HS256"
     )
-
+        
         return jsonify({
             "accessToken": new_access_token,
             "role": role,

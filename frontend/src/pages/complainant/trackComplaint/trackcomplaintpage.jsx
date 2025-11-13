@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import complaintsApi from '../../../api/complaintsAPI';
+import useComplaintsApi from '../../../api/complaintsAPI';
 
 const CU_TrackComplaintPage = () => {
   const [complaintId, setComplaintId] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const complaintsApi = useComplaintsApi();
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
