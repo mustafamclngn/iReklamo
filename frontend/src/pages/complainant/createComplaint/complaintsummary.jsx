@@ -94,13 +94,7 @@ export default function CU_ComplaintSummaryPage() {
             //start change
             const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
             const complainantId = resData.complainant_id || resData.complainantId || null;
-            
-            // Add a check in case the backend fails to send the code
-            if (!complaintCode) {
-                console.error("Submission successful, but backend did not return a 'complaint_code'.", resData);
-                alert("Submission successful, but failed to retrieve tracking code. Please contact support.");
-                return;
-            }
+        
 
             // Build a user-facing tracking code in the format CMP-YYYYMMDD-NNNN
             // where NNNN is the complaint id padded to 4 digits
@@ -111,6 +105,13 @@ export default function CU_ComplaintSummaryPage() {
             const datePart = `${yyyy}${mm}${dd}`;
             const seqPart = complaintId ? String(complaintId).padStart(4, '0') : '0000';
             const complaintCode = `CMP-${datePart}-${seqPart}`;
+
+            // Add a check in case the backend fails to send the code
+            if (!complaintCode) {
+                console.error("Submission successful, but backend did not return a 'complaint_code'.", resData);
+                alert("Submission successful, but failed to retrieve tracking code. Please contact support.");
+                return;
+            }
 
             // Reset form and close modal, then navigate passing tracking info in location state
             updateFormData(initialFormData);
