@@ -1,7 +1,9 @@
 from flask_cors import CORS
+from flask_mail import Mail
 
 # Initialize extensions
 cors = CORS()
+mail = Mail()
 
 def init_extensions(app):
     """Initialize all Flask extensions"""
@@ -21,4 +23,7 @@ def init_extensions(app):
                 }
             }
     )
+
+    # Initialize Flask-Mail
+    mail.init_app(app)
 

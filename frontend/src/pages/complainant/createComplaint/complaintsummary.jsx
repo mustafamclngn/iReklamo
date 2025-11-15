@@ -94,17 +94,8 @@ export default function CU_ComplaintSummaryPage() {
             //start change
             const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
             const complainantId = resData.complainant_id || resData.complainantId || null;
-        
-
-            // Build a user-facing tracking code in the format CMP-YYYYMMDD-NNNN
-            // where NNNN is the complaint id padded to 4 digits
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const datePart = `${yyyy}${mm}${dd}`;
-            const seqPart = complaintId ? String(complaintId).padStart(4, '0') : '0000';
-            const complaintCode = `CMP-${datePart}-${seqPart}`;
+            const complaintCode = resData.complaint_code || resData.tracking_code || null;
+            //end change
 
             // Add a check in case the backend fails to send the code
             if (!complaintCode) {
