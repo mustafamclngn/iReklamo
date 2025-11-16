@@ -25,6 +25,10 @@ def generate_complaint_id(cursor):
     sequential = str(count_today).zfill(4)  # Pad to 4 digits, e.g., 0001
     return f"CMP-{today}-{sequential}"
 
+def empty_to_null(value):
+    return value if value not in ("", None) else None
+
+
 # TO CREATE COMPLAINT
 @complaints_bp.route('/create_complaint', methods=['POST'])
 def create_complaint():
@@ -42,17 +46,18 @@ def create_complaint():
 
         # Insert complainant
         cursor.execute("""
-            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id, is_anonymous)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
-            data['first_name'],
-            data['last_name'],
-            data['sex'],
-            data['age'],
+            empty_to_null(data['first_name']),
+            empty_to_null(data['last_name']),
+            empty_to_null(data['sex']),
+            empty_to_null(data['age']),
             data['contact_number'],
             data['email'],
-            int(data.get('barangay'))
+            int(data.get('barangay')),
+            data.get('is_anonymous')
         ))
         complainant_id = cursor.fetchone()['id']
 
@@ -80,7 +85,7 @@ def create_complaint():
             data['case_type'],
             data['description'],
             data['full_address'],
-            data['specific_location'],
+            empty_to_null(data['specific_location']),
             complainant_id,
             int(data.get('barangay')),
             assigned_official_id
@@ -93,14 +98,26 @@ def create_complaint():
         # Send confirmation email (safe: exceptions caught)
         try:
             if mail:
+                # Build greeting
+                first = data.get("first_name")
+                last = data.get("last_name")
+                is_anonymous = data.get("is_anonymous")
+
+                if is_anonymous or (not first and not last):
+                    greeting_name = "anonymous"
+                else:
+                    greeting_name = " ".join(p for p in [first, last] if p)
+                    
                 message = Message(
                     subject='Complaint Submitted Successfully',
                     sender='noreply@ireklamo.ph',
                     recipients=[data['email']],
-                    body=f'Hello {data["first_name"]} {data["last_name"]},\n\n'
-                         f'Your complaint has been submitted successfully.\n'
-                         f'Complaint Tracking ID: {complaint_id_str}\n\n'
-                         f'Thank you for using iReklamo!'
+                    body=f'Hello {greeting_name},\n\n'
+                         f'Your complaint has been submitted successfully to iReklamo.\n\n'
+                         f'Tracking ID: {complaint_id_str}\n\n'
+                         f'You may use this tracking ID to follow up on the status of your complaint.\n\n'
+                         f'Thank you for helping us improve our community!\n'
+                         f'– iReklamo Support Team'
                 )
                 mail.send(message)
         except Exception as mail_err:
@@ -123,6 +140,7 @@ def create_complaint():
     finally:
         if conn:
             conn.close()
+
 
 
 # LIST OF ALL COMPLAINTS

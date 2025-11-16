@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../contexts/formcontext.jsx';
 import { ArrowRight, CircleCheck } from "lucide-react";
+import '../../../assets/css/checkbox.css';
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -158,22 +159,39 @@ const CU_FileComplaintPage = () => {
                                     {errors.contact_number && <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>}
                                 </div>
 
-                                {/* sex */}
-                                <div className="flex flex-col mt-6">
-                                    <label className="text-base font-medium mb-2">Sex:</label>
-                                    <select
-                                        value={formData.sex}
-                                        onChange={(e) => {
-                                            updateFormData({ sex: e.target.value });
-                                            if (errors.sex) setErrors(prev => ({ ...prev, sex: ''}));
-                                        }}
-                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.sex ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
-                                    >
-                                        <option value="">Select Sex</option>
-                                        <option>Female</option>
-                                        <option>Male</option>
-                                    </select>
-                                    {errors.sex && <p className="text-red-500 text-sm mt-1">{errors.sex}</p>}
+                                {/* sex and age*/}
+                                <div className="flex flex-row flex-wrap gap-5 mt-6">
+                                    <div className="flex flex-col flex-1">
+                                        <label className="text-base font-medium mb-2">Sex:</label>
+                                        <select
+                                            value={formData.sex}
+                                            onChange={(e) => {
+                                                updateFormData({ sex: e.target.value });
+                                                if (errors.sex) setErrors(prev => ({ ...prev, sex: ''}));
+                                            }}
+                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.sex ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        >
+                                            <option value="">Select Sex</option>
+                                            <option>Female</option>
+                                            <option>Male</option>
+                                        </select>
+                                        {errors.sex && <p className="text-red-500 text-sm mt-1">{errors.sex}</p>}
+                                    </div>
+                                    <div className="flex flex-col flex-1">
+                                        <label className="text-base font-medium mb-2">Age:</label>
+                                        <input
+                                            type="number"
+                                            min='1' max='100'
+                                            value={formData.age}
+                                            onChange={(e) => {
+                                                updateFormData({ age: e.target.value });
+                                                if (errors.age) setErrors(prev => ({ ...prev, age: ''}));
+                                            }}
+                                            placeholder='Enter your age'
+                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.age ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        />
+                                        {errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
+                                    </div>
                                 </div>
 
                                 {/* email */}
@@ -192,22 +210,28 @@ const CU_FileComplaintPage = () => {
                                     {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                                 </div>
 
-                                {/* age */}
-                                <div className="flex flex-col mt-6">
-                                    <label className="text-base font-medium mb-2">Age:</label>
-                                    <input
-                                        type="number"
-                                        min='1' max='100'
-                                        value={formData.age}
-                                        onChange={(e) => {
-                                            updateFormData({ age: e.target.value });
-                                            if (errors.age) setErrors(prev => ({ ...prev, age: ''}));
-                                        }}
-                                        placeholder='Enter your age'
-                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.age ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
-                                    />
-                                    {errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
-                                </div>
+                            </div>
+
+                            <div class="checkbox-wrapper-46 mt-7 px-5">
+                                <h1 className='font-semibold mb-2'>Identity option: </h1>
+                                <input 
+                                    type="checkbox" 
+                                    id="cbx-46" 
+                                    class="inp-cbx" 
+                                    name='is_anonymous' 
+                                    checked={formData.is_anonymous}
+                                    onChange={(e) =>
+                                        updateFormData({
+                                            ...formData,
+                                            is_anonymous: e.target.checked,  // true or false
+                                        })
+                                    }/>
+                                <label for="cbx-46" class="cbx"
+                                    ><span>
+                                    <svg viewBox="0 0 12 10" height="10px" width="12px">
+                                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span
+                                    ><span>Submit Complaint Anonymously</span>
+                                </label>
                             </div>
                         </div>
                         

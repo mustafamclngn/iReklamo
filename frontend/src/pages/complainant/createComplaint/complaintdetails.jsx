@@ -16,8 +16,6 @@ const CU_FileComplaintPage = () => {
         if (!formData.case_type) missing.case_type = 'Required';
         if (!formData.description) missing.description = 'Required';
         if (!formData.full_address) missing.full_address = 'Required';
-        // REQUIRED NI??
-        // if (!formData.specific_location) missing.specific_location = 'Required';
 
         if (Object.keys(missing).length > 0) {
             setErrors(missing);
@@ -70,7 +68,7 @@ const CU_FileComplaintPage = () => {
                         {/* form */}
                         <div>
                             <div className="flex flex-col px-5 text-black">
-                                <label className="text-base font-medium mb-2">Complaint Title:</label>
+                                <label className="text-base font-medium mb-2">Complaint Title: *</label>
                                 <input
                                     type="text"
                                     placeholder="Brief description of your complaint"
@@ -83,7 +81,7 @@ const CU_FileComplaintPage = () => {
                                 />
                                 {errors.complaint_title && <p className="text-red-500 text-sm mt-1">{errors.complaint_title}</p>}
 
-                                <label className="text-base font-medium mb-2 mt-6">Case Type:</label>
+                                <label className="text-base font-medium mb-2 mt-6">Case Type: *</label>
                                 <select
                                     value={formData.case_type}
                                     onChange={(e) => {
@@ -92,24 +90,19 @@ const CU_FileComplaintPage = () => {
                                     }}
                                     className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.case_type ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 >
-                                    <option value="">Select Case Type</option>
-                                    <option>Damaged Roads</option>
-                                    <option>Garbage Collection Problem</option>
-                                    <option>Water Supply Issue</option>
-                                    <option>Illegal Dumping</option>
-                                    <option>Noise Complaint</option>
-                                    <option>Public Disturbance</option>
-                                    <option>Barangay Personnel Misconduct</option>
-                                    <option>Delayed Government Service</option>
-                                    <option>Corruption or Bribery</option>
-                                    <option>Business Overpricing</option>
-                                    <option>Fraudulent Transaction</option>
-                                    <option>Violence or Abuse Report</option>
-                                    <option>Other</option>
+                                    <option value="">Select Category</option>
+                                    <option value="Infrastructure & Utilities">Infrastructure & Utilities</option>
+                                    <option value="Environment & Sanitation">Environment & Sanitation</option>
+                                    <option value="Peace & Order">Peace & Order</option>
+                                    <option value="Government Service & Conduct">Government Service & Conduct</option>
+                                    <option value="Consumer & Business Complaints">Consumer & Business Complaints</option>
+                                    <option value="Public Safety & Welfare">Public Safety & Welfare</option>
+                                    <option value="Other">Other</option>
+
                                 </select>
                                 {errors.case_type && <p className="text-red-500 text-sm mt-1">{errors.case_type}</p>}
 
-                                <label className="text-base font-medium mb-2 mt-6">Description:</label>
+                                <label className="text-base font-medium mb-2 mt-6">Description: *</label>
                                 <textarea
                                     placeholder="Please provide a detailed description of the issue, including all the relevant and necessary information in the complaint"
                                     value={formData.description}
@@ -121,7 +114,7 @@ const CU_FileComplaintPage = () => {
                                 />
                                 {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
 
-                                <label className="text-base font-medium mb-2 mt-6">Full Address:</label>
+                                <label className="text-base font-medium mb-2 mt-6">Full Address: *</label>
                                 <input
                                     type="text"
                                     placeholder="Provide the complete address where the incident took place"

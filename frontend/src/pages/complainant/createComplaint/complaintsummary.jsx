@@ -52,6 +52,7 @@ export default function CU_ComplaintSummaryPage() {
         contact_number: "",
         email: "",
         barangay: "",
+        is_anonymous: false,
         complaint_title: "",
         case_type: "",
         description: "",
@@ -177,6 +178,12 @@ export default function CU_ComplaintSummaryPage() {
                                 {/* info */}
                             <div className='grid grid-cols-2 gap-x-20 ml-12 text-base'>
                                 <div className='flex flex-col gap-2'>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Anonymous</span>
+                                        <span className='font-medium'>
+                                            {formData.is_anonymous ? "Yes" : "No"}
+                                        </span>
+                                    </div>
                                     <div className='flex flex-row'>
                                         <span className='text-gray-600 w-40'>First name</span>
                                         <span className='font-medium'>{formData.first_name || "Not provided"}</span>
