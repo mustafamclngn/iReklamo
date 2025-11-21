@@ -91,9 +91,11 @@ export default function CU_ComplaintSummaryPage() {
                 return;
             }
 
-            const complaintCode = resData.complaint_code || resData.complaintCode;
-            const complaintId = resData.complaint_id || resData.complaintId;
-            const complainantId = resData.complainant_id || resData.complainantId;
+            //start change
+            const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
+            const complainantId = resData.complainant_id || resData.complainantId || null;
+            const complaintCode = resData.complaint_code || resData.tracking_code || null;
+            //end change
 
             // Add a check in case the backend fails to send the code
             if (!complaintCode) {
