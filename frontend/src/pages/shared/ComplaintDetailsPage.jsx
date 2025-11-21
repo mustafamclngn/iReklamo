@@ -90,7 +90,7 @@ const ComplaintDetailsPage = () => {
     setIsAssignOpen(true);
   };  
 
-  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh]);
+  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
   const fetchComplaintDetails = async () => {
     setLoading(true);
     if (!complaint_id || isNaN(Number(complaint_id))) {
