@@ -51,7 +51,7 @@ const OfficialDetailsPage = () => {
 
     fetchOfficialDetails();
     fetchCases();
-  }, [user_id, refresh]);
+  }, [user_id, refresh, isAssignOpen]);
 
   const fetchOfficialDetails = async () => {
     try {
