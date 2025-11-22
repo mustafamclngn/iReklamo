@@ -41,7 +41,6 @@ import BC_AccountPage from "./pages/brgyCap/accountpage.jsx";
 // Import barangay official pages
 import BO_DashboardPage from "./pages/brgyOff/dashboardpage.jsx";
 import BO_AssignedComplaintsPage from "./pages/brgyOff/assignedcomplaintspage.jsx";
-import BO_BarangaysPage from "./pages/brgyOff/barangayspage.jsx";
 import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
 // Import complainant pages
@@ -139,7 +138,6 @@ function App() {
             <Route path="dashboard" element={<BO_DashboardPage />} />
             <Route path="assigned-complaints" element={<BO_AssignedComplaintsPage />} />
             <Route path="assigned-complaints/:complaint_id" element={<ComplaintDetailsPage />} />
-            <Route path="barangays" element={<BO_BarangaysPage />} />
             <Route path="account" element={<BO_AccountPage />} />
             {/* invalid routes */}
             <Route path="*" element={ <Navigate to="/brgyoff/dashboard" replace />} />
