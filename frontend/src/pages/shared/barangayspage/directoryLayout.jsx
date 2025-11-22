@@ -48,7 +48,7 @@ const DirectoryLayout = ({ children }) => {
           </ul>
         </aside>
 
-        <main className="flex-1 pt-8 pr-8">{children}</main>
+        <main className="flex-1 pt-8 pr-8 pb-12">{children}</main>
       </div>
     </div>
   );
