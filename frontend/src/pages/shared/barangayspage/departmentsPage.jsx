@@ -197,12 +197,12 @@ const DepartmentsPage = () => {
           />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-lg mb-2">{department.name}</h3>
+          <h3 className="font-black text-2xl mb-2">{department.name}</h3>
           {department.head && (
-            <p className="text-md text-black mb-1">{department.head}</p>
+            <p className="text-xl text-black mb-1">{department.head}</p>
           )}
           {department.contact && (
-            <p className="text-md text-black font-semibold mb-1">
+            <p className="text-xl text-black font-semibold mb-1">
               {department.contact}
             </p>
           )}
