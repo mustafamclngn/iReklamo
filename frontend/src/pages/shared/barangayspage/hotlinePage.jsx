@@ -174,7 +174,7 @@ const HotlinePage = () => {
   };
 
   const HotlineCard = ({ hotline }) => (
-    <div className="bg-gray-200 rounded-xl shadow-lg hover:shadow-lg transition-transform duration-300 overflow-hidden border border-gray-300 relative hover:scale-105">
+    <div className="bg-white rounded-xl shadow-lg hover:shadow-lg transition-transform duration-300 overflow-hidden border border-gray-300 relative hover:scale-105">
       <div className="flex items-center">
         <div className="w-40 h-40 flex-shrink-0 bg-teal-500 flex items-center justify-center p-6">
           <img
@@ -184,7 +184,7 @@ const HotlinePage = () => {
           />
         </div>
         <div className="flex-1 p-6">
-          <h3 className="font-bold text-lg mb-2">{hotline.name}</h3>
+          <h3 className="font-black text-xl mb-2">{hotline.name}</h3>
           <p className="text-teal-500 text-lg font-bold">{hotline.contact}</p>
         </div>
       </div>
