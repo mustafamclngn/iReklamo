@@ -170,7 +170,7 @@ const CreateAdmin = ({ isOpen, onClose }) => {
                   setIsErrorOpen(true);
               } 
               else if (err.response?.status === 409) {
-                  setErrMsg('Username Taken');
+                  setErrMsg(err.response.data.error);
                   setIsErrorOpen(true);
               }
               else {
@@ -388,7 +388,6 @@ const CreateAdmin = ({ isOpen, onClose }) => {
       <ErrorModal
         isOpen={isErrorOpen}
         onClose={() => setIsErrorOpen(false)}
-        onConfirm={onClose}
         message={errMsg}
       />
     </>

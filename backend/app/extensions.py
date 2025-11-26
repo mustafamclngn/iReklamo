@@ -19,7 +19,7 @@ def init_extensions(app):
                     "credentials": "true",
                     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
                     "allow_headers": ["Content-Type", "Authorization"],
-                    "supports_credentials":True,  
+                    "supports_credentials":"True",  
                 }
             }
     )

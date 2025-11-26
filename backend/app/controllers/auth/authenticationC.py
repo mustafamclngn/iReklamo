@@ -1,4 +1,5 @@
-from flask import make_response, request, jsonify
+from flask import current_app, make_response, request, jsonify
+from flask_mail import Message
 from app.config import Config
 from werkzeug.security import check_password_hash, generate_password_hash
 import random
@@ -55,16 +56,37 @@ def register_user():
         "barangay_id": int(barangay),
         "position": position,
         "role_id": int(role),
-        "user_password": generate_password_hash("admin123")
-        # "user_password": random_pwd # Uncomment for randomized password, email notification system
+        # "user_password": generate_password_hash("admin123")
+        "user_password": random_pwd # Uncomment for randomized password, email notification system
     })
+
+    email_details(username, email, random_pwd)
 
     return jsonify({
         "message": "User registered successfully",
         "username": username,
         "email": email,
-        "temporary_password": random_str
+        # "temporary_password": random_str
     }), 201
+
+def email_details(username, email, random_pwd):
+    mail = current_app.extensions.get('mail')
+    print("Sending email")
+    try:
+        if mail:
+            message = Message(
+                subject='User Created Successfully',
+                sender='noreply@ireklamo.ph',
+                recipients=[email],
+                body=f'Hello {username},\n\n'
+                        f'Your account has been created successfully.\n'
+                        f'A default randomized password has been generated for your account: {random_pwd}\n\n'
+                        f'You may change this password in your Accounts page.'
+                        f'Welcome to iReklamo!'
+            )
+            mail.send(message)
+    except Exception as mail_err:
+        print(f"Warning: Failed to send email - {mail_err}")
 
 # ========================== 
 # USER LOGIN

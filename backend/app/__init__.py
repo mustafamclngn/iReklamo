@@ -39,6 +39,7 @@ def create_app(config_name=None):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(userinfo_bp)
 
+    app.config['MAIL_DEBUG'] = True
 
     # Serve static files (profile pictures)
     STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
