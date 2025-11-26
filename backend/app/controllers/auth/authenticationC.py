@@ -9,6 +9,7 @@ import datetime
 from app.models.user import User
 from app.controllers.auth.viewUserC import view_user, view_user_nameemail
 from app.functions.Update import Update
+from app.controllers.auth.emailC import email_details
 
 # ========================== 
 # USER REGISTER
@@ -60,7 +61,7 @@ def register_user():
         "user_password": random_pwd # Uncomment for randomized password, email notification system
     })
 
-    email_details(username, email, random_pwd)
+    email_details(username, email, random_str)
 
     return jsonify({
         "message": "User registered successfully",
@@ -68,25 +69,6 @@ def register_user():
         "email": email,
         # "temporary_password": random_str
     }), 201
-
-def email_details(username, email, random_pwd):
-    mail = current_app.extensions.get('mail')
-    print("Sending email")
-    try:
-        if mail:
-            message = Message(
-                subject='User Created Successfully',
-                sender='noreply@ireklamo.ph',
-                recipients=[email],
-                body=f'Hello {username},\n\n'
-                        f'Your account has been created successfully.\n'
-                        f'A default randomized password has been generated for your account: {random_pwd}\n\n'
-                        f'You may change this password in your Accounts page.'
-                        f'Welcome to iReklamo!'
-            )
-            mail.send(message)
-    except Exception as mail_err:
-        print(f"Warning: Failed to send email - {mail_err}")
 
 # ========================== 
 # USER LOGIN
