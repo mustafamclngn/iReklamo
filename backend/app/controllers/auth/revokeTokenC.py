@@ -4,16 +4,44 @@ import jwt
 from app.functions.Select import Select
 from app.functions.Update import Update
 from app.config import Config
+from app.models.user import User
+
+
+# ========================== 
+# REVOKE TOKEN
+# ==========
+def revoke_token(existing_user): 
+
+    # ==============
+    # user details
+    user = User()
+    user_id = existing_user.get("user_id")
+
+    try: 
+
+        # ==============
+        # updated detalls
+        user_updates = {
+            "refresh_token": None,
+            "token_version": existing_user.get("token_version", 0) + 1
+        }
+
+        user.edit(user_id, user_updates)
+            
+    except Exception as e:
+        print(f"Server error: {e}")
+        return jsonify({
+            "error": "Server error. Please try again later."
+        }), 500
 
 # ========================== 
 # USER LOGOUT
 # ==========
-def revoke_token():
+def logout_user():
 
     # ==============
     # functions
     selector = Select()
-    updater = Update()
     
     # ==============
     # check refresh token
@@ -23,31 +51,22 @@ def revoke_token():
 
     # ==============
     # fetch user data dict
-    user = ( selector
-                    .table("users")
-                    .search(tag="refresh_token", key=refresh_token)
-                    .execute()
-                    .retDict()
-            )
+    existing_user = ( selector
+                            .table("users")
+                            .search(tag="refresh_token", key=refresh_token)
+                            .execute()
+                            .retDict())
 
     # ==============
     # user not found
-    if not user:
+    if not existing_user:
         response = make_response('', 204)
         response.set_cookie('refreshToken', '', httponly=True, samesite='None', secure=True, max_age=0)
         return response
 
     # ==============
-    # user found
-    user_id = user["user_id"]
-    token_version = user.get("token_version", 0) + 1
-
-    # ==============
     # update token status
-    updater.table("users").set({
-        "refresh_token": None,
-        "token_version": token_version,
-    }).where(whereCol="user_id", whereVal=user_id).execute()
+    revoke_token(existing_user)
 
     # ==============
     # update cookie

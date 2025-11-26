@@ -2,6 +2,7 @@ from flask import jsonify, request
 from psycopg2 import IntegrityError
 from app.models.user import User
 from app.functions.Update import Update
+from app.controllers.auth.revokeTokenC import revoke_token
 
 # ========================== 
 # USER DELETE
@@ -27,12 +28,7 @@ def delete_user(user_id):
                                     .where(whereCol="assigned_official_id", whereVal=user_id)\
                                     .execute()
             
-            user_updates = {
-                "refresh_token": None,
-                "token_version": existing_user.get("token_version", 0) + 1
-            }
-
-            user.edit(user_id, user_updates)
+            revoke_token(existing_user)
 
         user.delete(user_id)
         return jsonify({"message": "Account revoked successfully"}), 201
