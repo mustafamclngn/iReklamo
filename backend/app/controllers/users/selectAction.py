@@ -81,6 +81,7 @@ def user_forgot_pwd():
 
     try:
         reset_token = generate_reset_token(user["user_id"])
+        print("RESET TOKEN", reset_token)
         user_name = user.get("user_name")
         user_email = user.get("email")
 

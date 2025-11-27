@@ -10,12 +10,16 @@ from app.models.user import User
 # ========================== 
 # REVOKE TOKEN
 # ==========
-def revoke_token(existing_user): 
+def revoke_token(existing_user = None, user_id = None): 
 
     # ==============
     # user details
-    user = User()
-    user_id = existing_user.get("user_id")
+    if existing_user is not None:
+        user = User()
+        user_id = existing_user.get("user_id")
+    elif user_id is not None:
+        user = User()
+        existing_user = user.getID(user_id)
 
     try: 
 
@@ -66,7 +70,7 @@ def logout_user():
 
     # ==============
     # update token status
-    revoke_token(existing_user)
+    revoke_token(existing_user=existing_user)
 
     # ==============
     # update cookie

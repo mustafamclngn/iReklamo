@@ -6,6 +6,7 @@ from app.models.user import User
 from app.functions.Update import Update
 from werkzeug.security import generate_password_hash
 from app.config import Config
+from app.controllers.auth.revokeTokenC import revoke_token
 
 # ========================== 
 # USER UPDATE
@@ -85,7 +86,11 @@ def reset_password():
         if decoded.get("type") != "password_reset":
             return jsonify({"error": "Invalid token type"}), 400
 
+        print(decoded)
         user_id = decoded.get("user_id")
+        print("USER ID FROM DECODED", user_id)
+
+        revoke_token(user_id=user_id)
 
         hashed = generate_password_hash(new_pwd)
 

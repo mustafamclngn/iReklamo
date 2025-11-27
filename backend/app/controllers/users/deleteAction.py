@@ -28,7 +28,7 @@ def delete_user(user_id):
                                     .where(whereCol="assigned_official_id", whereVal=user_id)\
                                     .execute()
             
-            revoke_token(existing_user)
+            revoke_token(existing_user=existing_user)
 
         user.delete(user_id)
         return jsonify({"message": "Account revoked successfully"}), 201
