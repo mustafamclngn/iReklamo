@@ -54,6 +54,24 @@
   margin-bottom: 1.3rem;
 }
 
+.sessionmessage {
+  margin: 20px auto;
+  color: #686868;
+}
+
+.forget_password {
+  margin-right: auto;
+  color: #ff2828;
+  font-size: small;
+}
+
+/* Input wrapper */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.3rem;
+}
+
 /* Input fields */
 .auth-input {
   width: 100%;

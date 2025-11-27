@@ -6,9 +6,9 @@
 // =============
 // Hooks and context
 import { useRef, useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth.jsx";
 import useLogin from "../../hooks/useLogin.jsx"; 
-import { Link, useNavigate, useLocation } from "react-router-dom";
 import IliganLogo from "../../components/navheaders/iliganLogo.jsx";
 import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
@@ -130,8 +130,18 @@ const LogInPage = () => {
                 console.log(err?.response?.data)
                 setErrMsg(err?.response?.data?.error);
                 setIsErrorOpen(true);
+                setIsErrorOpen(true)
+            } else if (err.response?.status) {
+                if(err?.response?.data?.error === "Incorrect password") {
+                    console.log("Password error")
+                    setincPwd(true);
+                }
+                console.log(err?.response?.data)
+                setErrMsg(err?.response?.data?.error);
+                setIsErrorOpen(true);
             } else {
                 setErrMsg('Login Failed');
+                setIsErrorOpen(true)
                 setIsErrorOpen(true)
             }
             errRef.current.focus();
