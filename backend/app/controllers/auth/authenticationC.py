@@ -98,7 +98,7 @@ def login_user():
     print("pwd:", pwd)
 
     if not check_password_hash(stored_hash, pwd):
-        return jsonify({"error": "Invalid password"}), 401
+        return jsonify({"error": "Incorrect password"}), 401
     
     # ===============
     # fetch: role, token_version, id

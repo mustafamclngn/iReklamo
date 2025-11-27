@@ -1,13 +1,8 @@
 import './modal.css'
 
-const ErrorModal = ({ isOpen, onClose, onConfirm, message }) => {
+const ErrorModal = ({ isOpen, onClose, message }) => {
 
   if (!isOpen) return null;
-
-  const handleConfirm = () => {
-    onClose();
-    onConfirm();
-  }
 
   return (
     <div className="popup-overlay">
@@ -22,7 +17,7 @@ const ErrorModal = ({ isOpen, onClose, onConfirm, message }) => {
           </div>
 
           <div className="popup-footer">
-              <button type="button" className="revoke-button" onClick={handleConfirm}>
+              <button type="button" className="revoke-button" onClick={onClose}>
                 Okay 
               </button>
           </div>

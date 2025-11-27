@@ -244,6 +244,7 @@ import IliganLogo from "../../components/navheaders/iliganLogo.jsx";
 import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 import "./auth.css";
+import useUsersApi from '../../api/usersApi.js'
 
 // ==========
 // IMPORTS
@@ -264,6 +265,7 @@ const LogInPage = () => {
     // Navigation
     const navigate = useNavigate();
     const location = useLocation();
+    const { forgotPassword } = useUsersApi();
     const from = location.state?.from?.pathname || "/"
 
     // =============
@@ -278,6 +280,7 @@ const LogInPage = () => {
     // =============
     // Password states
     const [pwd, setPwd] = useState('');
+    const [incPwd, setincPwd] = useState(false)
 
     // =============
       // Error and Success messages 
@@ -349,15 +352,47 @@ const LogInPage = () => {
             if (!err?.response) {
                 console.log(err)
                 setErrMsg('No Server Response');
-            } else if (err.response?.status === 400) {
-                setErrMsg('Missing Username or Password');
-            } else if (err.response?.status === 401) {
-                setErrMsg('Unauthorized');
+                setIsErrorOpen(true)
+            } else if (err.response?.status) {
+                if(err?.response?.data?.error === "Incorrect password") {
+                    console.log("Password error")
+                    setincPwd(true);
+                }
+                console.log(err?.response?.data)
+                setErrMsg(err?.response?.data?.error);
+                setIsErrorOpen(true);
             } else {
                 setErrMsg('Login Failed');
+                setIsErrorOpen(true)
             }
             errRef.current.focus();
         }
+    }
+
+    // =============
+    // Forgot Password handler
+    const handleForgot = async (e) => {
+        e.preventDefault();
+        console.log("forgor");
+        try{
+            const response = await forgotPassword(identity)
+            if (response.success) {
+                setSuccessMessage(response?.data?.message)
+                setIsSuccessOpen(true)
+            }
+        } catch (err) {
+            if (!err?.response) {
+                console.log(err)
+                setErrMsg('No Server Response');
+                setIsErrorOpen(true)
+            }
+            else if (err.response?.status) {
+                console.log(err?.response?.data)
+                setErrMsg(err?.response?.data?.error);
+                setIsErrorOpen(true);
+            } 
+        }
+        
     }
 
 // ==========
@@ -373,7 +408,6 @@ const LogInPage = () => {
         <div className="auth-container">
 
             <IliganLogo scale={1.65} mode="login"/>
-
             <p className="sessionmessage">Sign in to start your session</p>
 
             {/* ========== */}
@@ -432,8 +466,14 @@ const LogInPage = () => {
                             Login
                     </button>
                 </div>
-                {/* ========== */}
+                {/* ========== */}     
                 
+                {/* ========== */}
+                {/* Forgot Password */}
+                {incPwd && (
+                    <p className="forget_password" onClick={handleForgot}>Forgot Password?</p>
+                )}
+                {/* ========== */}           
             </form>
         </div>
 
@@ -447,7 +487,6 @@ const LogInPage = () => {
         <ErrorModal
             isOpen={isErrorOpen}
             onClose={() => setIsErrorOpen(false)}
-            onConfirm={() => setIsErrorOpen(false)}
             message={errMsg}
         />
     </>
