@@ -1,4 +1,5 @@
-from flask import make_response, request, jsonify
+from flask import current_app, make_response, request, jsonify
+from flask_mail import Message
 from app.config import Config
 from werkzeug.security import check_password_hash, generate_password_hash
 import random
@@ -8,6 +9,7 @@ import datetime
 from app.models.user import User
 from app.controllers.auth.viewUserC import view_user, view_user_nameemail
 from app.functions.Update import Update
+from app.controllers.auth.emailC import email_details
 
 # ========================== 
 # USER REGISTER
@@ -55,15 +57,17 @@ def register_user():
         "barangay_id": int(barangay),
         "position": position,
         "role_id": int(role),
-        "user_password": generate_password_hash("admin123")
-        # "user_password": random_pwd # Uncomment for randomized password, email notification system
+        # "user_password": generate_password_hash("admin123")
+        "user_password": random_pwd # Uncomment for randomized password, email notification system
     })
+
+    email_details(username, email, random_str)
 
     return jsonify({
         "message": "User registered successfully",
         "username": username,
         "email": email,
-        "temporary_password": random_str
+        # "temporary_password": random_str
     }), 201
 
 # ========================== 

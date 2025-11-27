@@ -1,7 +1,9 @@
 from flask_cors import CORS
+from flask_mail import Mail
 
 # Initialize extensions
 cors = CORS()
+mail = Mail()
 
 def init_extensions(app):
     """Initialize all Flask extensions"""
@@ -17,8 +19,11 @@ def init_extensions(app):
                     "credentials": "true",
                     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
                     "allow_headers": ["Content-Type", "Authorization"],
-                    "supports_credentials":True,  
+                    "supports_credentials":"True",  
                 }
             }
     )
+
+    # Initialize Flask-Mail
+    mail.init_app(app)
 

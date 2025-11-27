@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
 from psycopg2 import IntegrityError
 from app.models.user import User
 
