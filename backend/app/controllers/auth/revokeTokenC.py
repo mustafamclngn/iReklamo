@@ -1,6 +1,9 @@
+import datetime
 from flask import jsonify, request, make_response
+import jwt
 from app.functions.Select import Select
 from app.functions.Update import Update
+from app.config import Config
 
 # ========================== 
 # USER LOGOUT
@@ -51,3 +54,69 @@ def revoke_token():
     response = make_response(jsonify({"message": "User logged out and tokens revoked"}), 200)
     response.set_cookie('refreshToken', '', httponly=True, samesite='None', secure=True, max_age=0)
     return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+# ========================== 
+# FORGOTTEN PASSWORD RESET TOKEN
+# ==========
+def generate_reset_token(user_id):
+    return jwt.encode(
+        {
+            "user_id": user_id,
+            "type": "password_reset",
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=30)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )

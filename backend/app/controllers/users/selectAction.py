@@ -1,11 +1,9 @@
 import math
-from flask import make_response, request, jsonify
+from flask import request, jsonify
 from app.functions import Select
 from app.models.user import User
 from app.controllers.auth.emailC import email_newpwd
-from werkzeug.security import check_password_hash, generate_password_hash
-import random
-import string
+from app.controllers.auth.revokeTokenC import generate_reset_token
 
 # ========================== 
 # USER LIST
@@ -72,19 +70,23 @@ def view_role(user_id):
 # ========================== 
 # USER PASSWORD FORGOT
 # ==========
-def userForgotPwd(identity):
-    user_details = view_user_nameemail(identity)
+def user_forgot_pwd():
+    
+    data = request.get_json()
+    identity = data.get("identity")
+
+    user = view_user_nameemail(identity)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
     try:
-        user_name = user_details.get("user_name")
-        user_email = user_details.get("email")
+        reset_token = generate_reset_token(user["user_id"])
+        user_name = user.get("user_name")
+        user_email = user.get("email")
 
-        # ===============
-        # generate random password
-        random_str = ''.join(random.choices(string.ascii_letters, k=15))
-        random_pwd = generate_password_hash(random_str)
+        reset_link = f"http://localhost:5173/auth/reset-password?token={reset_token}"
 
-        email_newpwd(user_name, user_email, random_str)
+        email_newpwd(user_name, user_email, reset_link)
 
         return jsonify({
             "message": "New temporary password has been sent to your email.",

@@ -14,6 +14,7 @@ import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 import "./auth.css";
 import useUsersApi from '../../api/usersApi.js'
+import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
 
 // ==========
 // IMPORTS
@@ -34,7 +35,6 @@ const LogInPage = () => {
     // Navigation
     const navigate = useNavigate();
     const location = useLocation();
-    const { forgotPassword } = useUsersApi();
     const from = location.state?.from?.pathname || "/"
 
     // =============
@@ -50,6 +50,7 @@ const LogInPage = () => {
     // Password states
     const [pwd, setPwd] = useState('');
     const [incPwd, setincPwd] = useState(false)
+    const { forgotPassword } = useUsersApi();
 
     // =============
       // Error and Success messages 
@@ -57,6 +58,7 @@ const LogInPage = () => {
       const [errMsg, setErrMsg] = useState('');
       const [isSuccessOpen, setIsSuccessOpen] = useState(false);
       const [successMessage, setSuccessMessage] = useState('');
+      const [loading, setLoading] =useState(false)
 
     // =============
     // State update
@@ -152,6 +154,7 @@ const LogInPage = () => {
     // Forgot Password handler
     const handleForgot = async (e) => {
         e.preventDefault();
+        setLoading(true)
         try{
             const response = await forgotPassword(identity)
             if (response.success) {
@@ -169,6 +172,9 @@ const LogInPage = () => {
                 setErrMsg(err?.response?.data?.error);
                 setIsErrorOpen(true);
             } 
+        } finally {
+            setLoading(false);
+            setincPwd(false);
         }
         
     }
@@ -248,8 +254,13 @@ const LogInPage = () => {
                 
                 {/* ========== */}
                 {/* Forgot Password */}
-                {incPwd && (
-                    <p className="forget_password" onClick={handleForgot}>Forgot Password?</p>
+                {incPwd && !loading && (
+                    <p className="forget_password" onClick={handleForgot}>
+                        Forgot Password?
+                    </p>
+                )}
+                {loading && incPwd && (
+                    <LoadingSpinner message="Sending password reset request..." scale={0.75}/>
                 )}
                 {/* ========== */}           
             </form>

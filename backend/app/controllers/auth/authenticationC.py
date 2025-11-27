@@ -1,5 +1,4 @@
 from flask import current_app, make_response, request, jsonify
-from flask_mail import Message
 from app.config import Config
 from werkzeug.security import check_password_hash, generate_password_hash
 import random

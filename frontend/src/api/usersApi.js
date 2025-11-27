@@ -13,7 +13,7 @@ const useUsersApi = () => {
 
   const forgotPassword = async (identity) => {
 
-    return axiosPrivate.patch(`/api/user/${identity}/forgot-password`);
+    return axiosPrivate.patch(`/api/user/forgot-password`, {identity});
   };
 
   return { revokePermissions, revokeAccount, forgotPassword };
