@@ -50,8 +50,14 @@
 /* Input wrapper */
 .input-wrapper {
   position: relative;
-  width: 100%;
+  width: 90%;
   margin-bottom: 1.3rem;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .sessionmessage {
@@ -65,12 +71,6 @@
   font-size: small;
 }
 
-/* Input wrapper */
-.input-wrapper {
-  position: relative;
-  width: 100%;
-  margin-bottom: 1.3rem;
-}
 
 /* Input fields */
 .auth-input {
@@ -98,6 +98,14 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #8a8a8a;
+}
+
+.pwd-toggle {
+  right: 12px;
+  top: 50%;
+  transform: translateY(-37%);
   font-size: 1.2rem;
   color: #8a8a8a;
 }

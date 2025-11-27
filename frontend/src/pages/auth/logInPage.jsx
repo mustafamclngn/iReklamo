@@ -50,6 +50,7 @@ const LogInPage = () => {
     // Password states
     const [pwd, setPwd] = useState('');
     const [incPwd, setincPwd] = useState(false)
+    const [showPwd, setShowPwd] = useState(false);
     const { forgotPassword } = useUsersApi();
 
     // =============
@@ -201,7 +202,6 @@ const LogInPage = () => {
         
             {/* ========== */}
                 {/* Username or Email */}
-                {/* label */}
                 {/* input field */}
                 <div className="input-wrapper">
                     <input
@@ -218,19 +218,24 @@ const LogInPage = () => {
                 </div>
                 {/* ========== */}
                 {/* Password */}
-                {/* label */}        
                 {/* input field */}
-                <div className="input-wrapper"> 
-                    <input
-                        type="password"
-                        id="password"
-                        autoComplete="off"
-                        onChange={(e) => setPwd(e.target.value)}
-                        required
-                        placeholder="Password"
-                        className="auth-input"
+                <div className="input-row">
+                    <div className="input-wrapper">
+                        <input
+                            type={showPwd ? "text" : "password"}
+                            id="password"
+                            autoComplete="off"
+                            onChange={(e) => setPwd(e.target.value)}
+                            required
+                            placeholder="Password"
+                            className="auth-input"
+                        />
+                        <i className="bi bi-lock-fill input-icon" style={{ color: 'gray'}}></i>
+                    </div>
+                    <i
+                        className={`bi ${showPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
+                        onClick={() => setShowPwd((prev) => !prev)}
                     />
-                    <i className="bi bi-lock-fill input-icon" style={{ color: 'gray'}}></i>
                 </div>
                 {/* ========== */}
                 {/* Persist */}
