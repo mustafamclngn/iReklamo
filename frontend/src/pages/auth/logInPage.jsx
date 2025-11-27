@@ -152,7 +152,6 @@ const LogInPage = () => {
     // Forgot Password handler
     const handleForgot = async (e) => {
         e.preventDefault();
-        console.log("forgor");
         try{
             const response = await forgotPassword(identity)
             if (response.success) {

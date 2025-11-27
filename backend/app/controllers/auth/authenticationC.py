@@ -7,7 +7,7 @@ import string
 import jwt
 import datetime
 from app.models.user import User
-from app.controllers.auth.viewUserC import view_user, view_user_nameemail
+from app.controllers.users.selectAction import view_user, view_user_nameemail
 from app.functions.Update import Update
 from app.controllers.auth.emailC import email_details
 

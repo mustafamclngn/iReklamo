@@ -27,6 +27,9 @@ def update_user(user_id):
             "error": "Server error. Please try again later."
         }), 500
     
+# ========================== 
+# USER ROLE REVOKED
+# ==========
 def revoke_permissions(user_id):
     user = User()
     data = user.getID(user_id)  
@@ -62,9 +65,4 @@ def revoke_permissions(user_id):
         return jsonify({
             "error": "Server error. Please try again later."
         }), 500
-
-# ========================== 
-# FORGOT PASSWORD
-# ==========
-def email_newpwd(user_id):
-    pass
+    
