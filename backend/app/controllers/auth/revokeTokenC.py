@@ -115,7 +115,7 @@ def generate_reset_token(user_id):
         {
             "user_id": user_id,
             "type": "password_reset",
-            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=30)
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)
         },
         Config.JWT_SECRET_KEY,
         algorithm="HS256"

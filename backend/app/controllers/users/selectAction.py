@@ -89,7 +89,8 @@ def user_forgot_pwd():
         email_newpwd(user_name, user_email, reset_link)
 
         return jsonify({
-            "message": "New temporary password has been sent to your email.",
+            "success":True,
+            "message":"New temporary password has been sent to your email.",
         }), 200
 
     except Exception as err:

@@ -1,6 +1,6 @@
 from flask import Blueprint
 from app.controllers.users.selectAction import user_forgot_pwd, userList
-from app.controllers.users.updateAction import revoke_permissions
+from app.controllers.users.updateAction import reset_password, revoke_permissions
 from app.controllers.users.deleteAction import delete_user
 from app.middleware.verifyJwt import verify_jwt
 from app.middleware.verifyRoles import verify_roles
@@ -28,3 +28,7 @@ def revokeUserAccount(user_id):
 @user_bp.route('/forgot-password', methods=['PATCH'])
 def forgotPassword():
     return user_forgot_pwd()
+
+@user_bp.route('/reset-password', methods=['PATCH'])
+def resetPassword():
+    return reset_password()

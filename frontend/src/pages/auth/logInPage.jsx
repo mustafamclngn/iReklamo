@@ -53,12 +53,12 @@ const LogInPage = () => {
     const { forgotPassword } = useUsersApi();
 
     // =============
-      // Error and Success messages 
-      const [isErrorOpen, setIsErrorOpen] = useState(false);
-      const [errMsg, setErrMsg] = useState('');
-      const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-      const [successMessage, setSuccessMessage] = useState('');
-      const [loading, setLoading] =useState(false)
+    // Error and Success messages 
+    const [isErrorOpen, setIsErrorOpen] = useState(false);
+    const [errMsg, setErrMsg] = useState('');
+    const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [loading, setLoading] =useState(false)
 
     // =============
     // State update
