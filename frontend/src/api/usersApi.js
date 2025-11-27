@@ -11,7 +11,11 @@ const useUsersApi = () => {
     return axiosPrivate.delete(`/api/user/${userId}/revoke-account`);
   };
 
-  return { revokePermissions, revokeAccount };
+  const forgotPassword = async (userId) => {
+    return axiosPrivate.patch(`/api/user/${userId}/forgot-password`);
+  };
+
+  return { revokePermissions, revokeAccount, forgotPassword };
 };
 
 export default useUsersApi;

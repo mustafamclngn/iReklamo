@@ -62,3 +62,9 @@ def revoke_permissions(user_id):
         return jsonify({
             "error": "Server error. Please try again later."
         }), 500
+
+# ========================== 
+# FORGOT PASSWORD
+# ==========
+def email_newpwd(user_id):
+    pass
