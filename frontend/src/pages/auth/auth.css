@@ -24,11 +24,17 @@
   text-align: left;
   width: 350px;
   max-width: 70vw;
+  width: 350px;
+  max-width: 70vw;
 }
 
 /* Label */
 .auth-label {
   display: block;
+  color: #4a4a4a;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
   color: #4a4a4a;
   font-weight: 600;
   font-size: 1.1rem;
@@ -60,7 +66,15 @@
   padding: 0.55rem 2.75rem 0.55rem 0.75rem;
   border: 1.7px solid #d8d8d8;
   border-radius: 0.2rem;
+  padding: 0.55rem 2.75rem 0.55rem 0.75rem;
+  border: 1.7px solid #d8d8d8;
+  border-radius: 0.2rem;
   font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: #aaa;
   transition: all 0.2s ease;
 }
 
@@ -82,25 +96,44 @@
   transform: translateY(-50%);
   font-size: 1.2rem;
   color: #8a8a8a;
+  border-color: #72d1fc;
+  box-shadow: 0 0 0 2px rgba(79,195,247,0.2);
+}
+
+/* Icon */
+.input-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #8a8a8a;
 }
 
 /* Button */
 .auth-button {
   width: 100px;
+  width: 100px;
   background-color: #4fc3f7;
   color: white;
   font-weight: 100;
   padding: 0.5rem;
+  font-weight: 100;
+  padding: 0.5rem;
   border: none;
+  border-radius: 0.6rem;
   border-radius: 0.6rem;
   font-family: "Montserrat", sans-serif;
   cursor: pointer;
   transition: background-color 0.2s ease;
   font-size: 1.1rem;
   margin-left: auto;
+  font-size: 1.1rem;
+  margin-left: auto;
 }
 
 .auth-button:hover {
+  background-color: #03a9f4;
   background-color: #03a9f4;
 }
 
@@ -111,7 +144,62 @@
 }
 
 /* Remember Me */
+/* Remember Me */
 .remember_me {
+  margin: 1.5rem 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #5a5a5a;
+}
+
+.remember_me_box {
+  display: none;
+}
+
+.remember_me_label {
+  position: relative;
+  padding-left: 36px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember_me_label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 1px;
+  border: 2px solid #2f71ff;
+  background-color: transparent;      
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.remember_me_label::after {
+  content: "";
+  position: absolute;
+  left: 6%;                             
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 6px;
+  height: 12px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.remember_me_box:checked + .remember_me_label::before {
+  background-color: #2f71ff;
+}
+
+.remember_me_box:checked + .remember_me_label::after {
+  opacity: 1;
   margin: 1.5rem 0 0 0;
   display: flex;
   align-items: center;
