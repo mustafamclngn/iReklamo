@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const CA_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
 
   const location = useLocation();
@@ -121,8 +123,8 @@ const CA_ComplaintsPage = () => {
 
   // Update Priority
   const handlePriorityUpdate = (complaint) => {
-    console.log('Update priority for:', complaint);
-    // Open priority modal
+    setComplaintData(complaint);
+    setIsPriorityOpen(true);
   };
 
   // Assign Official
@@ -130,6 +132,17 @@ const CA_ComplaintsPage = () => {
     console.log('Assign complaint to:', complaint);
     setComplaintData(complaint);
     setIsAssignOpen(true);
+  };
+
+  // Priority Update Handler
+  const handlePriorityChange = (newPriority) => {
+    setComplaints(prevComplaints =>
+      prevComplaints.map(complaint =>
+        complaint.id === complaintData?.id
+          ? { ...complaint, priority: newPriority }
+          : complaint
+      )
+    );
   };
 
   // Pagination logic
@@ -255,13 +268,19 @@ const CA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
-        isOpen={isAssignOpen} 
+      <AssignActionModal
+        isOpen={isAssignOpen}
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >
       </AssignActionModal>
+      <SetPriorityModal
+        isOpen={isPriorityOpen}
+        onClose={() => setIsPriorityOpen(false)}
+        complaint={complaintData}
+        onPriorityUpdate={handlePriorityChange}
+      />
     </>
   );
 };
