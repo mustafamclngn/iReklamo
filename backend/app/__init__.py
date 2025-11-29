@@ -40,17 +40,15 @@ def create_app(config_name=None):
     app.register_blueprint(userinfo_bp)
     app.register_blueprint(barangays_bp)
 
-
-    # Serve static files (profile pictures)
-    STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
+    # image upload path (machange pa cguro)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    UPLOADS_FOLDER = os.path.join(BASE_DIR, 'public', 'uploads')
     
-    @app.route('/storage/profile_pictures/<filename>')  # CHANGED: Added underscore
-    def serve_profile_picture(filename):
-        """Serve profile picture files"""
-        return send_from_directory(
-            os.path.join(STORAGE_FOLDER, 'profile_pictures'),
-            filename
-        )
-
+    @app.route('/uploads/<path:filename>')
+    def serve_upload(filename):
+        try:
+            return send_from_directory(os.path.join(UPLOADS_FOLDER), filename)
+        except FileNotFoundError:
+            return {"error": "File not found"}, 404
 
     return app
