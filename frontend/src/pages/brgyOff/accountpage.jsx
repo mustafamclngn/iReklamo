@@ -20,7 +20,6 @@ import {
 const BO_AccountPage = () => {
   const { auth } = useAuth();
   const { getOfficialById, updateOfficial } = useOfficialsApi();
-
   const [official, setOfficial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
