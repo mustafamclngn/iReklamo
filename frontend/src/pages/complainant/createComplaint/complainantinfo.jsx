@@ -22,9 +22,10 @@ const CU_FileComplaintPage = () => {
         if (!formData.barangay) missing.barangay = 'Required';
         if (!formData.email) {
             missing.email = 'Required' 
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            missing.email = "Invalid email format";
-        }
+        } 
+        // else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        //     missing.email = "Invalid email format";
+        // }
         if (!formData.contact_number) missing.contact_number = 'Required'
 
         if (Object.keys(missing).length > 0) {

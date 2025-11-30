@@ -9,7 +9,7 @@ const CU_TrackComplaintPage = () => {
   const navigate = useNavigate();
   const complaintsApi = useComplaintsApi();
 
-  const {trackComplaint} = useComplaintsApi();
+  const {trackComplaint} = complaintsApi;
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';

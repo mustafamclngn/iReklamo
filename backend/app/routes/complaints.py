@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_cors import CORS
 from flask_mail import Message
 import psycopg2
@@ -11,6 +11,7 @@ from app.functions.Delete import Delete
 
 from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
 from app.controllers.complaints.complaintAssignC import assign_complaint
+
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
@@ -106,19 +107,23 @@ def create_complaint():
                     greeting_name = "anonymous"
                 else:
                     greeting_name = " ".join(p for p in [first, last] if p)
-                    
+
+                # Render HTML email
+                html_body = render_template(
+                    "complaint_submitted.html",
+                    greeting_name=greeting_name,
+                    complaint_id=complaint_id_str,
+                    year=datetime.now().year
+                )
+
+                # Create the message
                 message = Message(
                     subject='Complaint Submitted Successfully',
-                    sender='noreply@ireklamo.ph',
                     recipients=[data['email']],
-                    body=f'Hello {greeting_name},\n\n'
-                         f'Your complaint has been submitted successfully to iReklamo.\n\n'
-                         f'Tracking ID: {complaint_id_str}\n\n'
-                         f'You may use this tracking ID to follow up on the status of your complaint.\n\n'
-                         f'Thank you for helping us improve our community!\n'
-                         f'– iReklamo Support Team'
+                    html=html_body
                 )
                 mail.send(message)
+
         except Exception as mail_err:
             print(f"Warning: Failed to send email - {mail_err}")
 
