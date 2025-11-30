@@ -8,6 +8,7 @@ import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -27,6 +28,10 @@ const BC_ComplaintsPage = () => {
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
   const [refresh, setRefresh] = useState(false);
+
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
@@ -140,6 +145,8 @@ const BC_ComplaintsPage = () => {
           : complaint
       )
     );
+    setToastMessage('Priority updated successfully!');
+    setToastVisible(true);
   };
 
   // Pagination logic
@@ -266,6 +273,11 @@ const BC_ComplaintsPage = () => {
         onClose={() => setIsPriorityOpen(false)}
         complaint={complaintData}
         onPriorityUpdate={handlePriorityChange}
+      />
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
       />
     </>
   );

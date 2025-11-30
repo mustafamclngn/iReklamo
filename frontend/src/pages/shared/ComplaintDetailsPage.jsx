@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 
 const formatDate = (dateString) => {
@@ -87,6 +88,10 @@ const ComplaintDetailsPage = () => {
 
   const [refresh, setRefresh] = useState(false);
 
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
   // Assign
   const handleAssign = () => {
     setIsAssignOpen(true);
@@ -99,7 +104,8 @@ const ComplaintDetailsPage = () => {
 
   const handlePriorityUpdate = (newPriority) => {
     setComplaint(prev => prev ? { ...prev, priority: newPriority } : null);
-    setRefresh(prev => !prev);
+    setToastMessage('Priority updated successfully');
+    setToastVisible(true);
   };
 
   useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh]);
@@ -345,6 +351,11 @@ const ComplaintDetailsPage = () => {
                   onClose={() => setIsPriorityOpen(false)}
                   complaint={complaint}
                   onPriorityUpdate={handlePriorityUpdate}
+                />
+                <Toast
+                  message={toastMessage}
+                  isVisible={toastVisible}
+                  onClose={() => setToastVisible(false)}
                 />
               </>
             );
