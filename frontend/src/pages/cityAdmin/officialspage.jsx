@@ -33,7 +33,9 @@ const CA_OfficialsPage = () => {
   });
 
   // get all barangays and positions for filter
-  const uniqueBarangays = [...new Set(officials.map(o => o.barangay).filter(Boolean))];
+  const uniqueBarangays = [
+    ...new Set(officials.map((o) => o.barangay_name).filter(Boolean)),
+  ];
   const uniquePositions = [...new Set(officials.map(o => o.position).filter(Boolean))];
 
   // fetch officials

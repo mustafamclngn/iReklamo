@@ -39,15 +39,10 @@ def get_all_officials():
         selector.tablequery = "FROM users LEFT JOIN user_info ON users.user_id = user_info.user_id LEFT JOIN roles ON users.role_id = roles.id LEFT JOIN barangays ON users.barangay_id = barangays.id"
         
         if barangay:
-            selector.search(search_mult={
-                "barangay_id": barangay,
-                "role_id": 4
-            })
+            selector.searchquery = f"WHERE users.barangay_id = %s AND users.role_id = 4"
+            selector.params.append(int(barangay))
         else:
-            selector.search(search_mult={
-                "role_id": 3,
-                "role_id": 4
-            }, search_mult_connect=" OR ")
+            selector.searchquery = "WHERE users.role_id IN (3, 4)"
 
         result = selector.sort("user_id", "DESC").execute().retDict()
 
