@@ -1,13 +1,11 @@
 import './modal.css'
 import { useState } from 'react'
 import useComplaintsApi from '../../api/complaintsAPI'
-import SuccessModal from './SuccessModal'
 import ErrorModal from './ErrorModal'
 
 const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
   const [selectedPriority, setSelectedPriority] = useState(complaint?.priority || 'Moderate')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false)
   const [isErrorOpen, setIsErrorOpen] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -73,13 +71,6 @@ const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
           </form>
         </div>
       </div>
-
-      <SuccessModal
-        isOpen={isSuccessOpen}
-        onClose={() => setIsSuccessOpen(false)}
-        onConfirm={() => {}}
-        message="Priority updated successfully"
-      />
 
       <ErrorModal
         isOpen={isErrorOpen}

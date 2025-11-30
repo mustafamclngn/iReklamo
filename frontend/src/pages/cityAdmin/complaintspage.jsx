@@ -7,6 +7,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -26,6 +27,10 @@ const CA_ComplaintsPage = () => {
   const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
+
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
@@ -143,6 +148,8 @@ const CA_ComplaintsPage = () => {
           : complaint
       )
     );
+    setToastMessage('Priority updated successfully!');
+    setToastVisible(true);
   };
 
   // Pagination logic
@@ -280,6 +287,11 @@ const CA_ComplaintsPage = () => {
         onClose={() => setIsPriorityOpen(false)}
         complaint={complaintData}
         onPriorityUpdate={handlePriorityChange}
+      />
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
       />
     </>
   );
