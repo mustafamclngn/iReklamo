@@ -8,8 +8,10 @@ from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
 
-from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
 from app.controllers.complaints.complaintAssignC import assign_complaint
+from app.middleware.verifyRoles import verify_roles
+from app.middleware.verifyJwt import verify_jwt
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
@@ -703,3 +705,39 @@ def get_active_cases(assigned_official_id):
 @complaints_bp.route('cases/resolved/<int:assigned_official_id>')
 def get_resolved_cases(assigned_official_id):
     return resolvedCases_official(assigned_official_id)
+
+@complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])
+@verify_jwt
+@verify_roles(1, 2, 3)  # Super Admin, City Admin, Barangay Captain
+def reject_complaint_route(complaint_id):
+    """
+    Reject a complaint with audit trail
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        rejection_reason = data.get('rejection_reason', '').strip()
+        if not rejection_reason:
+            return jsonify({
+                'success': False,
+                'error': 'Rejection reason is required'
+            }), 400
+
+        # Get authenticated user ID
+        user_id = request.user.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid user authentication'
+            }), 401
+
+        # Call controller function
+        return reject_complaint(complaint_id, user_id, rejection_reason)
+
+    except Exception as e:
+        print(f"Error in reject complaint route: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process rejection request'
+        }), 500
