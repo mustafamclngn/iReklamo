@@ -4,15 +4,15 @@ from app.functions.Update import Update
 from app.functions.Insert import Insert
 from app.middleware.verifyJwt import verify_jwt
 from app.middleware.verifyRoles import verify_roles
+from app.extensions import supabase_storage
 from werkzeug.utils import secure_filename
 import os
 import uuid
 
 officialsList_bp = Blueprint('superadmin_officials', __name__, url_prefix='/api/officials')
 
-# picture upload (to be updated)
-UPLOAD_FOLDER = 'public/uploads/profiles'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+# File upload configuration
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
 def allowed_file(filename):
@@ -145,32 +145,78 @@ def handle_official(user_id):
             purok = request.form.get('purok')
             street = request.form.get('street')
             
+            if birthdate:
+                try:
+                    from datetime import datetime
+                    if 'GMT' in birthdate or ',' in birthdate:
+                        birthdate = None
+                    elif len(birthdate) == 10 and birthdate.count('-') == 2:
+                        pass
+                except:
+                    birthdate = None
+            
             if not first_name or not last_name or not email:
                 return jsonify({
                     'success': False,
                     'error': 'First name, last name, and email are required'
                 }), 400
             
-            profile_picture_path = None
+            profile_picture_url = None
             if 'profile_picture' in request.files:
                 file = request.files['profile_picture']
                 
                 if file.filename != '':
+                    # validate file type
                     if not allowed_file(file.filename):
                         return jsonify({
                             'success': False,
-                            'error': 'Invalid file type. Only PNG, JPG, JPEG, and GIF are allowed.'
+                            'error': 'Invalid file type. Only PNG, JPG, JPEG, GIF, and WEBP are allowed.'
                         }), 400
+                    
+                    # validate file size
+                    file.seek(0, os.SEEK_END)
+                    file_size = file.tell()
+                    file.seek(0)
+                    
+                    if file_size > MAX_FILE_SIZE:
+                        return jsonify({
+                            'success': False,
+                            'error': f'File too large. Maximum size is {MAX_FILE_SIZE / (1024*1024)}MB'
+                        }), 400
+                    
+                    if supabase_storage.storage is None:
+                        return jsonify({
+                            'success': False,
+                            'error': 'Storage service not available'
+                        }), 503
                     
                     file_extension = file.filename.rsplit('.', 1)[1].lower()
                     unique_filename = f"{user_id}_{uuid.uuid4().hex[:8]}.{file_extension}"
                     
-                    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+                    success, file_path, public_url = supabase_storage.upload_file(
+                        file=file,
+                        folder="profiles",
+                        custom_filename=unique_filename
+                    )
                     
-                    file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-                    file.save(file_path)
+                    if not success:
+                        return jsonify({
+                            'success': False,
+                            'error': f'Failed to upload file: {public_url}'
+                        }), 500
                     
-                    profile_picture_path = f"/uploads/profiles/{unique_filename}"
+                    profile_picture_url = public_url
+                    
+                    try:
+                        existing_info = Select().table("user_info").search("user_id", user_id).execute().retDict()
+                        if existing_info and existing_info.get('profile_picture'):
+                            old_url = existing_info['profile_picture']
+                            if 'supabase.co/storage/v1/object/public/' in old_url:
+                                old_path = old_url.split('supabase.co/storage/v1/object/public/')[-1]
+                                old_path = '/'.join(old_path.split('/')[1:])
+                                supabase_storage.delete_file(old_path)
+                    except Exception as e:
+                        print(f"Error deleting old profile picture: {e}")
             
             users_data = {
                 'first_name': first_name,
@@ -183,13 +229,15 @@ def handle_official(user_id):
             user_info_data = {
                 'contact_number': contact_number if contact_number else None,
                 'sex': sex if sex else None,
-                'birthdate': birthdate if birthdate else None,
                 'purok': purok if purok else None,
                 'street': street if street else None
             }
             
-            if profile_picture_path:
-                user_info_data['profile_picture'] = profile_picture_path
+            if birthdate and len(birthdate) == 10:
+                user_info_data['birthdate'] = birthdate
+            
+            if profile_picture_url:
+                user_info_data['profile_picture'] = profile_picture_url
             
             existing_info = Select().table("user_info").search("user_id", user_id).execute().retDict()
             
@@ -203,12 +251,14 @@ def handle_official(user_id):
                 'success': True,
                 'message': 'Profile updated successfully',
                 'data': {
-                    'profile_picture': profile_picture_path
+                    'profile_picture': profile_picture_url
                 }
             }), 200
             
         except Exception as e:
             print(f"Error updating official: {e}")
+            import traceback
+            traceback.print_exc()
             return jsonify({
                 'success': False,
                 'error': str(e)
