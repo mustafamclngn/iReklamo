@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, TrendingUpIcon, NotebookPen, PencilLine, Eye, ScrollText } from 'lucide-react';
+import { ArrowUpRight, TrendingUpIcon, NotebookPen, PencilLine, Eye, ScrollText, Megaphone } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Footer from '../../components/navheaders/footer.jsx';
 import useAuth from "../../hooks/useAuth.jsx";
@@ -325,8 +325,8 @@ function QuickActions() {
                     hover:bg-gray-200 transition ease-in-out duration-200'
                     onClick={() => navigate('/superadmin/officials')}
                 >
-                    <PencilLine size={40} strokeWidth={'2.25px'}/>
-                    <div className='text-start'>
+                    <PencilLine size={28} strokeWidth={'2.25px'}/>
+                    <div className='text-start w-4/5'>
                         <p className='font-semibold text-base'>Create Official Account</p>
                         <p className='text-[12px] leading-tight text-gray-500 italic'>Add accounts for city admin, barangay officials, and barangay kagawads.</p>
                     </div>
@@ -334,10 +334,20 @@ function QuickActions() {
 
                 <button className='flex flex-row bg-gray-100 border border-gray-300 w-full shadow rounded-md mt-3 px-5 py-3 text-sm gap-5 justify-center items-center
                     hover:bg-gray-200 transition ease-in-out duration-200'
+                >
+                    <Megaphone size={28} strokeWidth={'2.25px'}/>
+                    <div className='text-start w-4/5'>
+                        <p className='font-semibold text-base'>Create an Announcement</p>
+                        <p className='text-[12px] leading-tight text-gray-500 italic'>Post announcements for city admin, barangay officials and kagawads.</p>
+                    </div>
+                </button>
+
+                <button className='flex flex-row bg-gray-100 border border-gray-300 w-full shadow rounded-md mt-3 px-5 py-3 text-sm gap-5 justify-center items-center
+                    hover:bg-gray-200 transition ease-in-out duration-200'
                     onClick={() => navigate('/superadmin/complaints')}
                 >
-                    <ScrollText size={40} strokeWidth={'2.25px'}/>
-                    <div className='text-start'>
+                    <ScrollText size={28} strokeWidth={'2.25px'}/>
+                    <div className='text-start w-4/5'>
                         <p className='font-semibold text-base'>View all Complaints</p>
                         <p className='text-[12px] text-gray-500 leading-tight italic'>Access the list of all complaints from all barangays within Iligan City.</p>
                     </div>
@@ -348,7 +358,7 @@ function QuickActions() {
                     onClick={() => navigate('/superadmin/barangays')}
                 >
                     <ScrollText size={28} strokeWidth={'2.25px'}/>
-                    <div className='text-start'>
+                    <div className='text-start w-4/5'>
                         <p className='font-semibold text-base'>View all Barangays</p>
                         <p className='text-[12px] leading-tight text-gray-500 italic'>Access the list of all barangays within Iligan City.</p>
                     </div>
