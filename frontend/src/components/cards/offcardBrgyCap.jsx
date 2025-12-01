@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getImageURL } from "../../utils/imageHelpers";
 
 const BrgyCapOfficialCard = ({ official, onViewDetails, onUserAction }) => {
   const navigate = useNavigate();
   const fullName = `${official.first_name} ${official.last_name}`;
-  const API_BASE_URL = 'http://localhost:5000'; // backend url
   const [imageError, setImageError] = useState(false);
-  
+
   const hasValidImage = official.profile_picture && !imageError;
-    
+
   const handleViewDetails = () => {
-    const basePath = window.location.pathname.split('/').slice(0, 2).join('/');
+    const basePath = window.location.pathname.split("/").slice(0, 2).join("/");
     const targetPath = `${basePath}/officials/${official.user_id}`;
     navigate(targetPath);
   };
@@ -19,10 +19,16 @@ const BrgyCapOfficialCard = ({ official, onViewDetails, onUserAction }) => {
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
-          <div className={`w-32 h-32 bg-gray-200 ${hasValidImage ? 'border-0' : 'border-2 border-dashed border-gray-400'} rounded flex-shrink-0 flex items-center justify-center overflow-hidden`}>
+          <div
+            className={`w-32 h-32 bg-gray-200 ${
+              hasValidImage
+                ? "border-0"
+                : "border-2 border-dashed border-gray-400"
+            } rounded flex-shrink-0 flex items-center justify-center overflow-hidden`}
+          >
             {hasValidImage ? (
-              <img 
-                src={`${API_BASE_URL}${official.profile_picture}`}
+              <img
+                src={getImageURL(official.profile_picture)}
                 alt={fullName}
                 className="w-full h-full object-cover rounded"
                 onError={() => setImageError(true)}
@@ -38,24 +44,26 @@ const BrgyCapOfficialCard = ({ official, onViewDetails, onUserAction }) => {
             </p>
             {official.position && (
               <p className="text-gray-600 mb-1">
-                <span className="font-medium">Position:</span> {official.position}
+                <span className="font-medium">Position:</span>{" "}
+                {official.position}
               </p>
             )}
             {official.contact_number && (
               <p className="text-gray-600 mb-1">
-                <span className="font-medium">Contact:</span> {official.contact_number}
+                <span className="font-medium">Contact:</span>{" "}
+                {official.contact_number}
               </p>
             )}
           </div>
         </div>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={handleViewDetails}
             className="px-4 py-2 bg-[#E3E3E3] text-black rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
           >
             View Details
           </button>
-          <button 
+          <button
             onClick={() => onUserAction && onUserAction(official)}
             className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
             title="Assign official to complaint"
