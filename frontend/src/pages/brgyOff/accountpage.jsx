@@ -4,10 +4,18 @@ import useAuth from "../../hooks/useAuth";
 import useOfficialsApi from "../../api/officialsApi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { formatDate, formatPhone } from "../../utils/formatters";
-import {validateEmail,validatePhone,validateImageFile,} from "../../utils/validators";
+import {
+  validateEmail,
+  validatePhone,
+  validateImageFile,
+} from "../../utils/validators";
 import { fileToDataURL, getImageURL } from "../../utils/imageHelpers";
 import { calculateProfileCompletion } from "../../utils/profileHelpers";
-import {handleFormChange,resetForm,createFormData,} from "../../utils/formHelpers";
+import {
+  handleFormChange,
+  resetForm,
+  createFormData,
+} from "../../utils/formHelpers";
 
 const BO_AccountPage = () => {
   const { auth } = useAuth();
@@ -35,7 +43,6 @@ const BO_AccountPage = () => {
   const [imageFile, setImageFile] = useState(null);
 
   const profileFields = [
-    "user_name",
     "first_name",
     "last_name",
     "sex",
@@ -44,7 +51,7 @@ const BO_AccountPage = () => {
     "contact_number",
     "purok",
     "street",
-    "barangay",
+    "barangay_name",
     "profile_picture",
   ];
 
