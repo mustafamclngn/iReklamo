@@ -5,6 +5,8 @@ import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
+import ConfirmRejectModal from '../../components/modals/ConfirmRejectModal';
 
 
 const formatDate = (dateString) => {
@@ -65,7 +67,8 @@ const formatPhone = (num) => {
 const statusColors = {
   Pending: "#FFB300",
   "In-Progress": "#FFD600",
-  Resolved: "#43B174"
+  Resolved: "#43B174",
+  Rejected: "#DC2626"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -82,13 +85,34 @@ const ComplaintDetailsPage = () => {
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [isRejectConfirmOpen, setIsRejectConfirmOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const [refresh, setRefresh] = useState(false);
 
-  // Assign 
+  // Assign
   const handleAssign = () => {
     setIsAssignOpen(true);
-  };  
+  };
+
+  // Reject handlers
+  const handleReject = () => {
+    setIsRejectOpen(true);
+  };
+
+  const handleRejectConfirm = (reason) => {
+    setRejectionReason(reason);
+    setIsRejectOpen(false);
+    setIsRejectConfirmOpen(true);
+  };
+
+  const handleRejectionSuccess = () => {
+    // Update local complaint state after successful rejection
+    setComplaint(prev => prev ? { ...prev, status: 'Rejected' } : null);
+    setIsRejectConfirmOpen(false);
+    setRefresh(prev => !prev); // Trigger refetch
+  };
 
   useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
   const fetchComplaintDetails = async () => {
@@ -268,6 +292,14 @@ const ComplaintDetailsPage = () => {
                               <i className="bi bi-chevron-down text-base"></i>
                             </button>
                             <button
+                              className="px-8 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-lg flex items-center gap-2 font-medium"
+                              onClick={handleReject}
+                              disabled={complaint.status === 'Rejected' || complaint.status === 'Resolved'}
+                            >
+                              <i className="bi bi-x-circle text-lg"></i>
+                              Reject Complaint
+                            </button>
+                            <button
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
                               onClick={handleAssign}>
                               <i className="bi bi-person-check text-lg"></i>
@@ -315,8 +347,23 @@ const ComplaintDetailsPage = () => {
                   assignDetails={complaint}
                   >
                 </AssignActionModal>
+
+                <RejectComplaintModal
+                  isOpen={isRejectOpen}
+                  onClose={() => setIsRejectOpen(false)}
+                  complaint={complaint}
+                  onConfirm={handleRejectConfirm}
+                />
+
+                <ConfirmRejectModal
+                  isOpen={isRejectConfirmOpen}
+                  onClose={() => setIsRejectConfirmOpen(false)}
+                  onConfirm={handleRejectionSuccess}
+                  complaint={complaint}
+                  rejectionReason={rejectionReason}
+                />
               </>
             );
           };
-          
+
           export default ComplaintDetailsPage;
