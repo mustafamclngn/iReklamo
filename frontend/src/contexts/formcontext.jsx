@@ -12,7 +12,7 @@ export const FormProvider = ({ children }) => {
         contact_number: "",
         email: "",
         barangay: "",
-        is_anonymous: "",
+        is_anonymous: false,
         
         // Step 2 — Complaint Details
         complaint_title: "",

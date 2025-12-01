@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, current_app, request, jsonify
 from flask_cors import CORS
 from flask_mail import Message
 import psycopg2
@@ -8,6 +8,7 @@ from app.config import DB_CONFIG
 from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
+from app.middleware.verifyJwt import verify_jwt
 
 from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
 from app.controllers.complaints.complaintAssignC import assign_complaint
@@ -429,11 +430,17 @@ def get_assigned_complaints(official_id):
 
 
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
+@verify_jwt
 def get_complaint(complaint_id):
     """
     Get a specific complaint by ID with joined data
     """
     try:
+        # Get user role from JWT - it's stored as an array in 'role' field
+        user_roles = request.user.get('role', [])
+        user_role = user_roles[0] if user_roles else None
+        is_superadmin = (user_role == 1)
+        
         # Use raw SQL with JOINs to get complete complaint data
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -463,6 +470,7 @@ def get_complaint(complaint_id):
                 complainants.age as complainant_age,
                 complainants.contact_number as complainant_contact_number,
                 complainants.email as complainant_email,
+                complainants.is_anonymous,
                 -- Joined assigned official data
                 COALESCE(
                     NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
@@ -488,6 +496,31 @@ def get_complaint(complaint_id):
 
         # Convert RealDictCursor result to regular dict
         complaint_data = dict(result)
+        
+        # Handle anonymous complaints based on role
+        if complaint_data.get('is_anonymous'):
+            if is_superadmin:
+                # Superadmin: Show actual data if provided, otherwise N/A
+                first_name = complaint_data.get('complainant_first_name')
+                last_name = complaint_data.get('complainant_last_name')
+                
+                # If both first and last name are empty/None, show N/A
+                if (not first_name or first_name.strip() == '') and (not last_name or last_name.strip() == ''):
+                    complaint_data['complainant_first_name'] = 'N/A'
+                    complaint_data['complainant_last_name'] = ''
+                # Otherwise keep the actual name that was provided
+                
+                if not complaint_data.get('complainant_sex') or complaint_data.get('complainant_sex').strip() == '':
+                    complaint_data['complainant_sex'] = 'N/A'
+                if not complaint_data.get('complainant_age'):
+                    complaint_data['complainant_age'] = 'N/A'
+            else:
+                # Other roles: Show "Anonymous" but keep email and contact
+                complaint_data['complainant_first_name'] = 'Anonymous'
+                complaint_data['complainant_last_name'] = ''
+                complaint_data['complainant_sex'] = None
+                complaint_data['complainant_age'] = None
+                # Email and contact_number are NOT censored - kept as-is
 
         return jsonify({
             'success': True,

@@ -33,7 +33,7 @@ const CU_FileComplaintPage = () => {
                 <div className='w-full flex justify-center mb-8'>
                     <div className="mx-auto max-w-[1500px] w-[80%]">
                         <div>
-                            <div className='flex flex-row justify-between place-items-center gap-3'>
+                            <div className='flex flex-row justify-between place-items-center gap-3 mx-44 px-3'>
                                 <CircleCheckBig size={32} color='#60A5FA' />
                                 <div className='flex-grow h-[3px] bg-[#60A5FA]'></div>
                                 <CircleCheck size={32} color='#60A5FA' />
