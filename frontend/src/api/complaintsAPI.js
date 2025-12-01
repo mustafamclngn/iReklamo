@@ -133,6 +133,13 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
+  const rejectComplaint = async (complaintId, rejectionReason) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/reject`, {
+      rejection_reason: rejectionReason
+    });
+    return response.data;
+  };
+
 return {
     complaintsByBarangayId,
     StatusComplaintsByBarangayId,
@@ -147,7 +154,8 @@ return {
     getBarangayCaptainComplaints,
     getBarangayOfficialComplaints,
     getActiveCases,
-    getResolvedCases
+    getResolvedCases,
+    rejectComplaint
   };
 
 };

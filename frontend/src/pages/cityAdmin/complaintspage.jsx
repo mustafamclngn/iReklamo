@@ -43,7 +43,7 @@ const CA_ComplaintsPage = () => {
   });
 
   // Define filter options
-  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved'];
+  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
   
   // Extract unique barangays from complaints data

@@ -44,7 +44,7 @@ const BC_ComplaintsPage = () => {
   });
 
   // Define filter options
-  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved'];
+  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
 
   // Fetch complaints - filtered by barangay captain's barangay on backend
