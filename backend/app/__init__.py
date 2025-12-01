@@ -40,15 +40,4 @@ def create_app(config_name=None):
     app.register_blueprint(userinfo_bp)
     app.register_blueprint(barangays_bp)
 
-    # image upload path (machange pa cguro)
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    UPLOADS_FOLDER = os.path.join(BASE_DIR, 'public', 'uploads')
-    
-    @app.route('/uploads/<path:filename>')
-    def serve_upload(filename):
-        try:
-            return send_from_directory(os.path.join(UPLOADS_FOLDER), filename)
-        except FileNotFoundError:
-            return {"error": "File not found"}, 404
-
     return app
