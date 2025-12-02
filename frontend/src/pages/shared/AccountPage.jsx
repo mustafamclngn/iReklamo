@@ -3,7 +3,7 @@ import { Camera, Save, X, AlertCircle } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import useOfficialsApi from "../../api/officialsApi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import ConfirmEditModal from "../../components/modals/confirmEditAccountModal";
+import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
 import { formatDate, formatPhone } from "../../utils/formatters";
 import {
   validateEmail,
@@ -406,7 +406,7 @@ const AccountPage = () => {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
-                First Name <span className="text-red-500">*</span>
+                First Name {editMode && <span className="text-red-500">*</span>}
               </label>
               {editMode ? (
                 <input
@@ -429,7 +429,7 @@ const AccountPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
-                Last Name <span className="text-red-500">*</span>
+                Last Name {editMode && <span className="text-red-500">*</span>}
               </label>
               {editMode ? (
                 <input
@@ -497,7 +497,7 @@ const AccountPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
-                Email <span className="text-red-500">*</span>
+                Email {editMode && <span className="text-red-500">*</span>}
               </label>
               {editMode ? (
                 <input
