@@ -3,6 +3,7 @@ import { Camera, Save, X, AlertCircle } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import useOfficialsApi from "../../api/officialsApi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import ConfirmEditModal from "../../components/modals/confirmEditAccountModal";
 import { formatDate, formatPhone } from "../../utils/formatters";
 import {
   validateEmail,
@@ -26,6 +27,7 @@ const AccountPage = () => {
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -126,20 +128,26 @@ const AccountPage = () => {
     setImageFile(null);
   };
 
-  const handleSave = async () => {
+  const handleSaveClick = () => {
+    // Validate required fields
+    if (!formData.first_name || !formData.last_name || !formData.email) {
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      return;
+    }
+
+    if (formData.contact_number && !validatePhone(formData.contact_number)) {
+      return;
+    }
+
+    // Show confirmation modal
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = async () => {
     try {
-      if (!formData.first_name || !formData.last_name || !formData.email) {
-        return;
-      }
-
-      if (!validateEmail(formData.email)) {
-        return;
-      }
-
-      if (formData.contact_number && !validatePhone(formData.contact_number)) {
-        return;
-      }
-
       setSaving(true);
 
       const formDataToSend = createFormData(formData, ["profile_picture"]);
@@ -168,6 +176,7 @@ const AccountPage = () => {
         setEditMode(false);
         setPreviewImage(null);
         setImageFile(null);
+        setShowConfirmModal(false);
 
         await fetchUserData();
       }
@@ -231,6 +240,13 @@ const AccountPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <ConfirmEditModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSave}
+        isLoading={saving}
+      />
+
       <div className="max-w-[1591px] mx-auto px-8 py-8">
         {/* header */}
         <div className="flex justify-between items-center mb-6">
@@ -256,21 +272,12 @@ const AccountPage = () => {
                 Cancel
               </button>
               <button
-                onClick={handleSave}
+                onClick={handleSaveClick}
                 disabled={saving}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5" />
-                    Save Changes
-                  </>
-                )}
+                <Save className="w-5 h-5" />
+                Save Changes
               </button>
             </div>
           )}
