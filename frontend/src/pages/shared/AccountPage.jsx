@@ -16,6 +16,7 @@ import {
   resetForm,
   createFormData,
 } from "../../utils/formHelpers";
+import { toTitleCase } from "../../utils/stringHelpers";
 
 const AccountPage = () => {
   const { auth } = useAuth();
@@ -54,10 +55,10 @@ const AccountPage = () => {
     "profile_picture",
   ];
 
-  // Helper function to determine user role
   const getUserRole = () => {
     if (!userData) return "User";
-    return userData.role || userData.position || "User";
+    const role = userData.position || userData.role || "User";
+    return toTitleCase(role);
   };
 
   useEffect(() => {
@@ -93,7 +94,13 @@ const AccountPage = () => {
   };
 
   const handleInputChange = (e) => {
-    handleFormChange(e, setFormData);
+    const { name, value } = e.target;
+
+    if (name === "first_name" || name === "last_name") {
+      setFormData((prev) => ({ ...prev, [name]: toTitleCase(value) }));
+    } else {
+      handleFormChange(e, setFormData);
+    }
   };
 
   const handleImageChange = async (e) => {
