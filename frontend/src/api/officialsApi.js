@@ -1,6 +1,4 @@
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import useAuth from "../hooks/useAuth";
-
 
 const useOfficialsApi = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -40,7 +38,26 @@ const useOfficialsApi = () => {
     }
   };
 
-  return { getAllOfficials, getOfficialsByBarangay, getOfficialById }
+  const updateOfficial = async (userId, formData) => {
+    try {
+      const response = await axiosPrivate.put(`/api/officials/${userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating official:', error);
+      throw error;
+    }
+  };
+
+  return { 
+    getAllOfficials, 
+    getOfficialsByBarangay, 
+    getOfficialById,
+    updateOfficial 
+  };
 };
 
 export default useOfficialsApi;

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, render_template
 from flask_cors import CORS
 from flask_mail import Message
 import psycopg2
@@ -25,6 +25,9 @@ def generate_complaint_id(cursor):
     sequential = str(count_today).zfill(4)  # Pad to 4 digits, e.g., 0001
     return f"CMP-{today}-{sequential}"
 
+def empty_to_null(value):
+    return value if value not in ("", None) else None
+
 # TO CREATE COMPLAINT
 @complaints_bp.route('/create_complaint', methods=['POST'])
 def create_complaint():
@@ -42,17 +45,18 @@ def create_complaint():
 
         # Insert complainant
         cursor.execute("""
-            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id, is_anonymous)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
-            data['first_name'],
-            data['last_name'],
-            data['sex'],
-            data['age'],
+            empty_to_null(data.get('first_name')),
+            empty_to_null(data.get('last_name')),
+            empty_to_null(data.get('sex')),
+            empty_to_null(data.get('age')),
             data['contact_number'],
             data['email'],
-            int(data.get('barangay'))
+            int(data.get('barangay')),
+            data.get('is_anonymous', False)
         ))
         complainant_id = cursor.fetchone()['id']
 
@@ -93,16 +97,33 @@ def create_complaint():
         # Send confirmation email (safe: exceptions caught)
         try:
             if mail:
+                # Build greeting
+                first = data.get("first_name")
+                last = data.get("last_name")
+                is_anonymous = data.get("is_anonymous")
+
+                if is_anonymous or (not first and not last):
+                    greeting_name = "anonymous"
+                else:
+                    greeting_name = " ".join(p for p in [first, last] if p)
+
+                # Render HTML email
+                html_body = render_template(
+                    "complaint_submitted.html",
+                    greeting_name=greeting_name,
+                    complaint_id=complaint_id_str,
+                    year=datetime.now().year
+                )
+
+                # Create the message
                 message = Message(
                     subject='Complaint Submitted Successfully',
-                    sender='noreply@ireklamo.ph',
                     recipients=[data['email']],
-                    body=f'Hello {data["first_name"]} {data["last_name"]},\n\n'
-                         f'Your complaint has been submitted successfully.\n'
-                         f'Complaint Tracking ID: {complaint_id_str}\n\n'
-                         f'Thank you for using iReklamo!'
+                    html=html_body
                 )
                 mail.send(message)
+                print(f"Email sent successfully to {data['email']}")
+
         except Exception as mail_err:
             print(f"Warning: Failed to send email - {mail_err}")
 
