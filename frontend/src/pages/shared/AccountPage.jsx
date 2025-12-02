@@ -4,7 +4,11 @@ import useAuth from "../../hooks/useAuth";
 import useOfficialsApi from "../../api/officialsApi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
-import { formatDate, formatPhone } from "../../utils/formatters";
+import {
+  formatDate,
+  formatPhone,
+  formatDateForInput,
+} from "../../utils/formatters";
 import {
   validateEmail,
   validatePhone,
@@ -80,9 +84,7 @@ const AccountPage = () => {
           email: response.data.email || "",
           contact_number: response.data.contact_number || "",
           sex: response.data.sex || "",
-          birthdate: response.data.birthdate
-            ? response.data.birthdate.split("T")[0]
-            : "",
+          birthdate: formatDateForInput(response.data.birthdate), // Use the new function
           purok: response.data.purok || "",
           street: response.data.street || "",
           profile_picture: response.data.profile_picture,
@@ -194,7 +196,7 @@ const AccountPage = () => {
       email: userData.email || "",
       contact_number: userData.contact_number || "",
       sex: userData.sex || "",
-      birthdate: userData.birthdate ? userData.birthdate.split("T")[0] : "",
+      birthdate: formatDateForInput(userData.birthdate), // Use the new function
       purok: userData.purok || "",
       street: userData.street || "",
       profile_picture: userData.profile_picture,
