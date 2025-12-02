@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify, current_app, render_template
-from flask_cors import CORS
 from flask_mail import Message
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -16,7 +15,6 @@ from app.controllers.complaints.complaintAssignC import assign_complaint
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
-CORS(complaints_bp)
 
 # FOR GENERATING TRACKING ID 
 def generate_complaint_id(cursor):
