@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const statusColors = {
   Pending: "#FFB300",
@@ -12,13 +12,24 @@ const priorityColors = {
   Low: "#43B174",
 };
 
+
+
 const ComplaintCardBrgyCap = ({
   complaint,
   onViewDetails,
   onStatusUpdate,
   onPriorityUpdate,
-  onAssignOfficial
+  onAssignOfficial,
+  onSelect,
+  isSelected
 }) => {
+
+  const [isChecked, setIsChecked] = useState(false); 
+
+  useEffect(() => {
+    setIsChecked(isSelected);
+  }, [isSelected]);
+
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start">
@@ -82,6 +93,17 @@ const ComplaintCardBrgyCap = ({
           >
             <i className="bi bi-person-check text-xl"></i>
           </button>
+
+          {/* Select for Assignment */}
+          <input
+            type="checkbox"
+            id="selectCheckbox"
+            checked={isChecked}
+            onChange={(e) => {
+              setIsChecked(e.target.checked);
+              onSelect(complaint.id, e.target.checked);
+            }}
+          />
         </div>
       </div>
     </div>

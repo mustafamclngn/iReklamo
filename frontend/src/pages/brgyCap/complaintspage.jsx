@@ -16,7 +16,6 @@ const BC_ComplaintsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const complaintsApi = useComplaintsApi();
   const itemsPerPage = 5;
 
   const { getBarangayCaptainComplaints } = useComplaintsApi();
@@ -129,6 +128,32 @@ const BC_ComplaintsPage = () => {
     setIsAssignOpen(true);
   };
 
+  // Selection
+  const [selectAll, setSelectAll] = useState(false);
+  const [selected, setSelected] = useState([]);
+
+  const handleSelect = (id, isChecked) => {
+    setSelected(prev => {
+      if (isChecked) {
+        return [...prev, id];
+      } else {
+        return prev.filter(item => item !== id); 
+      }
+    });
+  };
+
+  const handleSelAll = () => {
+    if (selectAll) {
+      setSelectAll(false);
+      console.log(selectAll)
+      setSelected([]); 
+    } else {
+      setSelectAll(true);
+      console.log(selectAll)
+      setSelected(filteredComplaints.map(c => c.id)); 
+    }
+  };
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -195,6 +220,23 @@ const BC_ComplaintsPage = () => {
                   <option key={priority} value={priority}>{priority}</option>
                 ))}
               </select>
+
+              {/* Select for Assignment */}
+              <button
+                onClick={handleSelAll}
+                className={`
+                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
+
+                  ${selectAll
+                    ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
+                    : "bg-gray-400 border-gray-400 text-black hover:bg-blue-300"}
+                `}
+                title="Select All for assignment"
+              >
+                {selectAll ? "Unselect All" : "Select All"}
+              </button>
+
+
             </div>
             {/* Loading State */}
             {loading && <LoadingSpinner message="Loading complaints..." />}
@@ -214,6 +256,8 @@ const BC_ComplaintsPage = () => {
                       onStatusUpdate={handleStatusUpdate}
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
+                      onSelect={handleSelect}
+                      isSelected={selected.includes(complaint.id)} 
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
