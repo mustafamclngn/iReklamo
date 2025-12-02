@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request, jsonify
+from flask import Blueprint, request, jsonify, current_app, render_template
 from flask_cors import CORS
 from flask_mail import Message
 import psycopg2
@@ -16,6 +16,7 @@ from app.controllers.complaints.complaintAssignC import assign_complaint
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
+CORS(complaints_bp)
 
 # FOR GENERATING TRACKING ID 
 def generate_complaint_id(cursor):
@@ -51,14 +52,14 @@ def create_complaint():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
-            empty_to_null(data['first_name']),
-            empty_to_null(data['last_name']),
-            empty_to_null(data['sex']),
-            empty_to_null(data['age']),
+            empty_to_null(data.get('first_name')),
+            empty_to_null(data.get('last_name')),
+            empty_to_null(data.get('sex')),
+            empty_to_null(data.get('age')),
             data['contact_number'],
             data['email'],
             int(data.get('barangay')),
-            data.get('is_anonymous')
+            data.get('is_anonymous', False)
         ))
         complainant_id = cursor.fetchone()['id']
 
@@ -86,7 +87,7 @@ def create_complaint():
             data['case_type'],
             data['description'],
             data['full_address'],
-            empty_to_null(data['specific_location']),
+            data['specific_location'],
             complainant_id,
             int(data.get('barangay')),
             assigned_official_id
@@ -124,6 +125,7 @@ def create_complaint():
                     html=html_body
                 )
                 mail.send(message)
+                print(f"Email sent successfully to {data['email']}")
 
         except Exception as mail_err:
             print(f"Warning: Failed to send email - {mail_err}")
@@ -145,7 +147,6 @@ def create_complaint():
     finally:
         if conn:
             conn.close()
-
 
 
 # LIST OF ALL COMPLAINTS
