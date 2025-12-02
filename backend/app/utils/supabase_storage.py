@@ -62,31 +62,7 @@ class SupabaseStorage:
     
     def get_public_url(self, file_path: str) -> str:
         return self.client.storage.from_(self.bucket_name).get_public_url(file_path)
-    
-    # fallback rani kung wala pa ang bucket, madelete rani later if working na ang inyong supabase bucket
-    def create_bucket_if_not_exists(self, public: bool = True) -> bool:
-        try:
-            buckets = self.client.storage.list_buckets()
-            bucket_names = [bucket['name'] for bucket in buckets]
-            
-            if self.bucket_name not in bucket_names:
-                self.client.storage.create_bucket(
-                    self.bucket_name,
-                    options={"public": public}
-                )
-                print(f"Created bucket: {self.bucket_name}")
-            else:
-                print(f"Bucket already exists: {self.bucket_name}")
-                
-            return True
-            
-        except Exception as e:
-            print(f"Error creating bucket: {e}")
-            return False
 
-
-# Utility functions for easy import
 def init_supabase_storage(url: str, key: str, bucket_name: str) -> SupabaseStorage:
     storage = SupabaseStorage(url, key, bucket_name)
-    storage.create_bucket_if_not_exists(public=True)
     return storage
