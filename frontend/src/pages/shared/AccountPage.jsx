@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Camera, Save, X, AlertCircle, CheckCircle } from "lucide-react";
+import { Camera, Save, X, AlertCircle } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import useOfficialsApi from "../../api/officialsApi";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { formatDate, formatPhone } from "../../utils/formatters";
+import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
+import {
+  formatDate,
+  formatPhone,
+  formatDateForInput,
+} from "../../utils/formatters";
 import {
   validateEmail,
   validatePhone,
@@ -16,15 +21,17 @@ import {
   resetForm,
   createFormData,
 } from "../../utils/formHelpers";
+import { toTitleCase } from "../../utils/stringHelpers";
 
-const BO_AccountPage = () => {
+const AccountPage = () => {
   const { auth } = useAuth();
   const { getOfficialById, updateOfficial } = useOfficialsApi();
-  const [official, setOfficial] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -54,40 +61,50 @@ const BO_AccountPage = () => {
     "profile_picture",
   ];
 
+  const getUserRole = () => {
+    if (!userData) return "User";
+    const role = userData.position || userData.role || "User";
+    return toTitleCase(role);
+  };
+
   useEffect(() => {
-    fetchOfficialData();
+    fetchUserData();
   }, []);
 
-  const fetchOfficialData = async () => {
+  const fetchUserData = async () => {
     try {
       setLoading(true);
       const response = await getOfficialById(auth?.user?.user_id);
 
       if (response.success && response.data) {
-        setOfficial(response.data);
+        setUserData(response.data);
         setFormData({
           first_name: response.data.first_name || "",
           last_name: response.data.last_name || "",
           email: response.data.email || "",
           contact_number: response.data.contact_number || "",
           sex: response.data.sex || "",
-          birthdate: response.data.birthdate
-            ? response.data.birthdate.split("T")[0]
-            : "",
+          birthdate: formatDateForInput(response.data.birthdate), // Use the new function
           purok: response.data.purok || "",
           street: response.data.street || "",
           profile_picture: response.data.profile_picture,
         });
       }
     } catch (error) {
-      console.error("Error fetching official data:", error);
+      console.error("Error fetching user data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleInputChange = (e) => {
-    handleFormChange(e, setFormData);
+    const { name, value } = e.target;
+
+    if (name === "first_name" || name === "last_name") {
+      setFormData((prev) => ({ ...prev, [name]: toTitleCase(value) }));
+    } else {
+      handleFormChange(e, setFormData);
+    }
   };
 
   const handleImageChange = async (e) => {
@@ -113,20 +130,26 @@ const BO_AccountPage = () => {
     setImageFile(null);
   };
 
-  const handleSave = async () => {
+  const handleSaveClick = () => {
+    // Validate required fields
+    if (!formData.first_name || !formData.last_name || !formData.email) {
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      return;
+    }
+
+    if (formData.contact_number && !validatePhone(formData.contact_number)) {
+      return;
+    }
+
+    // Show confirmation modal
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = async () => {
     try {
-      if (!formData.first_name || !formData.last_name || !formData.email) {
-        return;
-      }
-
-      if (!validateEmail(formData.email)) {
-        return;
-      }
-
-      if (formData.contact_number && !validatePhone(formData.contact_number)) {
-        return;
-      }
-
       setSaving(true);
 
       const formDataToSend = createFormData(formData, ["profile_picture"]);
@@ -138,25 +161,26 @@ const BO_AccountPage = () => {
       const response = await updateOfficial(auth.user.user_id, formDataToSend);
 
       if (response.success) {
-        const updatedOfficial = {
-          ...official,
+        const updatedUser = {
+          ...userData,
           ...formData,
           profile_picture:
-            response.data?.profile_picture || official.profile_picture,
+            response.data?.profile_picture || userData.profile_picture,
         };
 
-        setOfficial(updatedOfficial);
+        setUserData(updatedUser);
         setFormData({
           ...formData,
           profile_picture:
-            response.data?.profile_picture || official.profile_picture,
+            response.data?.profile_picture || userData.profile_picture,
         });
 
         setEditMode(false);
         setPreviewImage(null);
         setImageFile(null);
+        setShowConfirmModal(false);
 
-        await fetchOfficialData();
+        await fetchUserData();
       }
     } catch (error) {
       console.error("Error saving data:", error);
@@ -167,15 +191,15 @@ const BO_AccountPage = () => {
 
   const handleCancel = () => {
     const originalData = {
-      first_name: official.first_name || "",
-      last_name: official.last_name || "",
-      email: official.email || "",
-      contact_number: official.contact_number || "",
-      sex: official.sex || "",
-      birthdate: official.birthdate ? official.birthdate.split("T")[0] : "",
-      purok: official.purok || "",
-      street: official.street || "",
-      profile_picture: official.profile_picture,
+      first_name: userData.first_name || "",
+      last_name: userData.last_name || "",
+      email: userData.email || "",
+      contact_number: userData.contact_number || "",
+      sex: userData.sex || "",
+      birthdate: formatDateForInput(userData.birthdate), // Use the new function
+      purok: userData.purok || "",
+      street: userData.street || "",
+      profile_picture: userData.profile_picture,
     };
     resetForm(originalData, setFormData);
     setPreviewImage(null);
@@ -184,13 +208,13 @@ const BO_AccountPage = () => {
   };
 
   const getProfileCompletion = () => {
-    if (!official) return 0;
+    if (!userData) return 0;
 
     const profileData = {
-      ...official,
+      ...userData,
       profile_picture:
-        official.profile_picture && !imageError
-          ? official.profile_picture
+        userData.profile_picture && !imageError
+          ? userData.profile_picture
           : null,
     };
 
@@ -198,14 +222,14 @@ const BO_AccountPage = () => {
   };
 
   const hasValidImage =
-    (official?.profile_picture || previewImage) && !imageError;
-  const displayImage = previewImage || getImageURL(official?.profile_picture);
+    (userData?.profile_picture || previewImage) && !imageError;
+  const displayImage = previewImage || getImageURL(userData?.profile_picture);
 
   if (loading) {
     return <LoadingSpinner message="Loading account details..." />;
   }
 
-  if (!official) {
+  if (!userData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -218,6 +242,13 @@ const BO_AccountPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <ConfirmEditModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSave}
+        isLoading={saving}
+      />
+
       <div className="max-w-[1591px] mx-auto px-8 py-8">
         {/* header */}
         <div className="flex justify-between items-center mb-6">
@@ -243,21 +274,12 @@ const BO_AccountPage = () => {
                 Cancel
               </button>
               <button
-                onClick={handleSave}
+                onClick={handleSaveClick}
                 disabled={saving}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5" />
-                    Save Changes
-                  </>
-                )}
+                <Save className="w-5 h-5" />
+                Save Changes
               </button>
             </div>
           )}
@@ -324,13 +346,13 @@ const BO_AccountPage = () => {
             {/* info */}
             <div className="flex-1">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {official.first_name} {official.last_name}
+                {userData.first_name} {userData.last_name}
               </h2>
               <p className="text-gray-600 font-medium text-xl mb-1">
-                {official.position || "Barangay Official"}
+                {getUserRole()}
               </p>
               <p className="text-gray-600 text-lg">
-                {official.barangay_name || "N/A"}, Iligan City 9200
+                {userData.barangay_name || "N/A"}, Iligan City 9200
               </p>
             </div>
 
@@ -386,7 +408,7 @@ const BO_AccountPage = () => {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
-                First Name <span className="text-red-500">*</span>
+                First Name {editMode && <span className="text-red-500">*</span>}
               </label>
               {editMode ? (
                 <input
@@ -402,14 +424,14 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {official.first_name}
+                    {userData.first_name}
                   </p>
                 </div>
               )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
-                Last Name <span className="text-red-500">*</span>
+                Last Name {editMode && <span className="text-red-500">*</span>}
               </label>
               {editMode ? (
                 <input
@@ -425,7 +447,7 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {official.last_name}
+                    {userData.last_name}
                   </p>
                 </div>
               )}
@@ -449,7 +471,7 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {official.sex || "N/A"}
+                    {userData.sex || "N/A"}
                   </p>
                 </div>
               )}
@@ -470,14 +492,14 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {formatDate(official.birthdate)}
+                    {formatDate(userData.birthdate)}
                   </p>
                 </div>
               )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
-                Email <span className="text-red-500">*</span>
+                Email {editMode && <span className="text-red-500">*</span>}
               </label>
               {editMode ? (
                 <input
@@ -493,7 +515,7 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {official.email}
+                    {userData.email}
                   </p>
                 </div>
               )}
@@ -516,7 +538,7 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {formatPhone(official.contact_number)}
+                    {formatPhone(userData.contact_number)}
                   </p>
                 </div>
               )}
@@ -527,7 +549,7 @@ const BO_AccountPage = () => {
               </label>
               <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <p className="text-gray-900 font-medium text-lg">
-                  {official.user_name || "N/A"}
+                  {userData.user_name || "N/A"}
                 </p>
               </div>
             </div>
@@ -537,7 +559,7 @@ const BO_AccountPage = () => {
               </label>
               <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <p className="text-gray-900 font-medium text-lg">
-                  {formatDate(official.created_at)}
+                  {formatDate(userData.created_at)}
                 </p>
               </div>
             </div>
@@ -569,7 +591,7 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {official.purok || "N/A"}
+                    {userData.purok || "N/A"}
                   </p>
                 </div>
               )}
@@ -591,7 +613,7 @@ const BO_AccountPage = () => {
               ) : (
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {official.street || "N/A"}
+                    {userData.street || "N/A"}
                   </p>
                 </div>
               )}
@@ -602,7 +624,7 @@ const BO_AccountPage = () => {
               </label>
               <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <p className="text-gray-900 font-medium text-lg">
-                  {official.barangay_name || "N/A"}
+                  {userData.barangay_name || "N/A"}
                 </p>
               </div>
             </div>
@@ -621,4 +643,4 @@ const BO_AccountPage = () => {
   );
 };
 
-export default BO_AccountPage;
+export default AccountPage;
