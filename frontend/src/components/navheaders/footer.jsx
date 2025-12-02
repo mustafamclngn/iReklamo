@@ -1,4 +1,5 @@
 import React from 'react';
+import { Facebook, Twitter } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -37,11 +38,13 @@ export default function Footer() {
 
                         <div className="w-[200px] text-sm">
                             <h3 className="font-bold text-base mb-2">Follow us!</h3>
-                            <div className="flex flex-row gap-2 items-center mb-1">
-                                <p className="text-blue-400 hover:underline">IliganComplaints</p>
+                            <div className="flex flex-row gap-1 items-center mb-1">
+                                <Facebook size={15}/>
+                                <p className="text-blue-400 hover:underline">iReklamo Official</p>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
-                                <p className="text-blue-400 hover:underline">@IliganComplaints</p>
+                            <div className="flex flex-row gap-1 items-center">
+                                <Twitter size={15}/>
+                                <p className="text-blue-400 hover:underline">@ireklamo</p>
                             </div>
                         </div>
                     </div>
