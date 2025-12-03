@@ -41,6 +41,15 @@ class Config:
     # Logging Configuration
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
 
+    # Mail Configuration
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 2525))
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", 'True') == 'True'
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", 'False') == 'True'
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", 'noreply@ireklamo.ph')
+
 class DevelopmentConfig(Config):
     """Development configuration"""
 

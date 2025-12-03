@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from flask_cors import CORS
+from flask import Blueprint, request, jsonify, current_app, render_template
+from flask_mail import Message
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
@@ -22,6 +22,126 @@ def generate_complaint_id(cursor):
     count_today = cursor.fetchone()['count'] + 1  # Start from 1
     sequential = str(count_today).zfill(4)  # Pad to 4 digits, e.g., 0001
     return f"CMP-{today}-{sequential}"
+
+def empty_to_null(value):
+    return value if value not in ("", None) else None
+
+# TO CREATE COMPLAINT
+@complaints_bp.route('/create_complaint', methods=['POST'])
+def create_complaint():
+    conn = None
+    try:
+        data = request.get_json()
+        mail = current_app.extensions.get('mail')  # Get Flask-Mail
+
+        # Connect to DB
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Generate complaint ID
+        complaint_id_str = generate_complaint_id(cursor)
+
+        # Insert complainant
+        cursor.execute("""
+            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id, is_anonymous)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
+        """, (
+            empty_to_null(data.get('first_name')),
+            empty_to_null(data.get('last_name')),
+            empty_to_null(data.get('sex')),
+            empty_to_null(data.get('age')),
+            data['contact_number'],
+            data['email'],
+            int(data.get('barangay')),
+            data.get('is_anonymous', False)
+        ))
+        complainant_id = cursor.fetchone()['id']
+
+        # Find assigned official (e.g., barangay captain)
+        cursor.execute("""
+            SELECT user_id
+            FROM users
+            WHERE barangay_id = %s AND role_id = '3'
+            LIMIT 1;
+        """, (int(data.get('barangay')),))
+        captain_record = cursor.fetchone()
+        assigned_official_id = captain_record['user_id'] if captain_record else None
+
+        # Insert complaint
+        cursor.execute("""
+            INSERT INTO complaints (
+                complaint_code, title, case_type, description, full_address, specific_location,
+                complainant_id, barangay_id, assigned_official_id, created_at
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            RETURNING id;
+        """, (
+            complaint_id_str,
+            data['complaint_title'],
+            data['case_type'],
+            data['description'],
+            data['full_address'],
+            data['specific_location'],
+            complainant_id,
+            int(data.get('barangay')),
+            assigned_official_id
+        ))
+        complaint_id = cursor.fetchone()['id']
+
+        # Commit DB changes before sending email
+        conn.commit()
+
+        # Send confirmation email (safe: exceptions caught)
+        try:
+            if mail:
+                # Build greeting
+                first = data.get("first_name")
+                last = data.get("last_name")
+                is_anonymous = data.get("is_anonymous")
+
+                if is_anonymous or (not first and not last):
+                    greeting_name = "anonymous"
+                else:
+                    greeting_name = " ".join(p for p in [first, last] if p)
+
+                # Render HTML email
+                html_body = render_template(
+                    "complaint_submitted.html",
+                    greeting_name=greeting_name,
+                    complaint_id=complaint_id_str,
+                    year=datetime.now().year
+                )
+
+                # Create the message
+                message = Message(
+                    subject='Complaint Submitted Successfully',
+                    recipients=[data['email']],
+                    html=html_body
+                )
+                mail.send(message)
+                print(f"Email sent successfully to {data['email']}")
+
+        except Exception as mail_err:
+            print(f"Warning: Failed to send email - {mail_err}")
+
+        return jsonify({
+            "success": True,
+            "message": "Complaint created successfully!",
+            "complainant_id": complainant_id,
+            "complaint_id": complaint_id,
+            "complaint_code": complaint_id_str
+        }), 201
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error creating complaint: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
 
 
 # LIST OF ALL COMPLAINTS
@@ -305,96 +425,6 @@ def get_assigned_complaints(official_id):
         }), 500
 
 
-# TO CREATE COMPLAINT
-@complaints_bp.route('/create_complaint', methods=['POST'])
-def create_complaint():
-    try:
-        data = request.get_json()
-        print("Received complaint:", data)
-
-        conn = psycopg2.connect(**DB_CONFIG)
-
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            complaint_id_str = generate_complaint_id(cursor)
-            
-            barangay_id = int(data.get('barangay'))
-
-            # insert complainant info
-            cursor.execute("""
-                INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id;
-            """, (
-                data['first_name'],
-                data['last_name'], 
-                data['sex'], 
-                data['age'],
-                data['contact_number'], 
-                data['email'], 
-                str(barangay_id)  # Use the variable
-            ))
-            complainant_id = cursor.fetchone()['id']
-            
-            # IMPORTANT: Change 'users' to your actual table name 
-            # (e.g., 'barangay_officials', 'accounts')
-            # IMPORTANT: Change 'id' to the official's user ID column (like 'user_id')
-            cursor.execute("""
-                SELECT user_id 
-                FROM users 
-                WHERE barangay_id = %s AND role_id = '3'
-                LIMIT 1;
-            """, (barangay_id,))
-            
-            captain_record = cursor.fetchone()
-            if captain_record:
-                assigned_official_id = captain_record['user_id']  # Get the captain's user ID
-
-            # insert complaint
-            cursor.execute("""
-                INSERT INTO complaints (
-                    complaint_code, title, case_type, description, full_address, specific_location,
-                    complainant_id, barangay_id, assigned_official_id, created_at
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-                RETURNING id;
-            """, (
-                complaint_id_str,              # tracking id
-                data['complaint_title'],       # title
-                data['case_type'],             # case_type
-                data['description'],           # description
-                data['full_address'],          # full_address
-                data['specific_location'],     # specific_location
-                complainant_id,                # complainant_id FK
-                int(data.get('barangay')),     # barangay_id FK
-                None                           # assigned_official_id NULL
-            ))
-            complaint_id = cursor.fetchone()['id']
-
-            conn.commit()
-
-        # Save data to DB here
-        return jsonify({
-            "success": True, 
-            "message": "Complaint created!",
-            'complainant_id': complainant_id,
-            'complaint_id': complaint_id,
-            'complaint_code': complaint_id_str,
-        }), 201
-    
-    except Exception as e:
-        print(f"Error creating complaint: {e}")
-        # Rollback in case of error
-        if 'conn' in locals() and conn:
-            conn.rollback()
-        return jsonify({"error": str(e)}), 500
-    
-    finally:
-        # Ensure connection is always closed
-        if 'conn' in locals() and conn:
-            conn.close()
-
-
-
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
 def get_complaint(complaint_id):
     """
@@ -469,6 +499,8 @@ def get_complaint(complaint_id):
         }), 500
 
 
+
+
 @complaints_bp.route('/<int:complaint_id>', methods=['PUT'])
 def update_complaint(complaint_id):
     """
@@ -540,12 +572,7 @@ def delete_complaint(complaint_id):
         }), 500
 
 
-
-
-
-
 # ROLE-BASED COMPLAINTS ENDPOINTS
-
 @complaints_bp.route('/barangay-captain/<int:user_id>', methods=['GET'])
 def get_barangay_captain_complaints(user_id):
     """

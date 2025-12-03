@@ -17,6 +17,7 @@ def create_app(config_name=None):
 
     # Create Flask app instance
     app = Flask(__name__)
+
     
     # Load configuration
     if config_name is None:
@@ -29,7 +30,7 @@ def create_app(config_name=None):
 
     # Initialize extensions
     init_extensions(app)
-
+    
     # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)

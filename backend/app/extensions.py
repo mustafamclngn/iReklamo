@@ -1,7 +1,10 @@
 from flask_cors import CORS
+from flask_mail import Mail
 
 # Initialize extensions
 cors = CORS()
+mail = Mail()
+
 class SupabaseStorageWrapper:
     def __init__(self):
         self.storage = None
@@ -35,6 +38,10 @@ def init_extensions(app):
             }
         }
     )
+
+    # Initialize Flask-Mail
+    mail.init_app(app)
+
     
     # supabase storage
     supabase_url = app.config.get('SUPABASE_URL')
