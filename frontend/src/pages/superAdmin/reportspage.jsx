@@ -6,9 +6,10 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { Box } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
-import { ChartNoAxesColumn, Ellipsis, HandHelping, Megaphone, MessageCircleMore, Pin, SquareStack, SquareStar } from 'lucide-react';
+import { Ellipsis, HandHelping, Megaphone, MessageCircleMore, Pin, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import '/src/assets/css/eventcard.css';
 import useUserInfoApi from '../../api/userInfo';
+import reportsAPI from '../../api/reportsAPI';
 
 const MONTHS = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -47,7 +48,7 @@ export default function ReportsPage() {
                     </div>  
 
                     <div className='w-1/3 border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
-                        <DailyComplaints />
+                        <SatisfactionLevel />
                     </div>  
                 </div>
 
@@ -61,6 +62,13 @@ export default function ReportsPage() {
                         <ResolvedComplaintsperBrgy />
                     </div>
                 </div>
+
+                {/* BOTTOM ANALYTICS */}
+                <div className='flex flex-row gap-3 mt-3'>
+                    <div className='w-full border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
+                        <UrgentBarangays />
+                    </div>
+                </div>
             </div>
 
             {/* Right area */}
@@ -70,7 +78,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Announcements */}
-                <div className='mt-4 border-[1px] border-gray-200 rounded-md px-5 py-6'>
+                <div className='mt-4 border border-gray-200 rounded-2xl px-5 py-6'>
                     <div className='flex flex-row justify-between'>
                         <h1 className='text-xl font-semibold mb-5'>
                             <Megaphone size={20} strokeWidth={'2.25px'} className='inline-block mr-2'/>
@@ -115,137 +123,582 @@ export default function ReportsPage() {
 }
 
 
-function ResolvedComplaintsperBrgy(){
-    const barangayData = [
-        { barangay: 'Abuno' },
-        { barangay: 'Acmac-Mariano Badelles Sr.' },
-        { barangay: 'Bagong Silang' },
-        { barangay: 'Bonbonon' },
-        { barangay: 'Bunawan' },
-        { barangay: 'Buru-un' },
-        { barangay: 'Dalipuga' },
-        { barangay: 'Del Carmen' },
-        { barangay: 'Digkilaan' },
-        { barangay: 'Ditucalan' },
-        { barangay: 'Dulag' },
-        { barangay: 'Hinaplanon' },
-        { barangay: 'Hindang' },
-        { barangay: 'Kabacsanan' },
-        { barangay: 'Kalilangan' },
-        { barangay: 'Kiwalan' },
-        { barangay: 'Lanipao' },
-        { barangay: 'Luinab' },
-        { barangay: 'Mahayahay' },
-        { barangay: 'Mainit' },
-        { barangay: 'Mandulog' },
-        { barangay: 'Maria Cristina' },
-        { barangay: 'Pala-o' },
-        { barangay: 'Panoroganan' },
-        { barangay: 'Poblacion' },
-        { barangay: 'Puga-an' },
-        { barangay: 'Rogongon' },
-        { barangay: 'San Miguel' },
-        { barangay: 'San Roque' },
-        { barangay: 'Santa Elena' },
-        { barangay: 'Santa Filomena' },
-        { barangay: 'Santiago' },
-        { barangay: 'Santo Rosario' },
-        { barangay: 'Saray' },
-        { barangay: 'Suarez' },
-        { barangay: 'Tambacan' },
-        { barangay: 'Tibanga' },
-        { barangay: 'Tipanoy' },
-        { barangay: 'Tomas Cabili (Tominobo Proper)' },
-        { barangay: 'Upper Hinaplanon' },
-        { barangay: 'Upper Tominobo' },
-        { barangay: 'Villa Verde' },
-        { barangay: 'Bonifacio' },
-        { barangay: 'Ubaldo Laya' }
+
+
+
+function CaseTypeBreakdownperBrgy(){
+    const [selectedMonth, setSelectedMonth] = useState('November');
+    const [caseTypes, setCaseTypes] = useState([]);
+    const [barangayData, setBarangayData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [topMonthlyTypes, setTopMonthlyTypes] = useState([]);
+    const [selectedTopMonth, setSelectedTopMonth] = useState('November');
+
+    const mainCaseTypes = [
+        'Infrastructure & Utilities',
+        'Environment & Sanitation',
+        'Peace & Order',
+        'Government Service & Conduct',
+        'Consumer & Business Complaints',
+        'Public Safety & Welfare'
     ];
 
-    const caseTypes = [
-        {
-            label: 'Resolved',
-            data: [
-            45, 32, 38, 22, 30, 50, 42, 27, 35, 29, 31, 44, 36, 28, 34, 40,
-            33, 41, 39, 26, 24, 37, 48, 46, 55, 20, 23, 47, 52, 49, 43, 34,
-            36, 38, 29, 41, 50, 44, 33, 39, 31, 26, 28, 35
-            ],
-            color: '#3b82f6'
-        },
-        {
-            label: 'Pending',
-            data: [
-            28, 22, 25, 20, 18, 30, 27, 19, 24, 21, 23, 29, 26, 20, 22, 28,
-            25, 31, 27, 19, 17, 26, 32, 29, 35, 16, 18, 31, 34, 30, 28, 24,
-            26, 27, 22, 29, 33, 28, 23, 27, 25, 20, 21, 24
-            ],
-            color: '#10b981'
-        },
-        {
-            label: 'In-Progress',
-            data: [
-            28, 22, 25, 20, 18, 30, 27, 19, 24, 21, 23, 29, 26, 20, 22, 28,
-            25, 31, 27, 19, 17, 26, 32, 29, 35, 16, 18, 31, 34, 30, 28, 24,
-            26, 27, 22, 29, 33, 28, 23, 27, 25, 20, 21, 24
-            ],
-            color: '#f59e0b'
-        }
-    ];
+    const mainColors = {
+        'Infrastructure & Utilities': '#3b82f6',
+        'Environment & Sanitation': '#10b981',
+        'Peace & Order': '#f59e0b',
+        'Government Service & Conduct': '#ef4444',
+        'Consumer & Business Complaints': '#8b5cf6',
+        'Public Safety & Welfare': '#ec4899'
+    };
 
-    
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedMonth, '2025');
+                
+                // Transform data for the chart
+                const chartSeries = data.case_types.map((caseType, idx) => ({
+                    label: caseType,
+                    data: data.barangays.map(b => b.case_type_counts[idx] || 0),
+                    color: mainColors[caseType] || '#6b7280' // Gray for others
+                }));
+
+                setCaseTypes(chartSeries);
+                setBarangayData(data.barangays.map(b => b.barangay_name));
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching case type breakdown:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [selectedMonth]);
+
+    useEffect(() => {
+        const fetchTopMonthlyTypes = async () => {
+            try {
+                const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedTopMonth, '2025');
+                
+                // Calculate totals for each case type across all barangays
+                const typeTotals = data.case_types.map((caseType, idx) => {
+                    const total = data.barangays.reduce((sum, b) => sum + (b.case_type_counts[idx] || 0), 0);
+                    return { case_type: caseType, count: total };
+                });
+                
+                // Sort by count and get top 3
+                const top3 = typeTotals
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 3);
+                
+                setTopMonthlyTypes(top3);
+            } catch (error) {
+                console.error('Error fetching top monthly case types:', error);
+            }
+        };
+        
+        fetchTopMonthlyTypes();
+    }, [selectedTopMonth]);
+
+    const maxTopCount = topMonthlyTypes.length > 0 
+        ? Math.max(...topMonthlyTypes.map(item => item.count)) 
+        : 100;
+
+    useEffect(() => {
+        const fetchUrgentBarangays = async () => {
+            try {
+                const data = await reportsAPI.getTopUrgentBarangays();
+                setUrgentBarangays(data);
+            } catch (error) {
+                console.error('Error fetching urgent barangays:', error);
+            }
+        };
+        
+        fetchUrgentBarangays();
+    }, []);
 
     return (
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
                     <p className="event-title">Monthly Case Type Breakdown per Barangay</p>
-                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                    <select 
+                        className='border border-gray-300 rounded-lg p-1 text-xs'
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                    >
                         {MONTHS.map((month, idx) => (
                             <option key={idx} value={month}>{month}</option>
                         ))}
                     </select>
                 </div>
 
-                <div className='mt-4'>
-                    <BarChart
-                        height={250}
-                        series={caseTypes.map(ct => ({
-                            data: ct.data,
-                            label: ct.label,
-                            stack: 'total',
-                            color: ct.color,
-                        }))}
-                        xAxis={[{
-                            scaleType: 'band',
-                            data: barangayData.map(b => b.barangay),
-                            tickLabelStyle: {
-                                fontSize: 11,
-                                angle: -15,
-                                textAnchor: 'end',
-                            },
-                        }]}
-                        margin={0}
-                        sx={{
-                            '.MuiChartsLegend-root': {
-                                display: 'none',
-                            },
-                        }}
-                    />
+                {loading ? (
+                    <div className='flex justify-center items-center h-64'>
+                        <p className='text-gray-500'>Loading...</p>
+                    </div>
+                ) : caseTypes.length > 0 ? (
+                    <>
+                        <div className='mt-4'>
+                            <BarChart
+                                height={250}
+                                series={caseTypes.map(ct => ({
+                                    data: ct.data,
+                                    label: ct.label,
+                                    stack: 'total',
+                                    color: ct.color,
+                                }))}
+                                xAxis={[{
+                                    scaleType: 'band',
+                                    data: barangayData,
+                                    tickLabelStyle: {
+                                        fontSize: 11,
+                                        angle: -15,
+                                        textAnchor: 'end',
+                                    },
+                                }]}
+                                margin={0}
+                                sx={{
+                                    '.MuiChartsLegend-root': {
+                                        display: 'none',
+                                    },
+                                }}
+                            />
+                        </div>
+
+                        {/* Legend */}
+                        <div className='w-2/3 flex flex-wrap gap-3 text-xs justify-center items-center text-center mx-auto'>
+                            {caseTypes.map((ct, idx) => (
+                                <div key={idx} className='flex items-center gap-1 justify-center -mt-2'>
+                                    <div 
+                                        className='w-3 h-3 rounded-sm' 
+                                        style={{ backgroundColor: ct.color }}
+                                    />
+                                    <span className='text-gray-700'>{ct.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className='flex justify-center items-center h-64'>
+                        <p className='text-gray-500'>No data available for {selectedMonth}</p>
+                    </div>
+                )}
+
+                <div className='flex flex-row border rounded-lg mt-4'>
+                    <div className='w-full'>
+                        <div className='flex flex-row justify-between p-4 gap-5'>
+                            <h1 className="text-sm text-gray-500 font-medium">Top 3 Monthly Case Type</h1>
+                            <select 
+                                className='border border-gray-300 rounded-lg p-1 text-xs h-7'
+                                value={selectedTopMonth}
+                                onChange={(e) => setSelectedTopMonth(e.target.value)}
+                            >
+                                {MONTHS.map((month, idx) => (
+                                    <option key={idx} value={month}>{month}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className='px-4 pb-4'>
+                            {topMonthlyTypes.length > 0 ? (
+                                topMonthlyTypes.map((item, index) => (
+                                    <div key={index} className='flex flex-row mb-3 gap-2'>
+                                        <div className='w-1/3 truncate text-sm font-medium text-gray-700 -mb-2'>
+                                            {item.case_type}
+                                        </div>
+                                        <div className='w-2/3 -mb-2'>
+                                            <div className='bg-gray-200 rounded-full h-4 overflow-hidden'>
+                                                <div 
+                                                    className='bg-blue-600 h-full flex items-center justify-end pr-2 text-white text-xs font-semibold rounded-full transition-all duration-300'
+                                                    style={{ width: `${(item.count / maxTopCount) * 100}%` }}
+                                                >
+                                                    {item.count}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className='text-sm text-gray-500'>No data available</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
+
+function UrgentBarangays() {
+    const [urgentBarangays, setUrgentBarangays] = useState([]);
+    const [moderateBarangays, setModerateBarangays] = useState([]);
+    const [lowBarangays, setLowBarangays] = useState([]);
+    const [selectedMonth, setSelectedMonth] = useState('November');
+    const [priorityData, setPriorityData] = useState([]);
+    const [barangayNames, setBarangayNames] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUrgentBarangays = async () => {
+            try {
+                const data = await reportsAPI.getTopUrgentBarangays();
+                setUrgentBarangays(data);
+            } catch (error) {
+                console.error('Error fetching urgent barangays:', error);
+            }
+        };
+        
+        fetchUrgentBarangays();
+    }, []);
+
+    useEffect(() => {
+        const fetchModerateBarangays = async () => {
+            try {
+                const data = await reportsAPI.getTopModerateBarangays();
+                setModerateBarangays(data);
+            } catch (error) {
+                console.error('Error fetching moderate barangays:', error);
+            }
+        };
+        
+        fetchModerateBarangays();
+    }, []);
+
+    useEffect(() => {
+        const fetchLowBarangays = async () => {
+            try {
+                const data = await reportsAPI.getTopLowBarangays();
+                setLowBarangays(data);
+            } catch (error) {
+                console.error('Error fetching low barangays:', error);
+            }
+        };
+        
+        fetchLowBarangays();
+    }, []);
+
+    useEffect(() => {
+        const fetchPriorityData = async () => {
+            try {
+                setLoading(true);
+                const data = await reportsAPI.getPriorityCountsPerBarangay(selectedMonth, '2025');
+                
+                // Transform data for bar chart
+                const chartSeries = [
+                    {
+                        label: 'Urgent',
+                        data: data.data.map(b => b.priority_counts[0]),
+                        color: '#ef4444',
+                        stack: 'total'
+                    },
+                    {
+                        label: 'Moderate',
+                        data: data.data.map(b => b.priority_counts[1]),
+                        color: '#f59e0b',
+                        stack: 'total'
+                    },
+                    {
+                        label: 'Low',
+                        data: data.data.map(b => b.priority_counts[2]),
+                        color: '#3b82f6',
+                        stack: 'total'
+                    }
+                ];
+
+                setPriorityData(chartSeries);
+                setBarangayNames(data.barangays);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching priority counts:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchPriorityData();
+    }, [selectedMonth]);
+
+    return (
+        <div className="w-auto">
+            <div className="">
+                <div className='flex flex-row gap-3'>
+                    <div className='w-2/5'>
+                        <div className='flex flex-row items-center items-center justify-between'>
+                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Barangay</h1>
+                            <select 
+                                className='border rounded-lg text-xs h-7 px-1'
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                            >
+                                {MONTHS.map((month, idx) => (
+                                    <option key={idx} value={month}>{month}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {loading ? (
+                            <div className='flex justify-center items-center h-64'>
+                                <p className='text-gray-500'>Loading...</p>
+                            </div>
+                        ) : priorityData.length > 0 ? (
+                            <>
+                                <BarChart
+                                    height={200}
+                                    series={priorityData}
+                                    xAxis={[{
+                                        scaleType: 'band',
+                                        data: barangayNames,
+                                        tickLabelStyle: {
+                                            fontSize: 11,
+                                            angle: -15,
+                                            textAnchor: 'end',
+                                        },
+                                    }]}
+                                    margin={{ bottom: 0 }}
+                                    sx={{
+                                        '.MuiChartsLegend-root': {
+                                            display: 'none',
+                                        },
+                                    }}
+                                />
+                                
+                                {/* Legend */}
+                                <div className='flex flex-wrap gap-3 text-xs justify-center '>
+                                    {priorityData.map((priority, idx) => (
+                                        <div key={idx} className='flex items-center gap-1'>
+                                            <div 
+                                                className='w-3 h-3 rounded-sm' 
+                                                style={{ backgroundColor: priority.color }}
+                                            />
+                                            <span className='text-gray-700'>{priority.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <div className='flex justify-center items-center h-64'>
+                                <p className='text-gray-500'>No data available for {selectedMonth}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className='flex flex-row border rounded-xl w-3/5'>
+                        <div className='w-1/3 border-r p-4'>
+                            <h1 className="text-sm text-gray-500 font-medium mb-6 text-center">Barangays that Needs <h1 className='text-red-500'>Urgent Attention</h1></h1>
+                            {urgentBarangays.length > 0 ? (
+                                urgentBarangays.map((brgy, idx) => (
+                                    <div key={idx} className='mb-2'>
+                                        <p className='text-sm'>
+                                            <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
+                                            <h1 className='ml-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full w-fit inline-block'>
+                                                {brgy.urgent_count} urgent
+                                            </h1>
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className='text-sm text-gray-500'>No urgent complaints</p>
+                            )}
+                        </div>
+
+                        <div className='w-1/3 border-r p-4'>
+                            <h1 className="text-sm text-gray-500 font-medium mb-6 text-center">Barangays that Needs <h1 className='text-yellow-500'>Moderate Attention</h1></h1>
+                            {moderateBarangays.length > 0 ? (
+                                moderateBarangays.map((brgy, idx) => (
+                                    <div key={idx} className='mb-2'>
+                                        <p className='text-sm'>
+                                            <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
+                                            <h1 className='ml-2 text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full w-fit inline-block'>
+                                                {brgy.moderate_count} moderate
+                                            </h1>
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className='text-sm text-gray-500'>No moderate complaints</p>
+                            )}
+                        </div>
+                        <div className='w-1/3 p-4'>
+                            <h1 className="text-sm text-gray-500 font-medium mb-6 text-center">Barangays that Needs <h1 className='text-blue-500'>Low Attention</h1></h1>
+                            {lowBarangays.length > 0 ? (
+                                lowBarangays.map((brgy, idx) => (
+                                    <div key={idx} className='mb-2'>
+                                        <p className='text-sm'>
+                                            <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
+                                            <h1 className='ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full w-fit inline-block'>
+                                                {brgy.low_count} low
+                                            </h1>
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className='text-sm text-gray-500'>No low complaints</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
+
+function ResolvedComplaintsperBrgy(){
+    const [selectedMonth, setSelectedMonth] = useState('November');
+    const [statusTypes, setStatusTypes] = useState([]);
+    const [barangayData, setBarangayData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [highestResolved, setHighestResolved] = useState({ name: '', count: 0 });
+    const [lowestResolved, setLowestResolved] = useState({ name: '', count: 0 });
+    const [selectedBarangay, setSelectedBarangay] = useState('');
+    const [avgResolutionTime, setAvgResolutionTime] = useState('...');
+    const [resolutionTimeData, setResolutionTimeData] = useState([]);
+
+    useEffect(() => {
+        const fetchResolutionTime = async () => {
+            try {
+                console.log('Fetching resolution time data...');
+                const data = await reportsAPI.getAvgResolutionTimePerBarangay();
+                console.log('Resolution time data received:', data);
+                setResolutionTimeData(data);
+                
+                // Set default to first barangay
+                if (data.length > 0) {
+                    setSelectedBarangay(data[0].barangay_name);
+                    setAvgResolutionTime(data[0].avg_resolution_time_days || 0);
+                    console.log('Set default barangay:', data[0].barangay_name, 'Time:', data[0].avg_resolution_time_days);
+                } else {
+                    console.log('No resolution time data available');
+                }
+            } catch (error) {
+                console.error('Error fetching resolution time:', error);
+            }
+        };
+        
+        fetchResolutionTime();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const data = await reportsAPI.getMonthlyStatusPerBarangay(selectedMonth, '2025');
+                
+                // Define colors for each status
+                const statusColors = {
+                    'Pending': '#f59e0b',
+                    'In-Progress': '#10b981',
+                    'Resolved': '#3b82f6'
+                };
+
+                // Transform data for the chart
+                const chartSeries = data.statuses.map((status, idx) => ({
+                    label: status,
+                    data: data.barangays.map(b => b.status_counts[idx] || 0),
+                    color: statusColors[status] || '#6b7280'
+                }));
+
+                setStatusTypes(chartSeries);
+                setBarangayData(data.barangays.map(b => b.barangay_name));
+
+                // Find highest and lowest resolved cases (Resolved is at index 2)
+                const resolvedIndex = data.statuses.indexOf('Resolved');
+                if (resolvedIndex !== -1) {
+                    let maxResolved = { name: '', count: 0 };
+                    let minResolved = { name: '', count: Infinity };
+
+                    data.barangays.forEach(b => {
+                        const resolvedCount = b.status_counts[resolvedIndex] || 0;
+                        if (resolvedCount > maxResolved.count) {
+                            maxResolved = { name: b.barangay_name, count: resolvedCount };
+                        }
+                        if (resolvedCount < minResolved.count && resolvedCount > 0) {
+                            minResolved = { name: b.barangay_name, count: resolvedCount };
+                        }
+                    });
+
+                    setHighestResolved(maxResolved);
+                    setLowestResolved(minResolved.count !== Infinity ? minResolved : { name: 'N/A', count: 0 });
+                }
+
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching status breakdown:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [selectedMonth]);
+
+    return (
+        <div className="event-card">
+            <div className="event-content">
+                <div className='flex flex-row justify-between items-center mb-2'>
+                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Barangay</p>
+                    <select 
+                        className='border border-gray-300 rounded-lg p-1 text-xs'
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                    >
+                        {MONTHS.map((month, idx) => (
+                            <option key={idx} value={month}>{month}</option>
+                        ))}
+                    </select>
                 </div>
 
-                {/* Legend */}
-                <div className='flex flex-wrap gap-3 text-xs justify-center'>
-                    {caseTypes.map((ct, idx) => (
-                        <div key={idx} className='flex items-center gap-1 justify-center'>
-                            <div 
-                                className='w-3 h-3 rounded-sm' 
-                                style={{ backgroundColor: ct.color }}
+                {loading ? (
+                    <div className='flex justify-center items-center h-64'>
+                        <p className='text-gray-500'>Loading...</p>
+                    </div>
+                ) : statusTypes.length > 0 ? (
+                    <>
+                        <div className='mt-4'>
+                            <BarChart
+                                height={250}
+                                series={statusTypes.map(ct => ({
+                                    data: ct.data,
+                                    label: ct.label,
+                                    stack: 'total',
+                                    color: ct.color,
+                                }))}
+                                xAxis={[{
+                                    scaleType: 'band',
+                                    data: barangayData,
+                                    tickLabelStyle: {
+                                        fontSize: 11,
+                                        angle: -15,
+                                        textAnchor: 'end',
+                                    },
+                                }]}
+                                margin={0}
+                                sx={{
+                                    '.MuiChartsLegend-root': {
+                                        display: 'none',
+                                    },
+                                }}
                             />
-                            <span className='text-gray-700'>{ct.label}</span>
                         </div>
-                    ))}
-                </div>
+
+                        {/* Legend */}
+                        <div className='flex flex-wrap gap-3 text-xs justify-center'>
+                            {statusTypes.map((ct, idx) => (
+                                <div key={idx} className='flex items-center gap-1 justify-center'>
+                                    <div 
+                                        className='w-3 h-3 rounded-sm' 
+                                        style={{ backgroundColor: ct.color }}
+                                    />
+                                    <span className='text-gray-700'>{ct.label}</span>
+                                </div>
+                            ))}
+                        </div>
 
                 {/* STATS */}
                 <div className="mt-6 flex flex-row rounded-2xl border ">
@@ -255,16 +708,34 @@ function ResolvedComplaintsperBrgy(){
                         <div className="flex flex-col gap-5">
                             <div className='items-center flex flex-col justify-center'>
                                 <p className="text-sm text-gray-500 font-medium text-center">
-                                    Avg. Resolution Time (Monthly)
+                                    Avg. Resolution Time per Barangay
                                 </p>
 
-                                <select className='w-full border rounded-xl text-xs text-gray-500 mt-2 p-1'>
-                                    {barangayData.map((barangay, idx) => (
-                                        <option key={idx} value={barangay.barangay}>{barangay.barangay}</option>
+                                <div className='border-2 rounded-xl mt-6'>
+                                    <h2 className="w-full text-3xl font-bold text-gray-900 mt-4 text-center p-2 mb-2">
+                                        {avgResolutionTime === '...' 
+                                            ? '...' 
+                                            : avgResolutionTime === null || avgResolutionTime === 0
+                                            ? 'N/A'
+                                            : `${avgResolutionTime} days`}
+                                    </h2>
+                                </div>
+
+                                <select 
+                                    className='w-3/4 border bg-white rounded-lg text-xs font-semibold text-blue-500 -mt-[90px] p-1'
+                                    value={selectedBarangay}
+                                    onChange={(e) => {
+                                        const selected = e.target.value;
+                                        setSelectedBarangay(selected);
+                                        const brgyData = resolutionTimeData.find(b => b.barangay_name === selected);
+                                        console.log('Selected barangay:', selected, 'Data:', brgyData);
+                                        setAvgResolutionTime(brgyData?.avg_resolution_time_days || null);
+                                    }}
+                                >
+                                    {resolutionTimeData.map((brgy, idx) => (
+                                        <option key={idx} value={brgy.barangay_name}>{brgy.barangay_name}</option>
                                     ))}
                                 </select>
-
-                                <h2 className="text-3xl font-bold text-gray-900 mt-5 text-center">3.3 days</h2>
                             </div>
                         </div>
                     </div>
@@ -272,287 +743,274 @@ function ResolvedComplaintsperBrgy(){
                     {/* RIGHT CARD */}
                     <div className="bg-white border-l rounded-r-2xl p-4 w-2/3">
                         
-                        {/* Header */}
                         <p className="text-sm text-gray-500 font-medium mb-4">
                             Performance Highlights
                         </p>
 
                         <div className="mb-4">
                             <p className="text-sm text-gray-600">
-                                Highest Resolved Cases
+                                <TrendingUp size={14} className='inline-block mr-1' color='green'/>
+                                Barangay with Highest Resolved Cases
                             </p>
-                            <h2 className="text-lg font-semibold text-gray-900">
-                                Barangay Poblacion — 55 cases
-                            </h2>
+                            <div className='flex flex-row justify-between items-center border rounded-lg mx-4 mt-1'>
+                                <h2 className="w-2/3 text-lg px-2 font-semibold text-gray-900 overflow-hidden whitespace-nowrap text-ellipsis">
+                                    {highestResolved.name || 'N/A'}
+                                </h2>
+                                <h2 className='w-1/3 bg-green-500 text-center rounded-lg text-white text-lg font-semibold'>
+                                    {highestResolved.count} cases
+                                </h2>
+                            </div>
                         </div>
 
                         <div>
                             <p className="text-sm text-gray-600">
-                                Lowest Resolved Cases
+                                <TrendingDown size={14} className='inline-block mr-1' color='red'/>
+                                Barangay with Lowest Resolved Cases
                             </p>
-                            <div className='flex flex-row justify-between items-center'>
-                                <h2 className="text-lg font-semibold text-gray-900">
-                                    Barangay Abuno
+                            <div className='flex flex-row justify-between items-center border rounded-lg mx-4 mt-1'>
+                                <h2 className="w-2/3 text-lg px-2 font-semibold text-gray-900 overflow-hidden whitespace-nowrap text-ellipsis">
+                                    {lowestResolved.name || 'N/A'}
                                 </h2>
-                                <h2 className='bg-blue-500'>4 cases</h2>
+                                <h2 className='w-1/3 bg-red-500 text-center rounded-lg text-white text-lg font-semibold'>
+                                    {lowestResolved.count} cases
+                                </h2>
                             </div>
                         </div>
                     </div>
                 </div>
+                    </>
+                ) : (
+                    <div className='flex justify-center items-center h-64'>
+                        <p className='text-gray-500'>No data available for {selectedMonth}</p>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
 
-
-
-function CaseTypeBreakdownperBrgy(){
-    const barangayData = [
-        { barangay: 'Abuno' },
-        { barangay: 'Acmac-Mariano Badelles Sr.' },
-        { barangay: 'Bagong Silang' },
-        { barangay: 'Bonbonon' },
-        { barangay: 'Bunawan' },
-        { barangay: 'Buru-un' },
-        { barangay: 'Dalipuga' },
-        { barangay: 'Del Carmen' },
-        { barangay: 'Digkilaan' },
-        { barangay: 'Ditucalan' },
-        { barangay: 'Dulag' },
-        { barangay: 'Hinaplanon' },
-        { barangay: 'Hindang' },
-        { barangay: 'Kabacsanan' },
-        { barangay: 'Kalilangan' },
-        { barangay: 'Kiwalan' },
-        { barangay: 'Lanipao' },
-        { barangay: 'Luinab' },
-        { barangay: 'Mahayahay' },
-        { barangay: 'Mainit' },
-        { barangay: 'Mandulog' },
-        { barangay: 'Maria Cristina' },
-        { barangay: 'Pala-o' },
-        { barangay: 'Panoroganan' },
-        { barangay: 'Poblacion' },
-        { barangay: 'Puga-an' },
-        { barangay: 'Rogongon' },
-        { barangay: 'San Miguel' },
-        { barangay: 'San Roque' },
-        { barangay: 'Santa Elena' },
-        { barangay: 'Santa Filomena' },
-        { barangay: 'Santiago' },
-        { barangay: 'Santo Rosario' },
-        { barangay: 'Saray' },
-        { barangay: 'Suarez' },
-        { barangay: 'Tambacan' },
-        { barangay: 'Tibanga' },
-        { barangay: 'Tipanoy' },
-        { barangay: 'Tomas Cabili (Tominobo Proper)' },
-        { barangay: 'Upper Hinaplanon' },
-        { barangay: 'Upper Tominobo' },
-        { barangay: 'Villa Verde' },
-        { barangay: 'Bonifacio' },
-        { barangay: 'Ubaldo Laya' }
-    ];
-
-    const caseTypes = [
-    {
-        label: 'Peace & Order',
-        data: [
-        45, 32, 38, 22, 30, 50, 42, 27, 35, 29, 31, 44, 36, 28, 34, 40,
-        33, 41, 39, 26, 24, 37, 48, 46, 55, 20, 23, 47, 52, 49, 43, 34,
-        36, 38, 29, 41, 50, 44, 33, 39, 31, 26, 28, 35
-        ],
-        color: '#3b82f6'
-    },
-    {
-        label: 'Env & Sanitation',
-        data: [
-        28, 22, 25, 20, 18, 30, 27, 19, 24, 21, 23, 29, 26, 20, 22, 28,
-        25, 31, 27, 19, 17, 26, 32, 29, 35, 16, 18, 31, 34, 30, 28, 24,
-        26, 27, 22, 29, 33, 28, 23, 27, 25, 20, 21, 24
-        ],
-        color: '#10b981'
-    },
-    {
-        label: 'Consumer',
-        data: [
-        18, 15, 17, 14, 13, 20, 19, 12, 16, 15, 17, 18, 16, 14, 15, 19,
-        17, 21, 20, 14, 13, 18, 22, 19, 24, 11, 12, 21, 23, 22, 19, 16,
-        18, 17, 15, 20, 23, 19, 16, 18, 17, 14, 15, 16
-        ],
-        color: '#f59e0b'
-    },
-    {
-        label: 'Health',
-        data: [
-        14, 18, 12, 10, 9, 20, 17, 11, 13, 12, 15, 16, 14, 10, 12, 18,
-        15, 19, 17, 11, 10, 16, 21, 18, 22, 9, 10, 20, 23, 19, 16, 13,
-        15, 14, 12, 17, 21, 18, 14, 16, 13, 11, 12, 14
-        ],
-        color: '#ef4444'
-    },
-    {
-        label: 'Infrastructure',
-        data: [
-        25, 20, 22, 18, 17, 30, 28, 19, 24, 21, 23, 27, 25, 18, 21, 29,
-        26, 31, 28, 20, 19, 27, 33, 30, 35, 17, 19, 32, 36, 31, 27, 23,
-        25, 26, 21, 28, 34, 30, 24, 27, 22, 19, 20, 23
-        ],
-        color: '#8b5cf6'
-    },
-    {
-        label: 'Education',
-        data: [
-        10, 12, 15, 9, 8, 18, 16, 7, 11, 10, 12, 14, 13, 9, 11, 17,
-        14, 18, 16, 8, 7, 15, 19, 16, 21, 6, 7, 20, 22, 18, 14, 12,
-        13, 14, 10, 16, 20, 17, 12, 14, 11, 9, 10, 12
-        ],
-        color: '#ec4899'
-    },
-    {
-        label: 'Others',
-        data: [
-        8, 10, 9, 7, 6, 12, 11, 6, 8, 7, 9, 10, 9, 6, 7, 11,
-        9, 13, 12, 6, 5, 10, 14, 11, 15, 4, 5, 13, 16, 12, 10, 8,
-        9, 9, 7, 11, 14, 12, 8, 10, 7, 6, 7, 8
-        ],
-        color: '#6b7280'
-    }
-    ];
-
-    
-
-    return (
-        <div className="event-card">
-            <div className="event-content">
-                <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Case Type Breakdown per Barangay</p>
-                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
-                        {MONTHS.map((month, idx) => (
-                            <option key={idx} value={month}>{month}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className='mt-4'>
-                    <BarChart
-                        height={250}
-                        series={caseTypes.map(ct => ({
-                            data: ct.data,
-                            label: ct.label,
-                            stack: 'total',
-                            color: ct.color,
-                        }))}
-                        xAxis={[{
-                            scaleType: 'band',
-                            data: barangayData.map(b => b.barangay),
-                            tickLabelStyle: {
-                                fontSize: 11,
-                                angle: -15,
-                                textAnchor: 'end',
-                            },
-                        }]}
-                        margin={0}
-                        sx={{
-                            '.MuiChartsLegend-root': {
-                                display: 'none',
-                            },
-                        }}
-                    />
-                </div>
-
-                {/* Legend */}
-                <div className='flex flex-wrap gap-3 text-xs justify-center'>
-                    {caseTypes.map((ct, idx) => (
-                        <div key={idx} className='flex items-center gap-1 justify-center'>
-                            <div 
-                                className='w-3 h-3 rounded-sm' 
-                                style={{ backgroundColor: ct.color }}
-                            />
-                            <span className='text-gray-700'>{ct.label}</span>
-                        </div>
-                    ))}
-                </div>
-
-                <div>
-                    EXPLANATION
-                </div>
-            </div>
-        </div>
-    );
-}
-
-
-
-// TO FIX
-function DailyComplaints() {
-    return (
-        <div className="event-card">
-            <div className="event-content">
-                <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Daily Complaints</p>
-                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
-                        <option>2024</option>
-                        <option>2023</option>
-                        <option>2022</option>
-                        <option>2021</option>
-                        <option>All time</option>
-                    </select>
-                </div>
-
-            </div>
-
-        </div>
-    );
-} 
 
 
 function LeadingCaseType() {
-    const caseData = [
-        { case: 'Peace & Order', count: 156 },
-        { case: 'Environment & Sanitation', count: 132 },
-        { case: 'Consumer & Business Complaints', count: 98 },
-    ];
+    const [caseData, setCaseData] = useState([]);
+    const [selectedYear, setSelectedYear] = useState('2025');
+    const [maxCount, setMaxCount] = useState(100);
+
+    useEffect(() => {
+        const fetchTopCaseTypes = async () => {
+            try {
+                const data = await reportsAPI.getTop3CaseTypes();
+                setCaseData(data);
+                
+                // Calculate max count for percentage calculation
+                if (data.length > 0) {
+                    const max = Math.max(...data.map(item => item.count));
+                    setMaxCount(max);
+                }
+            } catch (error) {
+                console.error('Error fetching top case types:', error);
+            }
+        };
+
+        fetchTopCaseTypes();
+    }, [selectedYear]);
 
     return (
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
                     <p className="event-title">Annual Leading 3 Case Types</p>
-                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                    <select 
+                        className='border border-gray-300 rounded-lg p-1 text-xs'
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                    >
+                        <option>2025</option>
                         <option>2024</option>
                         <option>2023</option>
                         <option>2022</option>
                         <option>2021</option>
-                        <option>All time</option>
                     </select>
                 </div>
 
                 <div className='mt-2'>
-                    {caseData.map((item, index) => (
-                        <div key={index} className='flex items-center mb-3 gap-2'>
-                            <div className='w-1/3 truncate text-sm font-medium text-gray-700 -mb-2'>
-                                {item.case}
-                            </div>
-                            <div className='w-2/3'>
-                                <div className='bg-gray-200 rounded-full h-5 -mb-2 overflow-hidden '>
-                                    <div 
-                                        className='bg-blue-600 h-full flex items-center justify-end pr-2 text-white text-xs font-semibold rounded-full transition-all duration-300'
-                                        style={{ width: `${(item.count / 200) * 100}%` }}
-                                    >
-                                        {item.count}
+                    {caseData.length > 0 ? (
+                        caseData.map((item, index) => (
+                            <div key={index} className='flex items-center mb-3 gap-2'>
+                                <div className='w-1/3 truncate text-sm font-medium text-gray-700 -mb-2'>
+                                    {item.case_type}
+                                </div>
+                                <div className='w-2/3'>
+                                    <div className='bg-gray-200 rounded-full h-5 -mb-2 overflow-hidden '>
+                                        <div 
+                                            className='bg-blue-600 h-full flex items-center justify-end pr-2 text-white text-xs font-semibold rounded-full transition-all duration-300'
+                                            style={{ width: `${(item.count / maxCount) * 100}%` }}
+                                        >
+                                            {item.count}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className='text-sm text-gray-500'>No data available</p>
+                    )}
                 </div>
             </div>
         </div>
     );
 } 
 
+
+
+
+
+// connected to backend
+function AnnualComplaintCount() {
+    const [annualCount, setAnnualCount] = useState('...');
+    const [monthlyData, setMonthlyData] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const annualData = await reportsAPI.getAnnualComplaintCounts();
+                setAnnualCount(annualData[0]?.count || 0);
+
+                const monthly = await reportsAPI.getMonthlyComplaintCounts();
+                setMonthlyData(monthly);
+            } catch (error) {
+                console.error('Failed to fetch complaint data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Extract counts for each month, defaulting to 0 if no data
+    const getMonthlyValues = () => {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        return months.map(month => {
+            const found = monthlyData.find(m => m.month?.trim() === month);
+            return found ? found.count : 0;
+        });
+    };
+
+    return (
+        <div className="event-card">
+            <div className="event-content">
+                <div className='flex flex-row justify-between items-center mb-2'>
+                    <p className="event-title">Annual Total Complaints</p>
+                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                        <option>2025</option>
+                        <option>2024</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>2021</option>
+                    </select>
+                </div>
+                <div className='flex flex-row justify-between'>
+                    <h2 className="event-value">{annualCount}</h2>
+                    <div className="event-chart">
+                        <LineChart
+                            height={80}
+                            series={[
+                                {
+                                    data: getMonthlyValues(),
+                                    showMark: false,
+                                    color: '#2563eb',
+                                    area: true,
+                                },
+                            ]}
+                            xAxis={[{ scaleType: 'point', data: MONTHS, hide: true }]}
+                            yAxis={[{ hide: true }]}
+                            margin={0}
+                            sx={{
+                                '.MuiChartsAxis-root': { display: 'none' },
+                                '.MuiChartsGrid-root': { display: 'none' },
+                                '.MuiAreaElement-root': {
+                                    fill: 'url(#eventGradient)',
+                                },
+                            }}
+                        >
+                            <defs>
+                                <linearGradient id="eventGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.4} />
+                                    <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                        </LineChart>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+} 
+
+// static only
+function SatisfactionLevel() {
+    return (
+        <div className="event-card">
+            <div className="event-content">
+                <div className='flex flex-row justify-between items-center mb-2'>
+                    <p className="event-title">Complainant Overall Satisfaction Level</p>
+                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                        <option>2025</option>
+                        <option>2024</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>2021</option>
+                    </select>
+                </div>
+                <div className='flex flex-row'>
+                    <div className='w-1/3 border-r-2 items-center justify-center text-center'>
+                        <h1 className='text-3xl font-semibold leading-none'>4.1</h1>
+                        <p className='text-xs text-gray-600'>(125 reviews)</p>
+                        <div className='flex flex-row justify-center py-1'><Star size={16} color='orange' /><Star size={16} color='orange' /><Star size={16} color='orange' /><Star size={16} color='orange' /><Star size={16} /> </div>
+                    </div>
+                    <div className='w-2/3 ml-4'>
+                        <div className='flex flex-row items-center gap-2 mt-[1px]'>
+                            <p className='w-3 leading-none text-sm text-gray-700'>1</p>
+                            <div className='h-3 w-4/5 bg-yellow-500 rounded-full'></div>
+                        </div>
+                        
+                        <div className='flex flex-row items-center gap-2 mt-[1px]'>
+                            <p className='w-3 leading-none text-sm text-gray-700'>2</p>
+                            <div className='h-3 w-3/6 bg-yellow-500 rounded-full'></div>
+                        </div>
+                        
+                        <div className='flex flex-row items-center gap-2 mt-[1px]'>
+                            <p className='w-3 leading-none text-sm text-gray-700'>3</p>
+                            <div className='h-3 w-2/5 bg-yellow-500 rounded-full'></div>
+                        </div>
+                        
+                        <div className='flex flex-row items-center gap-2 mt-[1px]'>
+                            <p className='w-3 leading-none text-sm text-gray-700'>4</p>
+                            <div className='h-3 w-1/5 bg-yellow-500 rounded-full'></div>
+                        </div>
+                        
+                        <div className='flex flex-row items-center gap-2 mt-[1px]'>
+                            <p className='w-3 leading-none text-sm text-gray-700'>5</p>
+                            <div className='h-3 w-1/6 bg-yellow-500 rounded-full'></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+} 
+
+function BasicDateCalendar() {
+    return (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className='flex flex-row bg-gray-100 border border-gray-300 shadow rounded-2xl mt-2 px-5 py-3 text-sm gap-5 justify-center items-center
+                    hover:bg-gray-200 transition ease-in-out duration-200'>
+                    <DateCalendar showDaysOutsideCurrentMonth fixedWeekNumber={6} />
+                </div>
+            </LocalizationProvider>
+    );
+}
 
 function AnnouncementCard({logo, category, title, details}) {
     return (
@@ -573,70 +1031,4 @@ function AnnouncementCard({logo, category, title, details}) {
         </div>
     );
 }
-
-
-function BasicDateCalendar() {
-    return (
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <div className='flex flex-row bg-gray-100 border border-gray-300 shadow rounded-md mt-2 px-5 py-3 text-sm gap-5 justify-center items-center
-                    hover:bg-gray-200 transition ease-in-out duration-200'>
-                    <DateCalendar showDaysOutsideCurrentMonth fixedWeekNumber={6} />
-                </div>
-            </LocalizationProvider>
-    );
-}
-
-
-function AnnualComplaintCount() {
-    return (
-        <div className="event-card">
-            <div className="event-content">
-                <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Annual Total Complaints</p>
-                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
-                        <option>2024</option>
-                        <option>2023</option>
-                        <option>2022</option>
-                        <option>2021</option>
-                        <option>All time</option>
-                    </select>
-                </div>
-                <div className='flex flex-row justify-between'>
-                    <h2 className="event-value">1.2k</h2>
-                    <div className="event-chart">
-                        <LineChart
-                            height={80}
-                            series={[
-                                {
-                                    data: [40, 30, 45, 35, 50, 45, 60, 55, 70, 60, 65, 55],
-                                    showMark: false,
-                                    color: '#2563eb',
-                                    area: true,
-                                },
-                            ]}
-                            xAxis={[{ scaleType: 'point', data: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], hide: true }]}
-                            yAxis={[{ min: 0, max: 100, hide: true }]}
-                            margin={0}
-                            sx={{
-                                '.MuiChartsAxis-root': { display: 'none' },
-                                '.MuiChartsGrid-root': { display: 'none' },
-                                '.MuiAreaElement-root': {
-                                    fill: 'url(#eventGradient)',
-                                },
-                            }}
-                        >
-                            <defs>
-                                <linearGradient id="eventGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.4} />
-                                    <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                        </LineChart>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    );
-} 
 
