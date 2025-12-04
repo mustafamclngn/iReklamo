@@ -4,6 +4,10 @@ from flask_mail import Mail
 # Initialize extensions
 cors = CORS()
 mail = Mail()
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 class SupabaseStorageWrapper:
     def __init__(self):
         self.storage = None

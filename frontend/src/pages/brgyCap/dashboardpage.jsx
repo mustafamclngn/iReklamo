@@ -321,7 +321,7 @@ function UrgentComplaintsList() {
 
                         {!loading && urgentComplaints.map((complaint) => (
                             <tr key={complaint.id} className="border-b border-gray-300 hover:bg-gray-50 text-sm text-gray-700 my-1">
-                                <td className="max-w-[180px] truncate px-2 py-2" title={complaint.title}>
+                                <td className="px-2 py-2" title={complaint.title}>
                                     {complaint.title}
                                 </td>
                                 <td className="text-right px-2">

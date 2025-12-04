@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 from flask import Blueprint, current_app, request, jsonify
 from flask_cors import CORS
+=======
+from flask import Blueprint, request, jsonify, current_app, render_template
+>>>>>>> main
 from flask_mail import Message
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -29,7 +33,10 @@ def generate_complaint_id(cursor):
 def empty_to_null(value):
     return value if value not in ("", None) else None
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 # TO CREATE COMPLAINT
 @complaints_bp.route('/create_complaint', methods=['POST'])
 def create_complaint():
@@ -51,6 +58,7 @@ def create_complaint():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
+<<<<<<< HEAD
             empty_to_null(data['first_name']),
             empty_to_null(data['last_name']),
             empty_to_null(data['sex']),
@@ -59,6 +67,16 @@ def create_complaint():
             data['email'],
             int(data.get('barangay')),
             data.get('is_anonymous')
+=======
+            empty_to_null(data.get('first_name')),
+            empty_to_null(data.get('last_name')),
+            empty_to_null(data.get('sex')),
+            empty_to_null(data.get('age')),
+            data['contact_number'],
+            data['email'],
+            int(data.get('barangay')),
+            data.get('is_anonymous', False)
+>>>>>>> main
         ))
         complainant_id = cursor.fetchone()['id']
 
@@ -86,7 +104,11 @@ def create_complaint():
             data['case_type'],
             data['description'],
             data['full_address'],
+<<<<<<< HEAD
             empty_to_null(data['specific_location']),
+=======
+            data['specific_location'],
+>>>>>>> main
             complainant_id,
             int(data.get('barangay')),
             assigned_official_id
@@ -124,6 +146,10 @@ def create_complaint():
                     html=html_body
                 )
                 mail.send(message)
+<<<<<<< HEAD
+=======
+                print(f"Email sent successfully to {data['email']}")
+>>>>>>> main
 
         except Exception as mail_err:
             print(f"Warning: Failed to send email - {mail_err}")
@@ -146,7 +172,10 @@ def create_complaint():
         if conn:
             conn.close()
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 
 # LIST OF ALL COMPLAINTS
 @complaints_bp.route('/all_complaints', methods=['GET'])
