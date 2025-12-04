@@ -2,6 +2,9 @@ import React from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { LineChart } from '@mui/x-charts/LineChart';
+import { Box } from '@mui/material';
+import { PieChart } from '@mui/x-charts/PieChart';
 import { ChartNoAxesColumn, Ellipsis, HandHelping, Megaphone, MessageCircleMore, Pin, SquareStack, SquareStar } from 'lucide-react';
 
 export default function ReportsPage() {
@@ -12,30 +15,59 @@ export default function ReportsPage() {
             <div className=' w-3/4'>
                 <div className='flex flex-row gap-3'>
                     {/* COMPLAINT COUNT */}
-                    <div className='border-[1px] border-gray-200 p-4 rounded-lg w-fit'>
-                        <h1 className='text-xl font-semibold mb-2 text-center'>
-                            <ChartNoAxesColumn size={20} strokeWidth={'2.25px'} className='inline-block mr-2 -mt-2'/>
-                            Summary Statistics
-                        </h1>
-                        <div className='flex flex-row gap-1'>
-                            <div className='flex flex-col gap-1'>
-                                <SummaryStatCard count={'1,420'} label="Total" />
-                                <SummaryStatCard count={'712'} label="Pending" />
+                    <div className='border-[1px] border-gray-200 bg-gray-100 p-4 rounded-lg w-1/3'>
+                        <div className='flex flex-row justify-between items-start'>
+                            <div>
+                                <h1 className='text-base font-semibold leading-none'>Annual Total Complaints</h1>
+                                <p className='text-gray-600 text-base'>Top 3 case type for each month</p>
                             </div>
-                            <div className='flex flex-col gap-1'>
-                                <SummaryStatCard count={'220'} label="In-Progress" />
-                                <SummaryStatCard count={'935'} label="Resolved" />
-                            </div>
+                            <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                              <option>2024</option>
+                              <option>2023</option>
+                              <option>2022</option>
+                              <option>2021</option>
+                              <option>All time</option>
+                            </select>
                         </div>
-                        <h1 className='mt-3 font-semibold'>Average Resolution Time</h1>
-                        <h1 className='bg-gray-200 h-10'>4.3 days</h1>
-                    </div>
-                    {/* AVERAGE RESOLUTION TIME */}
-                    <div>
-                        <div className='border-[1px] border-gray-200 p-4 rounded-lg w-fit'>
-                            <h1 className='text-xl font-semibold mb-2'>⏱️ Average Resolution Time</h1>
 
+                        <div className='flex flex-row items-center bg-white rounded-lg mt-4 border-[1px] border-gray-200 pt-2'>
+                            <h1 className='text-5xl font-bold -mr-12 ml-3 text-gray-700'>1.2k</h1>
+                            <MiniTrendChart />
                         </div>
+                    </div>
+
+                    <div className='border-[1px] border-gray-200 bg-gray-100 p-4 rounded-lg w-1/3'>
+                        <div className='flex flex-row justify-between items-start'>
+                            <div>
+                                <h1 className='text-base font-semibold leading-none'>Leading Case Types</h1>
+                                <p className='text-gray-600 text-base'>Top 3 case type for each month</p>
+                            </div>
+                            <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                              <option>Jan</option>
+                              <option>Feb</option>
+                              <option>Mar</option>
+                              <option>Apr</option>
+                              <option>May</option>
+                              <option>Jun</option>
+                              <option>Jul</option>
+                              <option>Aug</option>
+                              <option>Sep</option>
+                              <option>Oct</option>
+                              <option>Nov</option>
+                              <option>Dec</option>
+                            </select>
+                        </div>
+
+                        <div className='flex flex-row items-center bg-white rounded-lg mt-4 border-[1px] border-gray-200 pt-2'>
+                            
+                        </div>
+                    </div>
+
+                    {/* AVERAGE RESOLUTION TIME */}
+                    <div className='border-[1px] border-gray-200 p-4 rounded-lg w-1/3'>
+                        <h1 className='text-base font-semibold leading-none'>Highest Case Type per Month</h1>
+                        <p className='text-gray-600 text-base'>Top 3 case type for each month</p>
+
                     </div>
                 </div>
             </div>
@@ -92,18 +124,10 @@ export default function ReportsPage() {
 }
 
 
-function SummaryStatCard({count, label}) {
-    return (
-        <div>
-            <div className='bg-gray-100 w-24 rounded-md p-1'>
-                <div>
-                    <h1 className='font-bold text-3xl'>{count}</h1>
-                    <p className='text-sm'>{label}</p>
-                </div>
-            </div>
-        </div>
-    )
-}
+
+
+
+
 
 
 function AnnouncementCard({logo, category, title, details}) {
@@ -137,3 +161,46 @@ function BasicDateCalendar() {
             </LocalizationProvider>
     );
 }
+
+
+function MiniTrendChart() {
+    return (
+        <Box> 
+            <LineChart
+                xAxis={[
+                    { 
+                        data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        label: '',
+                        tickLabelStyle : { display: 'none' }, 
+                        disableLine: true,
+                        disableTicks: true,
+                    }
+                ]}
+                
+                yAxis={[
+                    { 
+                        label: '',
+                        tickLabelStyle : { display: 'none' }, 
+                        disableLine: true,
+                        disableTicks: true,
+                    }
+                ]}
+                
+                series={[
+                    {
+                        data: [10, 5, 12, 11, 15, 13, 16, 7, 14, 15, 13, 14], 
+                        area: true,
+                        color: '#90D5FF', 
+                        showMark: false,
+                    },
+                ]}
+                width={250}
+                height={100}
+                margin={0}
+            />
+        </Box>
+    );
+}
+
+
+

@@ -35,12 +35,10 @@ import BC_DashboardPage from "./pages/brgyCap/dashboardpage.jsx";
 import BC_ComplaintsPage from "./pages/brgyCap/complaintspage.jsx";
 import BC_OfficialsPage from "./pages/brgyCap/officialspage.jsx";
 import BC_ReportsPage from "./pages/brgyCap/reportspage.jsx";
-import BC_AccountPage from "./pages/brgyCap/accountpage.jsx";
 
 // Import barangay official pages
 import BO_DashboardPage from "./pages/brgyOff/dashboardpage.jsx";
 import BO_AssignedComplaintsPage from "./pages/brgyOff/assignedcomplaintspage.jsx";
-import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
 // Import complainant pages
 import CU_HomePage from "./pages/complainant/homepage.jsx";
@@ -56,6 +54,7 @@ import DepartmentsPage from "./pages/shared/barangayspage/departmentsPage.jsx";
 import HotlinePage from "./pages/shared/barangayspage/hotlinePage.jsx";
 import OfficialDetailsPage from "./pages/shared/OfficialDetailsPage.jsx";
 import ComplaintDetailsPage from "./pages/shared/ComplaintDetailsPage.jsx";
+import AccountPage from "./pages/shared/AccountPage.jsx";
 
 // Import track complaint pages
 import CU_TrackComplaintDetailsPage from "./pages/complainant/trackComplaint/trackcomplaintdetailspage.jsx";
@@ -168,7 +167,7 @@ function App() {
                 element={<OfficialDetailsPage />}
               />
               <Route path="reports" element={<BC_ReportsPage />} />
-              <Route path="account" element={<BC_AccountPage />} />
+              <Route path="account" element={<AccountPage />} />
               {/* invalid routes */}
               <Route
                 path="*"
@@ -190,7 +189,7 @@ function App() {
                 path="assigned-complaints/:complaint_id"
                 element={<ComplaintDetailsPage />}
               />
-              <Route path="account" element={<BO_AccountPage />} />
+              <Route path="account" element={<AccountPage />} />
               {/* invalid routes */}
               <Route
                 path="*"
