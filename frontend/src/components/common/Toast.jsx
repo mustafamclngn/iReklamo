@@ -127,6 +127,12 @@ const Toast = ({
         {/* Message */}
         <span className="text-sm font-medium flex-1">{message}</span>
 
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="flex-shrink-0 text-white/70 hover:text-white transition-colors p-0.5"
+          aria-label="Close notification"
+        >
           <svg
             className="w-4 h-4"
             fill="currentColor"
@@ -139,6 +145,7 @@ const Toast = ({
               clipRule="evenodd"
             />
           </svg>
+        </button>
 
         {/* Progress Bar */}
         {showProgress && (
