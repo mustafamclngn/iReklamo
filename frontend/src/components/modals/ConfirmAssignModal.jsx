@@ -12,7 +12,7 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => 
       <div className="popup-overlay">
         <div className="confirm-content">
           <button onClick={onClose} className="popup-close">✕</button>
-          <h2 className="title">Confirm Complaint Assignment</h2>
+          <h2 className="title">Confirm Assignment</h2>
           <form className="form">
             
             <div className="form-group">
@@ -33,8 +33,6 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => 
                     <p className="no-complaints">None</p>
                   )}
                 </div>
-                <p><strong>Complaint Code:</strong> {complaint.complaint_code}</p>
-                <p><strong>Complaint Title:</strong> {complaint.title}</p>
               </div>
             </div>
 

@@ -126,31 +126,43 @@ const BC_ComplaintsPage = () => {
 
   // Selection
   const [selectAll, setSelectAll] = useState(false);
-  const [selected, setSelected] = useState([]); // selected complaints for assignment
+  const [selected, setSelected] = useState(new Map()); // selected complaints for assignment
 
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    if(complaint) setSelected(prev => [...prev, complaint]);
+    if(complaint) {
+      setSelected(prev => {
+        const map = new Map(prev);
+        map.set(complaint.id, complaint);   
+        return map;
+      });
+    }
     setIsAssignOpen(true);
   };
 
+  useEffect(() => {
+    console.log("Selected changed:", [...selected.values()]);
+  }, [selected]);
+
+
   const handleSelect = (complaint, isChecked) => {
     setSelected(prev => {
-      if (isChecked) {
-        return [...prev, complaint];
-      } else {
-        return prev.filter(item => item.id !== complaint.id); 
-      }
+      const map = new Map(prev);
+      if (isChecked) map.set(complaint.id, complaint);
+      else map.delete(complaint.id);
+      return map;
     });
   };
 
   const handleSelAll = () => {
     if (selectAll) {
       setSelectAll(false);
-      setSelected([]); 
+      setSelected(new Map()); 
     } else {
-      setSelectAll(true);
-      setSelected([...filteredComplaints]); 
+      const map = new Map();
+      filteredComplaints.forEach(c => map.set(c.id, c));
+      setSelected(map);
+      setSelectAll(true); 
     }
   };
 
@@ -257,7 +269,7 @@ const BC_ComplaintsPage = () => {
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
                       onSelect={handleSelect}
-                      isSelected={selected?.some(item => item.id === complaint.id)}
+                      isSelected={selected.has(complaint.id)}
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
@@ -288,7 +300,7 @@ const BC_ComplaintsPage = () => {
       <AssignComplaintModal 
         isOpen={isAssignOpen} 
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        selectedComplaints={selected}
+        selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>
     </>

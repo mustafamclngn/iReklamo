@@ -115,16 +115,16 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
           <h2 className="title">Assign Complaint</h2>
-          <h4 className='title'>{assignBrgy.name}</h4>
+          <p className='subtitle'>{assignBrgy.name}</p>
           <form onSubmit={handleSubmit} className="form">
 
-            <label>Selected Complaints</label>
+            <label>Selected Complaints: </label>
               <div className="complaint-list">
                 {selectedComplaints.length > 0 ? (
                   <ol>
                     {selectedComplaints.map((complaint, index) => (
                       <li key={complaint.id}>
-                        <strong>{index + 1}</strong>. <em>{complaint.title}</em>
+                        <strong>{index + 1}</strong>. <em>{complaint.complaint_code}</em>: <em>{complaint.title}</em>
                       </li>
                     ))}
                   </ol>

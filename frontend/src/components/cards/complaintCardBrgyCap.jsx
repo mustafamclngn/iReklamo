@@ -24,12 +24,6 @@ const ComplaintCardBrgyCap = ({
   isSelected
 }) => {
 
-  const [isChecked, setIsChecked] = useState(false); 
-
-  useEffect(() => {
-    setIsChecked(isSelected);
-  }, [isSelected]);
-
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start">
@@ -98,11 +92,8 @@ const ComplaintCardBrgyCap = ({
           <input
             type="checkbox"
             id="selectCheckbox"
-            checked={!!isChecked}
-            onChange={(e) => {
-              setIsChecked(e.target.checked);
-              onSelect(complaint.id, e.target.checked);
-            }}
+            checked={!!isSelected}
+            onChange={(e) => onSelect(complaint, e.target.checked)}
           />
         </div>
       </div>
