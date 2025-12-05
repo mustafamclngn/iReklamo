@@ -90,7 +90,7 @@ const CU_FileComplaintPage = () => {
                                     }}
                                     className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.case_type ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 >
-                                    <option value="">Select Category</option>
+                                    <option value="">Select Case Type</option>
                                     <option value="Infrastructure & Utilities">Infrastructure & Utilities</option>
                                     <option value="Environment & Sanitation">Environment & Sanitation</option>
                                     <option value="Peace & Order">Peace & Order</option>
