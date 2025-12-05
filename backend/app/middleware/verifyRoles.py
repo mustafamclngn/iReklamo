@@ -1,4 +1,3 @@
-# app/middleware/verify_roles.py
 from functools import wraps
 from flask import jsonify, request
 
@@ -8,29 +7,36 @@ def verify_roles(*allowed_roles):
         def decorated(*args, **kwargs):
             user_data = getattr(request, "user", None)
             if not user_data:
-                print("DEBUG verify_roles: No user_data found - JWT middleware may not have run")
                 return jsonify({"error": "Unauthorized"}), 401
 
-            role_data = user_data.get("role")
-            print("DEBUG verify_roles:")
-            print(f"  user_data exists: {bool(user_data)}")
-            print(f"  raw role_data from JWT: {role_data} (type: {type(role_data)})")
+            user_role = user_data.get("role")
+            if not user_role:
+                return jsonify({"error": "No role specified"}), 401
 
-            if isinstance(role_data, list):
-                roles = role_data
-                print(f"  roles (list): {roles}")
+            # Ensure roles is a list regardless of JWT format
+            if isinstance(user_role, list):
+                roles = user_role
             else:
-                roles = [role_data] if role_data is not None else []
-                print(f"  roles (converted): {roles}")
+                roles = [user_role] if user_role is not None else []
 
-            print(f"  allowed_roles: {allowed_roles}")
-            print(f"  any(role in allowed_roles for role in roles): {any(role in allowed_roles for role in roles)}")
+            # Convert allowed_roles to set for faster lookup
+            allowed_set = set(allowed_roles)
 
-            if not any(role in allowed_roles for role in roles):
-                print(f"  DENIED: User roles {roles} not in allowed roles {allowed_roles}")
+            # Check if any of the user's roles (handling both int/string types) are allowed
+            role_authorized = False
+            for role in roles:
+                # Handle both integer and string role types from JWT
+                try:
+                    role_int = int(role) if isinstance(role, str) else role
+                    if role_int in allowed_set:
+                        role_authorized = True
+                        break
+                except (ValueError, TypeError):
+                    continue
+
+            if not role_authorized:
                 return jsonify({"error": "Forbidden: insufficient role"}), 403
 
-            print("  ALLOWED: Access granted")
             return f(*args, **kwargs)
         return decorated
     return decorator

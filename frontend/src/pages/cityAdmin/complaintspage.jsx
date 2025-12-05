@@ -15,7 +15,6 @@ const CA_ComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const complaintsApi = useComplaintsApi();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -58,12 +57,41 @@ const CA_ComplaintsPage = () => {
     fetchComplaints();
   }, [refresh]);
 
-  const fetchComplaints = async () => {
+  // Fetch complaints when server-side filters change
+  useEffect(() => {
+    fetchComplaints(filters);
+    // Clear search when filters change to avoid confusion with new results
+    setSearchTerm('');
+  }, [filters]);
+
+  // Check for refresh trigger from navigation state
+  useEffect(() => {
+    if (location.state?.refresh) {
+      setRefresh(prev => !prev);
+      // Clear the navigation state
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+  }, [location.state]);
+
+  const fetchComplaints = async (currentFilters = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllComplaints();
-      
+
+      // Build server filters - exclude search which is handled client-side
+      const serverFilters = {};
+      if (currentFilters.barangay && currentFilters.barangay !== 'all') {
+        serverFilters.barangay = currentFilters.barangay;
+      }
+      if (currentFilters.status && currentFilters.status !== 'all') {
+        serverFilters.status = currentFilters.status;
+      }
+      if (currentFilters.priority && currentFilters.priority !== 'all') {
+        serverFilters.priority = currentFilters.priority;
+      }
+
+      const response = await getAllComplaints(serverFilters);
+
       if (response.success) {
         setComplaints(response.data);
       } else {
@@ -85,9 +113,11 @@ const CA_ComplaintsPage = () => {
     }));
   };
 
-  // UPDATED: Filter logic with all 3 filters
+  // Client-side filtering - only search since status/barangay/priority are server-side
   const filteredComplaints = complaints.filter(complaint => {
-    // Search filter
+    if (!searchTerm) return true;
+
+    // Search filter - check multiple fields for matches
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       complaint.title?.toLowerCase().includes(searchLower) ||
@@ -95,24 +125,10 @@ const CA_ComplaintsPage = () => {
       complaint.complaint_code?.toLowerCase().includes(searchLower) ||
       complaint.id?.toString().includes(searchLower) ||
       (complaint.barangay && complaint.barangay.toLowerCase().includes(searchLower)) ||
-      (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower));
-    
-    // Barangay filter
-    const matchesBarangay = 
-      filters.barangay === 'all' || 
-      complaint.barangay === filters.barangay;
+      (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower)) ||
+      complaint.status?.toLowerCase().includes(searchLower);
 
-    // Status filter
-    const matchesStatus = 
-      filters.status === 'all' || 
-      complaint.status === filters.status;
-
-    // Priority filter
-    const matchesPriority = 
-      filters.priority === 'all' || 
-      complaint.priority === filters.priority;
-    
-    return matchesSearch && matchesBarangay && matchesStatus && matchesPriority;
+    return matchesSearch;
   });
 
   // View Details

@@ -82,7 +82,7 @@ const ComplaintDetailsPage = () => {
   const { complaint_id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const {getComplaintById} = useComplaintsApi();
+  const { getComplaintById, updateComplaint } = useComplaintsApi();
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +90,7 @@ const ComplaintDetailsPage = () => {
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [isRejectConfirmOpen, setIsRejectConfirmOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
@@ -117,22 +118,13 @@ const ComplaintDetailsPage = () => {
   const handleRejectionSuccess = () => {
     // Update local complaint state after successful rejection
     setComplaint(prev => prev ? { ...prev, status: 'Rejected' } : null);
+
+    // Close the rejection modal
     setIsRejectConfirmOpen(false);
     setRefresh(prev => !prev); // Trigger refetch
   };
 
-  // Priority
-  const handlePriorityClick = () => {
-    setIsPriorityOpen(true);
-  };
-
-  const handlePriorityUpdate = (newPriority) => {
-    setComplaint(prev => prev ? { ...prev, priority: newPriority } : null);
-    setToastMessage('Priority updated successfully');
-    setToastVisible(true);
-  };
-
-  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh]);
+  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
   const fetchComplaintDetails = async () => {
     setLoading(true);
     if (!complaint_id || isNaN(Number(complaint_id))) {
@@ -285,16 +277,6 @@ const ComplaintDetailsPage = () => {
                         </h2>
                         {canEdit && (
                           <div className="flex gap-4">
-                            <button
-                              className="px-4 py-2 font-medium transition-colors rounded-lg text-white whitespace-nowrap text-lg flex items-center gap-2 hover:opacity-90"
-                              style={{
-                                backgroundColor: statusColors[complaint.status] || "#AEAEAE",
-                              }}
-                              title="Click to change status"
-                            >
-                              {complaint.status}
-                              <i className="bi bi-chevron-down text-base"></i>
-                            </button>
                             <button
                               className="px-8 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-lg flex items-center gap-2 font-medium"
                               onClick={handleReject}

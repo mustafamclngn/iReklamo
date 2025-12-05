@@ -218,6 +218,11 @@ def get_all_complaints():
             conditions.append("complaints.assigned_official_id = %s")
             params.append(assigned_filter)
 
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
 
@@ -635,6 +640,7 @@ def get_barangay_captain_complaints(user_id):
         user_barangay_id = user_result['barangay_id']
 
         # Get complaints for this barangay with official names resolved
+        # Exclude rejected complaints from default view for consistency
         query = """
             SELECT
                 complaints.id,
@@ -658,7 +664,7 @@ def get_barangay_captain_complaints(user_id):
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
-            WHERE complaints.barangay_id = %s
+            WHERE complaints.barangay_id = %s AND complaints.status != 'Rejected'
             ORDER BY complaints.created_at DESC
         """
 
@@ -699,6 +705,7 @@ def get_barangay_official_complaints(user_id):
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         # Get complaints assigned to this specific official
+        # Exclude rejected complaints from default view for consistency
         query = """
             SELECT
                 complaints.id,
@@ -722,7 +729,7 @@ def get_barangay_official_complaints(user_id):
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
-            WHERE complaints.assigned_official_id = %s
+            WHERE complaints.assigned_official_id = %s AND complaints.status != 'Rejected'
             ORDER BY complaints.created_at DESC
         """
 
