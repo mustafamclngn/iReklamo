@@ -22,6 +22,12 @@ PyJWT==2.10.1
 # PostgreSQL (Database Driver)
 psycopg2==2.9.9
 
+# Email
+Flask-Mail==0.10.0
+
+# Supabase
+supabase==2.10.1
+
 # Utility
 colorama==0.4.6
 pip==25.2
