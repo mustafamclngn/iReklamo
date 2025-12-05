@@ -16,6 +16,7 @@ import RedirectFallback from "./utils/Redirect.jsx";
 import LoginPage from "./pages/auth/logInPage.jsx";
 import RequireAuth from "./pages/auth/RequireAuth.jsx";
 import PersistLogin from "./pages/auth/PersistLogin.jsx";
+import ResetPassword from "./pages/auth/resetPassword.jsx";
 
 // Import superadmin pages
 import DashboardPage from "./pages/superAdmin/dashboardpage.jsx";
@@ -201,8 +202,9 @@ function App() {
         {/* Authentication Routes */}
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<LoginPage />} />
+          <Route path="reset-password" element={<ResetPassword />} />
         </Route>
-
+    
         {/* other invalid routes*/}
         <Route path="*" element={<RedirectFallback />} />
       </Routes>

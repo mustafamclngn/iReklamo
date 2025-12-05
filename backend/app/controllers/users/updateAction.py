@@ -1,7 +1,12 @@
+import datetime
 from flask import Blueprint, jsonify, request
+import jwt
 from psycopg2 import IntegrityError
 from app.models.user import User
 from app.functions.Update import Update
+from werkzeug.security import generate_password_hash
+from app.config import Config
+from app.controllers.auth.revokeTokenC import revoke_token
 
 # ========================== 
 # USER UPDATE
@@ -27,6 +32,9 @@ def update_user(user_id):
             "error": "Server error. Please try again later."
         }), 500
     
+# ========================== 
+# USER ROLE REVOKED
+# ==========
 def revoke_permissions(user_id):
     user = User()
     data = user.getID(user_id)  
@@ -62,3 +70,41 @@ def revoke_permissions(user_id):
         return jsonify({
             "error": "Server error. Please try again later."
         }), 500
+    
+ 
+# ========================== 
+# USER PASSWORD RESET
+# ==========
+def reset_password():
+    data = request.get_json()
+    token = data.get("token")
+    new_pwd = data.get("password")
+
+    try:
+        decoded = jwt.decode(token, Config.JWT_SECRET_KEY, algorithms=["HS256"])
+
+        if decoded.get("type") != "password_reset":
+            return jsonify({"error": "Invalid token type"}), 400
+
+        print(decoded)
+        user_id = decoded.get("user_id")
+        print("USER ID FROM DECODED", user_id)
+
+        revoke_token(user_id=user_id)
+
+        hashed = generate_password_hash(new_pwd)
+
+        updater = Update()
+        updater.table("users").set({
+            "user_password": hashed
+        }).where("user_id", user_id).execute()
+
+        return jsonify({
+            "success":True,
+            "message":"Password updated successfully"
+            }), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Reset token expired"}), 403
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid reset token"}), 403

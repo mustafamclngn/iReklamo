@@ -1,16 +1,51 @@
+import datetime
 from flask import jsonify, request, make_response
+import jwt
 from app.functions.Select import Select
 from app.functions.Update import Update
+from app.config import Config
+from app.models.user import User
+
+
+# ========================== 
+# REVOKE TOKEN
+# ==========
+def revoke_token(existing_user = None, user_id = None): 
+
+    # ==============
+    # user details
+    if existing_user is not None:
+        user = User()
+        user_id = existing_user.get("user_id")
+    elif user_id is not None:
+        user = User()
+        existing_user = user.getID(user_id)
+
+    try: 
+
+        # ==============
+        # updated detalls
+        user_updates = {
+            "refresh_token": None,
+            "token_version": existing_user.get("token_version", 0) + 1
+        }
+
+        user.edit(user_id, user_updates)
+            
+    except Exception as e:
+        print(f"Server error: {e}")
+        return jsonify({
+            "error": "Server error. Please try again later."
+        }), 500
 
 # ========================== 
 # USER LOGOUT
 # ==========
-def revoke_token():
+def logout_user():
 
     # ==============
     # functions
     selector = Select()
-    updater = Update()
     
     # ==============
     # check refresh token
@@ -20,34 +55,91 @@ def revoke_token():
 
     # ==============
     # fetch user data dict
-    user = ( selector
-                    .table("users")
-                    .search(tag="refresh_token", key=refresh_token)
-                    .execute()
-                    .retDict()
-            )
+    existing_user = ( selector
+                            .table("users")
+                            .search(tag="refresh_token", key=refresh_token)
+                            .execute()
+                            .retDict())
 
     # ==============
     # user not found
-    if not user:
+    if not existing_user:
         response = make_response('', 204)
         response.set_cookie('refreshToken', '', httponly=True, samesite='None', secure=True, max_age=0)
         return response
 
     # ==============
-    # user found
-    user_id = user["user_id"]
-    token_version = user.get("token_version", 0) + 1
-
-    # ==============
     # update token status
-    updater.table("users").set({
-        "refresh_token": None,
-        "token_version": token_version,
-    }).where(whereCol="user_id", whereVal=user_id).execute()
+    revoke_token(existing_user=existing_user)
 
     # ==============
     # update cookie
     response = make_response(jsonify({"message": "User logged out and tokens revoked"}), 200)
     response.set_cookie('refreshToken', '', httponly=True, samesite='None', secure=True, max_age=0)
     return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+# ========================== 
+# FORGOTTEN PASSWORD RESET TOKEN
+# ==========
+def generate_reset_token(user_id):
+    return jwt.encode(
+        {
+            "user_id": user_id,
+            "type": "password_reset",
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )

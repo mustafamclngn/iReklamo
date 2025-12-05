@@ -111,33 +111,22 @@ const ComplaintDetailsPage = () => {
 
 
 
-  // Complainant info logic
-  // should set to complaint.is_anonymous
-  const isAnonymous =
-    complaint?.is_anonymous || complaint?.complainant?.is_anonymous || false;
+  // Complainant info logic - backend already handles role-based filtering
+  const isAnonymous = complaint?.is_anonymous || false;
 
   const isAssignedToYou =
     complaint?.assigned_official_id === auth?.id ||
     complaint?.assignedOfficialId === auth?.id ||
     false;
 
-  const canViewPII =
-    (userRole === 1 ||
-      userRole === 2 ||
-      userRole === 3 ||
-      (userRole === 4 && isAssignedToYou)) && !isAnonymous;
-
-  const complainant = complaint.complainant || {};
-  const rawFullName =
-    complainant.full_name ||
-    `${complainant.first_name || ''} ${complainant.last_name || ''}`.trim() ||
-    complaint.complainant_name ||
-    '';
-  const displayName = isAnonymous ? 'Anonymous' : (rawFullName || 'N/A');
-  const rawEmail = complainant.email || complaint.complainant_email || '';
-  const rawPhone = complainant.phone || complaint.complainant_phone || '';
-  const displayEmail = canViewPII ? (rawEmail || 'N/A') : maskEmail(rawEmail);
-  const displayPhone = canViewPII ? (formatPhone(rawPhone) || 'N/A') : maskPhone(rawPhone);
+  // Use backend-provided data directly (it already applies role-based filtering)
+  const rawFullName = `${complaint.complainant_first_name || ''} ${complaint.complainant_last_name || ''}`.trim();
+  const displayName = rawFullName || 'N/A';
+  const rawEmail = complaint.complainant_email || '';
+  const rawPhone = complaint.complainant_contact_number || '';
+  // Email and contact are NEVER censored - needed for communication
+  const displayEmail = rawEmail || 'N/A';
+  const displayPhone = formatPhone(rawPhone) || 'N/A';
 
   return (
     <>
@@ -204,11 +193,7 @@ const ComplaintDetailsPage = () => {
                         </h2>
                       </div>
                       <hr className="border-t border-gray-200 mt-4 mb-6" />
-                      {isAnonymous && (
-                        <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-200">
-                          This complaint is filed as Anonymous; contact details are hidden by design.
-                        </div>
-                      )}
+                      {isAnonymous}
                       <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Name:</label>

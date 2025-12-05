@@ -295,7 +295,6 @@ const AssignActionModal = ({ isOpen, onClose, Action, assignDetails }) => {
       <ErrorModal
         isOpen={isErrorOpen}
         onClose={() => setIsErrorOpen(false)}
-        onConfirm={onClose}
         message={errMsg}
       />
     </>
