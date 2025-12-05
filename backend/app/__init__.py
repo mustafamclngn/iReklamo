@@ -41,4 +41,25 @@ def create_app(config_name=None):
     app.register_blueprint(userinfo_bp)
     app.register_blueprint(barangays_bp)
 
+    app.config['MAIL_DEBUG'] = True
+
+    # Serve static files (profile pictures)
+    STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
+
+    print("MAIL CONFIG CHECK")
+    print("SERVER:", app.config.get("MAIL_SERVER"))
+    print("PORT:", app.config.get("MAIL_PORT"))
+    print("USERNAME:", app.config.get("MAIL_USERNAME"))
+    print("PASSWORD:", app.config.get("MAIL_PASSWORD"))
+
+    
+    @app.route('/storage/profile_pictures/<filename>')  # CHANGED: Added underscore
+    def serve_profile_picture(filename):
+        """Serve profile picture files"""
+        return send_from_directory(
+            os.path.join(STORAGE_FOLDER, 'profile_pictures'),
+            filename
+        )
+
+
     return app

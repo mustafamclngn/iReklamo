@@ -31,10 +31,9 @@ def init_extensions(app):
         resources={
             r"/api/*": {
                 "origins": origins or ["http://localhost:5173"],
-                "credentials": "true",
                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
                 "allow_headers": ["Content-Type", "Authorization"],
-                "supports_credentials": True,  
+                "supports_credentials": True,
             }
         }
     )
