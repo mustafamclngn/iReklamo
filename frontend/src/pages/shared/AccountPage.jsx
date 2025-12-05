@@ -647,9 +647,9 @@ const AccountPage = () => {
           <button
             onClick={() => setIsConfirmOpen(true)}
             className="px-4 py-2 mt-8 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-        >
+          >
             Log Out
-        </button>
+          </button>
         </div>
       </div>
 
