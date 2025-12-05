@@ -31,10 +31,24 @@ class Config:
 
     # File Upload Configuration
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+
+    # supabase config
+    SUPABASE_URL = os.environ.get('SUPABASE_URL')
+    SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY')
+    SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'ireklamo-uploads')
 
     # Logging Configuration
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+
+    # Mail Configuration
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 2525))
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", 'True') == 'True'
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", 'False') == 'True'
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", 'noreply@ireklamo.ph')
 
 class DevelopmentConfig(Config):
     """Development configuration"""
@@ -63,3 +77,4 @@ config = {
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }
+

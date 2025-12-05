@@ -1,9 +1,10 @@
 from flask import Blueprint
-from app.controllers.users.selectAction import userList
-from app.controllers.users.updateAction import revoke_permissions
+from app.controllers.users.selectAction import user_forgot_pwd, userList
+from app.controllers.users.updateAction import reset_password, revoke_permissions
 from app.controllers.users.deleteAction import delete_user
 from app.middleware.verifyJwt import verify_jwt
 from app.middleware.verifyRoles import verify_roles
+from app.controllers.auth.emailC import email_newpwd
 
 # Create blueprint
 user_bp = Blueprint('user', __name__, url_prefix='/api/user')
@@ -23,3 +24,11 @@ def revokeUserPermissions(user_id):
 @user_bp.route('/<int:user_id>/revoke-account', methods=['DELETE'])
 def revokeUserAccount(user_id):
     return delete_user(user_id)
+
+@user_bp.route('/forgot-password', methods=['PATCH'])
+def forgotPassword():
+    return user_forgot_pwd()
+
+@user_bp.route('/reset-password', methods=['PATCH'])
+def resetPassword():
+    return reset_password()

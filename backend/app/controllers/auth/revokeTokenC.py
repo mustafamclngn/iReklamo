@@ -1,18 +1,25 @@
+import datetime
 from flask import jsonify, request, make_response
+import jwt
 from app.functions.Select import Select
 from app.functions.Update import Update
+from app.config import Config
 from app.models.user import User
 
 
 # ========================== 
 # REVOKE TOKEN
 # ==========
-def revoke_token(existing_user): 
+def revoke_token(existing_user = None, user_id = None): 
 
     # ==============
     # user details
-    user = User()
-    user_id = existing_user.get("user_id")
+    if existing_user is not None:
+        user = User()
+        user_id = existing_user.get("user_id")
+    elif user_id is not None:
+        user = User()
+        existing_user = user.getID(user_id)
 
     try: 
 
@@ -63,10 +70,76 @@ def logout_user():
 
     # ==============
     # update token status
-    revoke_token(existing_user)
+    revoke_token(existing_user=existing_user)
 
     # ==============
     # update cookie
     response = make_response(jsonify({"message": "User logged out and tokens revoked"}), 200)
     response.set_cookie('refreshToken', '', httponly=True, samesite='None', secure=True, max_age=0)
     return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+# ========================== 
+# FORGOTTEN PASSWORD RESET TOKEN
+# ==========
+def generate_reset_token(user_id):
+    return jwt.encode(
+        {
+            "user_id": user_id,
+            "type": "password_reset",
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)
+        },
+        Config.JWT_SECRET_KEY,
+        algorithm="HS256"
+    )

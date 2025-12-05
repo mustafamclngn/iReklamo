@@ -4,7 +4,7 @@ import IliganLogo from "./iliganLogo";
 
 // BarangayOffNavBar Component
 const BarangayOffNavBar = () => {
-  const links = ["Dashboard", "Assigned Complaints", "Barangays", "Account"];
+  const links = ["Dashboard", "Assigned Complaints", "Account"];
 
   return (
     <nav className="bg-white py-6 font-[Inter] font-black">
@@ -14,8 +14,8 @@ const BarangayOffNavBar = () => {
         <ul className="flex items-center gap-5">
           {links.map((label) => (
             <li key={label}>
-              <NavLink 
-                to={`/brgyoff/${label.toLowerCase().replace(/ /g, '-')}`}
+              <NavLink
+                to={`/brgyoff/${label.toLowerCase().replace(/ /g, "-")}`}
                 className={({ isActive }) =>
                   `text-base uppercase tracking-wide transition-all duration-200 pb-2 ${
                     isActive

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import SuperAdminOfficialCard from '../../components/cards/offcardSuperAdmin';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import ErrorAlert from '../../components/common/ErrorAlert';
-import Pagination from '../../components/common/Pagination';
+import React, { useState, useEffect } from "react";
+import SuperAdminOfficialCard from "../../components/cards/offcardSuperAdmin";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import ErrorAlert from "../../components/common/ErrorAlert";
+import Pagination from "../../components/common/Pagination";
 
-import { useNavigate } from 'react-router-dom';
-import DeleteModal from '../../components/modals/DeleteUserModal';
-import useOfficialsApi from '../../api/officialsApi';
-import CreateAdmin from '../../components/modals/CreateAdmin';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import { useNavigate } from "react-router-dom";
+import DeleteModal from "../../components/modals/DeleteUserModal";
+import useOfficialsApi from "../../api/officialsApi";
+import CreateAdmin from "../../components/modals/CreateAdmin";
+import AssignActionModal from "../../components/modals/AssignActionModal";
 
 const SA_OfficialsPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   const { getAllOfficials } = useOfficialsApi();
@@ -27,18 +27,22 @@ const SA_OfficialsPage = () => {
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [officialData, setOfficialData] = useState(null);
 
   // filter states
   const [filters, setFilters] = useState({
-    barangay: 'all',
-    position: 'all'
+    barangay: "all",
+    position: "all",
   });
 
   // get all barangays and positions for filter
-  const uniqueBarangays = [...new Set(officials.map(o => o.barangay).filter(Boolean))];
-  const uniquePositions = [...new Set(officials.map(o => o.position).filter(Boolean))];
+  const uniqueBarangays = [
+    ...new Set(officials.map((o) => o.barangay_name).filter(Boolean)),
+  ];
+  const uniquePositions = [
+    ...new Set(officials.map((o) => o.position).filter(Boolean)),
+  ];
 
   // Fetch officials
   useEffect(() => {
@@ -50,15 +54,15 @@ const SA_OfficialsPage = () => {
       setLoading(true);
       setError(null);
       const response = await getAllOfficials();
-      
+
       if (response.success) {
         setOfficials(response.data);
       } else {
-        setError('Failed to fetch officials');
+        setError("Failed to fetch officials");
       }
     } catch (err) {
-      setError('Error connecting to server. Please try again.');
-      console.error('Error fetching officials:', err);
+      setError("Error connecting to server. Please try again.");
+      console.error("Error fetching officials:", err);
     } finally {
       setLoading(false);
     }
@@ -66,53 +70,54 @@ const SA_OfficialsPage = () => {
 
   // filter change
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [filterType]: value
+      [filterType]: value,
     }));
   };
 
   // filter
-  const filteredOfficials = officials.filter(official => {
+  const filteredOfficials = officials.filter((official) => {
     // search
     const searchLower = searchTerm.toLowerCase();
-    const fullName = `${official.first_name} ${official.last_name}`.toLowerCase();
-    const matchesSearch = 
+    const fullName =
+      `${official.first_name} ${official.last_name}`.toLowerCase();
+    const matchesSearch =
       fullName.includes(searchLower) ||
       official.email.toLowerCase().includes(searchLower) ||
-      (official.barangay && official.barangay.toLowerCase().includes(searchLower)) ||
-      (official.position && official.position.toLowerCase().includes(searchLower));
-    
+      (official.barangay &&
+        official.barangay.toLowerCase().includes(searchLower)) ||
+      (official.position &&
+        official.position.toLowerCase().includes(searchLower));
+
     // barangay
-    const matchesBarangay = 
-      filters.barangay === 'all' || 
-      official.barangay === filters.barangay;
+    const matchesBarangay =
+      filters.barangay === "all" || official.barangay_name === filters.barangay;
 
     // position
-    const matchesPosition = 
-      filters.position === 'all' || 
-      official.position === filters.position;
-    
+    const matchesPosition =
+      filters.position === "all" || official.position === filters.position;
+
     return matchesSearch && matchesBarangay && matchesPosition;
   });
 
   // View Details
   const handleViewDetails = (official) => {
-    console.log('View details for:', official);
+    console.log("View details for:", official);
     setOfficialData(official);
     navigate(`/officials/${official.id}`, { state: { official } });
   };
 
   // Assign Official to Complaint
   const handleUserAction = (official) => {
-    console.log('User action for:', official);
+    console.log("User action for:", official);
     setOfficialData(official);
     setIsAssignOpen(true);
   };
 
   // Revoke Permissions
   const handleRevokePermissions = (official) => {
-    console.log('Revoke permissions for:', official);
+    console.log("Revoke permissions for:", official);
     setOfficialData(official);
     setIsDeleteOpen(true);
   };
@@ -125,7 +130,10 @@ const SA_OfficialsPage = () => {
   // pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOfficials = filteredOfficials.slice(indexOfFirstItem, indexOfLastItem);
+  const currentOfficials = filteredOfficials.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredOfficials.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
@@ -167,23 +175,27 @@ const SA_OfficialsPage = () => {
               {/* barangay dropdown */}
               <select
                 value={filters.barangay}
-                onChange={(e) => handleFilterChange('barangay', e.target.value)}
+                onChange={(e) => handleFilterChange("barangay", e.target.value)}
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#578fe0] bg-white text-gray-700 cursor-pointer hover:border-gray-400 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3cpath%20d%3D%22M1%201.5L6%206.5L11%201.5%22%20stroke%3D%22%23666666%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3c%2Fsvg%3E')] bg-[length:12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
               >
                 <option value="all">All Barangays</option>
-                {uniqueBarangays.map(barangay => (
-                  <option key={barangay} value={barangay}>{barangay}</option>
+                {uniqueBarangays.map((barangay) => (
+                  <option key={barangay} value={barangay}>
+                    {barangay}
+                  </option>
                 ))}
               </select>
               {/* position dropdown */}
               <select
                 value={filters.position}
-                onChange={(e) => handleFilterChange('position', e.target.value)}
+                onChange={(e) => handleFilterChange("position", e.target.value)}
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#578fe0] bg-white text-gray-700 cursor-pointer hover:border-gray-400 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3cpath%20d%3D%22M1%201.5L6%206.5L11%201.5%22%20stroke%3D%22%23666666%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3c%2Fsvg%3E')] bg-[length:12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
               >
                 <option value="all">All Positions</option>
-                {uniquePositions.map(position => (
-                  <option key={position} value={position}>{position}</option>
+                {uniquePositions.map((position) => (
+                  <option key={position} value={position}>
+                    {position}
+                  </option>
                 ))}
               </select>
               <button
@@ -214,9 +226,11 @@ const SA_OfficialsPage = () => {
                   ))}
                   {filteredOfficials.length === 0 && (
                     <div className="text-center py-12 text-gray-500">
-                      {searchTerm || filters.barangay !== 'all' || filters.position !== 'all' ?
-                        'No officials found matching your filters.' :
-                        'No officials in the database yet.'}
+                      {searchTerm ||
+                      filters.barangay !== "all" ||
+                      filters.position !== "all"
+                        ? "No officials found matching your filters."
+                        : "No officials in the database yet."}
                     </div>
                   )}
                 </div>
@@ -237,24 +251,30 @@ const SA_OfficialsPage = () => {
           </div>
         </div>
       </div>
-      <CreateAdmin 
-        isOpen={isCreateOpen} 
-        onClose={() => {setIsCreateOpen(false); setRefresh(prev => !prev);}}
-        >
-      </CreateAdmin>
-      <DeleteModal 
-        isOpen={isDeleteOpen} 
-        onClose={() => {setIsDeleteOpen(false); setRefresh(prev => !prev);}}
+      <CreateAdmin
+        isOpen={isCreateOpen}
+        onClose={() => {
+          setIsCreateOpen(false);
+          setRefresh((prev) => !prev);
+        }}
+      ></CreateAdmin>
+      <DeleteModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setRefresh((prev) => !prev);
+        }}
         deleteData={officialData}
-        >
-      </DeleteModal>
-      <AssignActionModal 
-        isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+      ></DeleteModal>
+      <AssignActionModal
+        isOpen={isAssignOpen}
+        onClose={() => {
+          setIsAssignOpen(false);
+          setRefresh((prev) => !prev);
+        }}
         Action="Assign Official"
         assignDetails={officialData}
-        >
-      </AssignActionModal>
+      ></AssignActionModal>
     </>
   );
 };

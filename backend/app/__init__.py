@@ -10,12 +10,14 @@ from app.routes.users import user_bp
 from app.routes.officialsList import officialsList_bp
 from app.routes.dashboard import dashboard_bp
 from app.routes.user_info import userinfo_bp
+from app.routes.barangays import barangays_bp
 
 def create_app(config_name=None):
     """Application factory function"""
 
     # Create Flask app instance
     app = Flask(__name__)
+
     
     # Load configuration
     if config_name is None:
@@ -28,7 +30,7 @@ def create_app(config_name=None):
 
     # Initialize extensions
     init_extensions(app)
-
+    
     # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -37,10 +39,19 @@ def create_app(config_name=None):
     app.register_blueprint(officialsList_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(userinfo_bp)
+    app.register_blueprint(barangays_bp)
 
+    app.config['MAIL_DEBUG'] = True
 
     # Serve static files (profile pictures)
     STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
+
+    print("MAIL CONFIG CHECK")
+    print("SERVER:", app.config.get("MAIL_SERVER"))
+    print("PORT:", app.config.get("MAIL_PORT"))
+    print("USERNAME:", app.config.get("MAIL_USERNAME"))
+    print("PASSWORD:", app.config.get("MAIL_PASSWORD"))
+
     
     @app.route('/storage/profile_pictures/<filename>')  # CHANGED: Added underscore
     def serve_profile_picture(filename):

@@ -16,18 +16,17 @@ import RedirectFallback from "./utils/Redirect.jsx";
 import LoginPage from "./pages/auth/logInPage.jsx";
 import RequireAuth from "./pages/auth/RequireAuth.jsx";
 import PersistLogin from "./pages/auth/PersistLogin.jsx";
+import ResetPassword from "./pages/auth/resetPassword.jsx";
 
 // Import superadmin pages
 import DashboardPage from "./pages/superAdmin/dashboardpage.jsx";
 import ComplaintsPage from "./pages/superAdmin/complaintspage.jsx";
-import BarangaysPage from "./pages/superAdmin/barangayspage.jsx";
 import OfficialsPage from "./pages/superAdmin/officialspage.jsx";
 import ReportsPage from "./pages/superAdmin/reportspage.jsx";
 
 // Import city admin pages
 import CA_DashboardPage from "./pages/cityAdmin/dashboardpage.jsx";
 import CA_ComplaintsPage from "./pages/cityAdmin/complaintspage.jsx";
-import CA_BarangaysPage from "./pages/cityAdmin/barangayspage.jsx";
 import CA_OfficialsPage from "./pages/cityAdmin/officialspage.jsx";
 import CA_ReportsPage from "./pages/cityAdmin/reportspage.jsx";
 
@@ -36,13 +35,10 @@ import BC_DashboardPage from "./pages/brgyCap/dashboardpage.jsx";
 import BC_ComplaintsPage from "./pages/brgyCap/complaintspage.jsx";
 import BC_OfficialsPage from "./pages/brgyCap/officialspage.jsx";
 import BC_ReportsPage from "./pages/brgyCap/reportspage.jsx";
-import BC_AccountPage from "./pages/brgyCap/accountpage.jsx";
 
 // Import barangay official pages
 import BO_DashboardPage from "./pages/brgyOff/dashboardpage.jsx";
 import BO_AssignedComplaintsPage from "./pages/brgyOff/assignedcomplaintspage.jsx";
-import BO_BarangaysPage from "./pages/brgyOff/barangayspage.jsx";
-import BO_AccountPage from "./pages/brgyOff/accountpage.jsx";
 
 // Import complainant pages
 import CU_HomePage from "./pages/complainant/homepage.jsx";
@@ -52,110 +48,167 @@ import CU_ComplaintDetailsPage from "./pages/complainant/createComplaint/complai
 import CU_ComplaintSummaryPage from "./pages/complainant/createComplaint/complaintsummary.jsx";
 import CU_CompletionMessagePage from "./pages/complainant/createComplaint/completionmessage.jsx";
 
-
 // Import shared detail pages
+import BarangaysPage from "./pages/shared/barangayspage/barangaysPage.jsx";
+import DepartmentsPage from "./pages/shared/barangayspage/departmentsPage.jsx";
+import HotlinePage from "./pages/shared/barangayspage/hotlinePage.jsx";
 import OfficialDetailsPage from "./pages/shared/OfficialDetailsPage.jsx";
 import ComplaintDetailsPage from "./pages/shared/ComplaintDetailsPage.jsx";
+import AccountPage from "./pages/shared/AccountPage.jsx";
 
 // Import track complaint pages
-import CU_TrackComplaintDetailsPage from "./pages/complainant/trackComplaint/trackcomplaintdetailspage.jsx"
+import CU_TrackComplaintDetailsPage from "./pages/complainant/trackComplaint/trackcomplaintdetailspage.jsx";
 
 function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
 
-
   return (
     <FormProvider>
       <Routes>
-          {/* Home route (Default) */}
-          <Route path="/" element={<ComplainantHomeLayout />}>
-            <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<CU_HomePage />} />
-          </Route>
+        {/* Home route (Default) */}
+        <Route path="/" element={<ComplainantHomeLayout />}>
+          <Route index element={<Navigate to="home" replace />} />
+          <Route path="home" element={<CU_HomePage />} />
+        </Route>
 
         {/* Complainant Route */}
         <Route element={<ComplainantLayout />}>
-          <Route path="/file-complaint/complainantinfo" element={<CU_ComplainantInfoPage />} />
-          <Route path="/file-complaint/complaintdetails" element={<CU_ComplaintDetailsPage />} />
-          <Route path="/file-complaint/summary" element={<CU_ComplaintSummaryPage />} />
-          <Route path="/file-complaint/completionmessage" element={<CU_CompletionMessagePage />} />
+          <Route
+            path="/file-complaint/complainantinfo"
+            element={<CU_ComplainantInfoPage />}
+          />
+          <Route
+            path="/file-complaint/complaintdetails"
+            element={<CU_ComplaintDetailsPage />}
+          />
+          <Route
+            path="/file-complaint/summary"
+            element={<CU_ComplaintSummaryPage />}
+          />
+          <Route
+            path="/file-complaint/completionmessage"
+            element={<CU_CompletionMessagePage />}
+          />
           <Route path="/track-complaint" element={<CU_TrackComplaintPage />} />
-          <Route path="/track/:complaintCode" element={<CU_TrackComplaintDetailsPage />} />
+          <Route
+            path="/track/:complaintCode"
+            element={<CU_TrackComplaintDetailsPage />}
+          />
         </Route>
-        
-      <Route element={<PersistLogin />}>
-        <Route element={<RequireAuth allowedRoles={[1]}/>}>
-          {/* SuperAdmin Routes */}
-          <Route path="/superadmin" element={<SuperAdminLayout />}> 
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="complaints" element={<ComplaintsPage />} />
-            <Route path="complaints/:complaint_id" element={<ComplaintDetailsPage />} />
-            <Route path="barangays" element={<BarangaysPage />} />
-            <Route path="officials" element={<OfficialsPage />} />
-            <Route path="officials/:user_id" element={<OfficialDetailsPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            {/* invalid routes */}
-            <Route path="*" element={ <Navigate to="/superadmin/dashboard" replace />} />
+
+        <Route element={<PersistLogin />}>
+          <Route element={<RequireAuth allowedRoles={[1]} />}>
+            {/* SuperAdmin Routes */}
+            <Route path="/superadmin" element={<SuperAdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="complaints" element={<ComplaintsPage />} />
+              <Route
+                path="complaints/:complaint_id"
+                element={<ComplaintDetailsPage />}
+              />
+              <Route path="barangays" element={<BarangaysPage />} />
+              <Route path="departments" element={<DepartmentsPage />} />
+              <Route path="hotline" element={<HotlinePage />} />
+              <Route path="officials" element={<OfficialsPage />} />
+              <Route
+                path="officials/:user_id"
+                element={<OfficialDetailsPage />}
+              />
+              <Route path="reports" element={<ReportsPage />} />
+              {/* invalid routes */}
+              <Route
+                path="*"
+                element={<Navigate to="/superadmin/dashboard" replace />}
+              />
+            </Route>
+          </Route>
+
+          <Route element={<RequireAuth allowedRoles={[2]} />}>
+            {/* CityAdmin Routes */}
+            <Route path="/cityadmin" element={<CityAdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<CA_DashboardPage />} />
+              <Route path="complaints" element={<CA_ComplaintsPage />} />
+              <Route
+                path="complaints/:complaint_id"
+                element={<ComplaintDetailsPage />}
+              />
+              <Route path="barangays" element={<BarangaysPage />} />
+              <Route path="departments" element={<DepartmentsPage />} />
+              <Route path="hotline" element={<HotlinePage />} />
+              <Route path="officials" element={<CA_OfficialsPage />} />
+              <Route
+                path="officials/:user_id"
+                element={<OfficialDetailsPage />}
+              />
+              <Route path="reports" element={<CA_ReportsPage />} />
+              {/* invalid routes */}
+              <Route
+                path="*"
+                element={<Navigate to="/cityadmin/dashboard" replace />}
+              />
+            </Route>
+          </Route>
+
+          <Route element={<RequireAuth allowedRoles={[3]} />}>
+            {/* Barangay Captain Routes */}
+            <Route path="/brgycap" element={<BarangayCapLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<BC_DashboardPage />} />
+              <Route path="complaints" element={<BC_ComplaintsPage />} />
+              <Route
+                path="complaints/:complaint_id"
+                element={<ComplaintDetailsPage />}
+              />
+              <Route path="officials" element={<BC_OfficialsPage />} />
+              <Route
+                path="officials/:user_id"
+                element={<OfficialDetailsPage />}
+              />
+              <Route path="reports" element={<BC_ReportsPage />} />
+              <Route path="account" element={<AccountPage />} />
+              {/* invalid routes */}
+              <Route
+                path="*"
+                element={<Navigate to="/brgycap/dashboard" replace />}
+              />
+            </Route>
+          </Route>
+
+          <Route element={<RequireAuth allowedRoles={[4]} />}>
+            {/* Barangay Official Routes */}
+            <Route path="/brgyoff" element={<BarangayOffLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<BO_DashboardPage />} />
+              <Route
+                path="assigned-complaints"
+                element={<BO_AssignedComplaintsPage />}
+              />
+              <Route
+                path="assigned-complaints/:complaint_id"
+                element={<ComplaintDetailsPage />}
+              />
+              <Route path="account" element={<AccountPage />} />
+              {/* invalid routes */}
+              <Route
+                path="*"
+                element={<Navigate to="/brgyoff/dashboard" replace />}
+              />
+            </Route>
           </Route>
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={[2]}/>}>
-          {/* CityAdmin Routes */}
-          <Route path="/cityadmin" element={<CityAdminLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<CA_DashboardPage />} />
-            <Route path="complaints" element={<CA_ComplaintsPage />} />
-            <Route path="complaints/:complaint_id" element={<ComplaintDetailsPage />} />
-            <Route path="barangays" element={<CA_BarangaysPage />} />
-            <Route path="officials" element={<CA_OfficialsPage />} />
-            <Route path="officials/:user_id" element={<OfficialDetailsPage />} />
-            <Route path="reports" element={<CA_ReportsPage />} />
-            {/* invalid routes */}
-            <Route path="*" element={ <Navigate to="/cityadmin/dashboard" replace />} />
-          </Route>
+        {/* Authentication Routes */}
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="reset-password" element={<ResetPassword />} />
         </Route>
-
-        <Route element={<RequireAuth allowedRoles={[3]}/>}>
-          {/* Barangay Captain Routes */}
-          <Route path="/brgycap" element={<BarangayCapLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<BC_DashboardPage />} />
-            <Route path="complaints" element={<BC_ComplaintsPage />} />
-            <Route path="complaints/:complaint_id" element={<ComplaintDetailsPage />} />
-            <Route path="officials" element={<BC_OfficialsPage />} />
-            <Route path="officials/:user_id" element={<OfficialDetailsPage />} />
-            <Route path="reports" element={<BC_ReportsPage />} />
-            <Route path="account" element={<BC_AccountPage />} />
-            {/* invalid routes */}
-            <Route path="*" element={ <Navigate to="/brgycap/dashboard" replace />} />
-          </Route>
-        </Route>
-
-        <Route element={<RequireAuth allowedRoles={[4]}/>}>
-          {/* Barangay Official Routes */}
-          <Route path="/brgyoff" element={<BarangayOffLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<BO_DashboardPage />} />
-            <Route path="assigned-complaints" element={<BO_AssignedComplaintsPage />} />
-            <Route path="assigned-complaints/:complaint_id" element={<ComplaintDetailsPage />} />
-            <Route path="barangays" element={<BO_BarangaysPage />} />
-            <Route path="account" element={<BO_AccountPage />} />
-            {/* invalid routes */}
-            <Route path="*" element={ <Navigate to="/brgyoff/dashboard" replace />} />
-          </Route>
-        </Route>
-      </Route>
-      
-      {/* Authentication Routes */}
-      <Route path="/auth" element={<AuthLayout />}>
-        <Route path="login" element={<LoginPage />} />
-      </Route>
-      
-      {/* other invalid routes*/}
-      <Route path="*" element={<RedirectFallback />} />
-  </Routes>
-  </FormProvider>
+    
+        {/* other invalid routes*/}
+        <Route path="*" element={<RedirectFallback />} />
+      </Routes>
+    </FormProvider>
   );
 }
 

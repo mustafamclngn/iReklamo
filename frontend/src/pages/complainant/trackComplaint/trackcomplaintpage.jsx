@@ -9,7 +9,7 @@ const CU_TrackComplaintPage = () => {
   const navigate = useNavigate();
   const complaintsApi = useComplaintsApi();
 
-  const {trackComplaint} = useComplaintsApi();
+  const {trackComplaint} = complaintsApi;
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -60,7 +60,7 @@ const CU_TrackComplaintPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-[1591px] mx-auto px-8">
         <div
-          className="relative w-full h-[870px] bg-gray-800 bg-cover bg-center rounded-3xl overflow-hidden shadow-xl"
+          className="relative w-full h-[700px] bg-gray-800 bg-cover bg-center rounded-3xl overflow-hidden shadow-xl"
           style={{ backgroundImage: `url('/images/trackcomplaint.jpg')` }}
         >
           <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center px-8">
