@@ -10,6 +10,7 @@ from app.functions.Delete import Delete
 from app.middleware.verifyJwt import verify_jwt
 
 from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
 from app.controllers.complaints.complaintAssignC import assign_complaint
 from app.middleware.verifyRoles import verify_roles
 from app.middleware.verifyJwt import verify_jwt
@@ -217,6 +218,11 @@ def get_all_complaints():
         if assigned_filter:
             conditions.append("complaints.assigned_official_id = %s")
             params.append(assigned_filter)
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
 
         # If no explicit status filter provided, exclude rejected complaints from default view
         if not status_filter:
