@@ -22,6 +22,9 @@ import {
   createFormData,
 } from "../../utils/formHelpers";
 import { toTitleCase } from "../../utils/stringHelpers";
+import useLogOut from '../../hooks/useLogout';
+import { useNavigate, Link } from 'react-router-dom';
+import LogOutModal from '../../components/modals/ConfirmLogOut';
 
 const AccountPage = () => {
   const { auth } = useAuth();
@@ -225,6 +228,16 @@ const AccountPage = () => {
     (userData?.profile_picture || previewImage) && !imageError;
   const displayImage = previewImage || getImageURL(userData?.profile_picture);
 
+  const logout = useLogOut();
+  const navigate = useNavigate();
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  const signout = async () => {
+    await logout();
+    navigate('/home');
+  }
+
   if (loading) {
     return <LoadingSpinner message="Loading account details..." />;
   }
@@ -241,405 +254,413 @@ const AccountPage = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <ConfirmEditModal
-        isOpen={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={handleConfirmSave}
-        isLoading={saving}
-      />
-
-      <div className="max-w-[1591px] mx-auto px-8 py-8">
-        {/* header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            View Account Details
-          </h1>
-          {!editMode ? (
-            <button
-              onClick={() => setEditMode(true)}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 text-lg"
-            >
-              <i className="bi bi-pencil-square"></i>
-              Edit Profile
-            </button>
-          ) : (
-            <div className="flex gap-3">
+    <>
+      <div className="bg-gray-50 min-h-screen">
+        <ConfirmEditModal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmSave}
+          isLoading={saving}
+        />
+        <div className="max-w-[1591px] mx-auto px-8 py-8">
+          {/* header */}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              View Account Details
+            </h1>
+            {!editMode ? (
               <button
-                onClick={handleCancel}
-                disabled={saving}
-                className="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setEditMode(true)}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 text-lg"
               >
-                <X className="w-5 h-5" />
-                Cancel
+                <i className="bi bi-pencil-square"></i>
+                Edit Profile
               </button>
-              <button
-                onClick={handleSaveClick}
-                disabled={saving}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save className="w-5 h-5" />
-                Save Changes
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 mb-6">
-          <div className="flex items-center gap-8">
-            <div className="flex-shrink-0">
-              <div className="relative">
-                <div
-                  className={`w-40 h-40 bg-gray-200 ${
-                    hasValidImage
-                      ? "border-0"
-                      : "border-2 border-dashed border-gray-400"
-                  } rounded-lg flex items-center justify-center overflow-hidden`}
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancel}
+                  disabled={saving}
+                  className="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {hasValidImage ? (
-                    <img
-                      src={displayImage}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                      onError={() => setImageError(true)}
-                    />
-                  ) : (
-                    <i className="bi bi-person text-6xl text-gray-400"></i>
+                  <X className="w-5 h-5" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveClick}
+                  disabled={saving}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-5 h-5" />
+                  Save Changes
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 mb-6">
+            <div className="flex items-center gap-8">
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <div
+                    className={`w-40 h-40 bg-gray-200 ${
+                      hasValidImage
+                        ? "border-0"
+                        : "border-2 border-dashed border-gray-400"
+                    } rounded-lg flex items-center justify-center overflow-hidden`}
+                  >
+                    {hasValidImage ? (
+                      <img
+                        src={displayImage}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                        onError={() => setImageError(true)}
+                      />
+                    ) : (
+                      <i className="bi bi-person text-6xl text-gray-400"></i>
+                    )}
+                  </div>
+                  {editMode && (
+                    <div className="absolute bottom-2 right-2">
+                      <label htmlFor="profile-picture" className="cursor-pointer">
+                        <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center hover:bg-green-700 transition-colors shadow-lg">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                        <input
+                          id="profile-picture"
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/gif"
+                          className="hidden"
+                          onChange={handleImageChange}
+                          disabled={saving}
+                        />
+                      </label>
+                    </div>
+                  )}
+                  {editMode && previewImage && (
+                    <button
+                      onClick={handleRemoveImage}
+                      disabled={saving}
+                      className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
                   )}
                 </div>
                 {editMode && (
-                  <div className="absolute bottom-2 right-2">
-                    <label htmlFor="profile-picture" className="cursor-pointer">
-                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center hover:bg-green-700 transition-colors shadow-lg">
-                        <Camera className="w-5 h-5 text-white" />
-                      </div>
-                      <input
-                        id="profile-picture"
-                        type="file"
-                        accept="image/png,image/jpeg,image/jpg,image/gif"
-                        className="hidden"
-                        onChange={handleImageChange}
-                        disabled={saving}
-                      />
-                    </label>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Max 5MB
+                    <br />
+                    PNG, JPG, GIF
+                  </p>
+                )}
+              </div>
+              {/* info */}
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  {userData.first_name} {userData.last_name}
+                </h2>
+                <p className="text-gray-600 font-medium text-xl mb-1">
+                  {getUserRole()}
+                </p>
+                <p className="text-gray-600 text-lg">
+                  {userData.barangay_name || "N/A"}, Iligan City 9200
+                </p>
+              </div>
+              {/* profile completion circle */}
+              <div className="flex-shrink-0 flex flex-col items-center">
+                <div className="relative w-32 h-32">
+                  <svg className="transform -rotate-90 w-32 h-32">
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      stroke="#E5E7EB"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      stroke={
+                        getProfileCompletion() === 100 ? "#10B981" : "#3B82F6"
+                      }
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 56}`}
+                      strokeDashoffset={`${
+                        2 * Math.PI * 56 * (1 - getProfileCompletion() / 100)
+                      }`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold text-gray-900">
+                      {getProfileCompletion()}%
+                    </span>
+                    <span className="text-xs text-gray-500">Complete</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2 text-center">
+                  Profile Status
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* personal information */}
+          <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 mb-6">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6">
+              Personal Information
+            </h3>
+            <hr className="border-t border-gray-200 mb-6" />
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  First Name {editMode && <span className="text-red-500">*</span>}
+                </label>
+                {editMode ? (
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Enter first name"
+                    required
+                  />
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {userData.first_name}
+                    </p>
                   </div>
                 )}
-                {editMode && previewImage && (
-                  <button
-                    onClick={handleRemoveImage}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Last Name {editMode && <span className="text-red-500">*</span>}
+                </label>
+                {editMode ? (
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleInputChange}
                     disabled={saving}
-                    className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <X className="w-4 h-4 text-white" />
-                  </button>
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Enter last name"
+                    required
+                  />
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {userData.last_name}
+                    </p>
+                  </div>
                 )}
               </div>
-              {editMode && (
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  Max 5MB
-                  <br />
-                  PNG, JPG, GIF
-                </p>
-              )}
-            </div>
-
-            {/* info */}
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {userData.first_name} {userData.last_name}
-              </h2>
-              <p className="text-gray-600 font-medium text-xl mb-1">
-                {getUserRole()}
-              </p>
-              <p className="text-gray-600 text-lg">
-                {userData.barangay_name || "N/A"}, Iligan City 9200
-              </p>
-            </div>
-
-            {/* profile completion circle */}
-            <div className="flex-shrink-0 flex flex-col items-center">
-              <div className="relative w-32 h-32">
-                <svg className="transform -rotate-90 w-32 h-32">
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r="56"
-                    stroke="#E5E7EB"
-                    strokeWidth="8"
-                    fill="none"
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Sex
+                </label>
+                {editMode ? (
+                  <select
+                    name="sex"
+                    value={formData.sex}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select sex</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {userData.sex || "N/A"}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Date of Birth
+                </label>
+                {editMode ? (
+                  <input
+                    type="date"
+                    name="birthdate"
+                    value={formData.birthdate}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r="56"
-                    stroke={
-                      getProfileCompletion() === 100 ? "#10B981" : "#3B82F6"
-                    }
-                    strokeWidth="8"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 56}`}
-                    strokeDashoffset={`${
-                      2 * Math.PI * 56 * (1 - getProfileCompletion() / 100)
-                    }`}
-                    strokeLinecap="round"
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {formatDate(userData.birthdate)}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Email {editMode && <span className="text-red-500">*</span>}
+                </label>
+                {editMode ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Enter email address"
+                    required
                   />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {getProfileCompletion()}%
-                  </span>
-                  <span className="text-xs text-gray-500">Complete</span>
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {userData.email}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Contact Number
+                </label>
+                {editMode ? (
+                  <input
+                    type="text"
+                    name="contact_number"
+                    value={formData.contact_number}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="09XXXXXXXXX"
+                    maxLength="11"
+                  />
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {formatPhone(userData.contact_number)}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Username
+                </label>
+                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                  <p className="text-gray-900 font-medium text-lg">
+                    {userData.user_name || "N/A"}
+                  </p>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mt-2 text-center">
-                Profile Status
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* personal information */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 mb-6">
-          <h3 className="text-2xl font-semibold text-gray-900 mb-6">
-            Personal Information
-          </h3>
-          <hr className="border-t border-gray-200 mb-6" />
-
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                First Name {editMode && <span className="text-red-500">*</span>}
-              </label>
-              {editMode ? (
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Enter first name"
-                  required
-                />
-              ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Date Registered
+                </label>
                 <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                   <p className="text-gray-900 font-medium text-lg">
-                    {userData.first_name}
+                    {formatDate(userData.created_at)}
                   </p>
                 </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Last Name {editMode && <span className="text-red-500">*</span>}
-              </label>
-              {editMode ? (
-                <input
-                  type="text"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Enter last name"
-                  required
-                />
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {userData.last_name}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Sex
-              </label>
-              {editMode ? (
-                <select
-                  name="sex"
-                  value={formData.sex}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select sex</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {userData.sex || "N/A"}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Date of Birth
-              </label>
-              {editMode ? (
-                <input
-                  type="date"
-                  name="birthdate"
-                  value={formData.birthdate}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {formatDate(userData.birthdate)}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Email {editMode && <span className="text-red-500">*</span>}
-              </label>
-              {editMode ? (
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Enter email address"
-                  required
-                />
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {userData.email}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Contact Number
-              </label>
-              {editMode ? (
-                <input
-                  type="text"
-                  name="contact_number"
-                  value={formData.contact_number}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="09XXXXXXXXX"
-                  maxLength="11"
-                />
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {formatPhone(userData.contact_number)}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Username
-              </label>
-              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                <p className="text-gray-900 font-medium text-lg">
-                  {userData.user_name || "N/A"}
-                </p>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Date Registered
-              </label>
-              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                <p className="text-gray-900 font-medium text-lg">
-                  {formatDate(userData.created_at)}
-                </p>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* address information */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8">
-          <h3 className="text-2xl font-semibold text-gray-900 mb-6">
-            Address Information
-          </h3>
-          <hr className="border-t border-gray-200 mb-6" />
-
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Purok / House No.
-              </label>
-              {editMode ? (
-                <input
-                  type="text"
-                  name="purok"
-                  value={formData.purok}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Enter purok or house number"
-                />
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {userData.purok || "N/A"}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Street / Sitio
-              </label>
-              {editMode ? (
-                <input
-                  type="text"
-                  name="street"
-                  value={formData.street}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Enter street or sitio"
-                />
-              ) : (
-                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {userData.street || "N/A"}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Barangay
-              </label>
-              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                <p className="text-gray-900 font-medium text-lg">
-                  {userData.barangay_name || "N/A"}
-                </p>
+          {/* address information */}
+          <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6">
+              Address Information
+            </h3>
+            <hr className="border-t border-gray-200 mb-6" />
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Purok / House No.
+                </label>
+                {editMode ? (
+                  <input
+                    type="text"
+                    name="purok"
+                    value={formData.purok}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Enter purok or house number"
+                  />
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {userData.purok || "N/A"}
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                City
-              </label>
-              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                <p className="text-gray-900 font-medium text-lg">Iligan City</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Street / Sitio
+                </label>
+                {editMode ? (
+                  <input
+                    type="text"
+                    name="street"
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Enter street or sitio"
+                  />
+                ) : (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                    <p className="text-gray-900 font-medium text-lg">
+                      {userData.street || "N/A"}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Barangay
+                </label>
+                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                  <p className="text-gray-900 font-medium text-lg">
+                    {userData.barangay_name || "N/A"}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  City
+                </label>
+                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                  <p className="text-gray-900 font-medium text-lg">Iligan City</p>
+                </div>
               </div>
             </div>
           </div>
+          <button
+            onClick={() => setIsConfirmOpen(true)}
+            className="px-4 py-2 mt-8 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+        >
+            Log Out
+        </button>
         </div>
       </div>
-    </div>
+
+      <LogOutModal 
+        isOpen={isConfirmOpen} 
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => signout()}
+        >
+      </LogOutModal>
+
+    </>
   );
 };
 
