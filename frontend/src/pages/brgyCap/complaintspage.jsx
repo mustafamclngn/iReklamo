@@ -6,15 +6,21 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const { auth } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [complaints, setComplaints] = useState([]);
+    
+  const [complaints, setComplaints] = useState([]); // All complaints under barangay
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -22,10 +28,7 @@ const BC_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
-  const [complaintData, setComplaintData] = useState(null);
-  const [refresh, setRefresh] = useState(false);
 
-  const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
   const defaultPriority = location.state?.defaultPriority || 'all';
 
@@ -121,23 +124,22 @@ const BC_ComplaintsPage = () => {
     // Open priority modal
   };
 
+  // Selection
+  const [selectAll, setSelectAll] = useState(false);
+  const [selected, setSelected] = useState([]); // selected complaints for assignment
+
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    console.log('Assign complaint to:', complaint);
-    setComplaintData(complaint);
+    if(complaint) setSelected(prev => [...prev, complaint]);
     setIsAssignOpen(true);
   };
 
-  // Selection
-  const [selectAll, setSelectAll] = useState(false);
-  const [selected, setSelected] = useState([]);
-
-  const handleSelect = (id, isChecked) => {
+  const handleSelect = (complaint, isChecked) => {
     setSelected(prev => {
       if (isChecked) {
-        return [...prev, id];
+        return [...prev, complaint];
       } else {
-        return prev.filter(item => item !== id); 
+        return prev.filter(item => item.id !== complaint.id); 
       }
     });
   };
@@ -145,12 +147,10 @@ const BC_ComplaintsPage = () => {
   const handleSelAll = () => {
     if (selectAll) {
       setSelectAll(false);
-      console.log(selectAll)
       setSelected([]); 
     } else {
       setSelectAll(true);
-      console.log(selectAll)
-      setSelected(filteredComplaints.map(c => c.id)); 
+      setSelected([...filteredComplaints]); 
     }
   };
 
@@ -257,7 +257,7 @@ const BC_ComplaintsPage = () => {
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
                       onSelect={handleSelect}
-                      isSelected={selected.includes(complaint.id)} 
+                      isSelected={selected?.some(item => item.id === complaint.id)}
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
@@ -285,13 +285,12 @@ const BC_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
+      <AssignComplaintModal 
         isOpen={isAssignOpen} 
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Complaint"
-        assignDetails={complaintData}
+        selectedComplaints={selected}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
     </>
   );
 };

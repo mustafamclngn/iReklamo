@@ -34,9 +34,6 @@ def brgy(id):
                     .search(tag="id", key=id)\
                     .execute()\
                     .retDict()
-        
-        print(result)
-
 
         return jsonify({
             'success': True,

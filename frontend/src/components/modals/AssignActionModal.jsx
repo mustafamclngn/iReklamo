@@ -19,9 +19,9 @@ const AssignActionModal = ({ isOpen, onClose, Action, assignDetails }) => {
 
   // ===========
   // Barangay states
-  const { getBarangays, getBarangayById } = useUserInfoApi();
-  const [barangays, setBarangays] = useState([]);
-  const [selectedBarangay, setSelectedBarangay] = useState('');
+  // const { getBarangays, getBarangayById } = useUserInfoApi();
+  // const [barangays, setBarangays] = useState([]);
+  // const [selectedBarangay, setSelectedBarangay] = useState('');
 
   // ===========
   // Official states
@@ -33,7 +33,7 @@ const AssignActionModal = ({ isOpen, onClose, Action, assignDetails }) => {
   // Complaint states
   const { StatusComplaintsByBarangayId, assignComplaints } = useComplaintsApi();
   const [complaints, setComplaints] = useState([]);
-  const [selectedComplaint, setSelectedComplaint] = useState('');
+  const [selectedComplaint, setSelectedComplaint] = useState([]);
 
   // =============
   // Error and Success messages 

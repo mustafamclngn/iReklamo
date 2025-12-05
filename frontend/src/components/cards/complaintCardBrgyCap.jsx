@@ -98,7 +98,7 @@ const ComplaintCardBrgyCap = ({
           <input
             type="checkbox"
             id="selectCheckbox"
-            checked={isChecked}
+            checked={!!isChecked}
             onChange={(e) => {
               setIsChecked(e.target.checked);
               onSelect(complaint.id, e.target.checked);
