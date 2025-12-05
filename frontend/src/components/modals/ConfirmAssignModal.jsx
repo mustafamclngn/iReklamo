@@ -21,7 +21,7 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => 
               </label>
               <div className="user-summary">
                 <div className="complaint-list">
-                  {complaints.length > 0 ? (
+                  {complaints?.length > 0 ? (
                     <ol>
                       {complaints.map((complaint, index) => (
                         <li key={complaint.id}>

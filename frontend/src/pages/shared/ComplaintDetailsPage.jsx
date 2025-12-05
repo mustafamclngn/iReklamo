@@ -4,7 +4,7 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 
 
 const formatDate = (dateString) => {
@@ -308,13 +308,12 @@ const ComplaintDetailsPage = () => {
                     </div>
                   </div>
                 </div>
-                <AssignActionModal 
+                <AssignComplaintModal
                   isOpen={isAssignOpen} 
                   onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-                  Action="Assign Complaint"
-                  assignDetails={complaint}
+                  assignDetails={[complaint]}
                   >
-                </AssignActionModal>
+                </AssignComplaintModal>
               </>
             );
           };

@@ -5,7 +5,7 @@ import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import DeleteModal from '../../components/modals/DeleteUserModal';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
 import ActiveCasesModal from '../../components/modals/ActiveCasesModal';
 import useComplaintsApi from '../../api/complaintsAPI';
 
@@ -404,13 +404,13 @@ const OfficialDetailsPage = () => {
         >
       </DeleteModal>
 
-      <AssignActionModal 
+      <AssignOfficialModal 
         isOpen={isAssignOpen} 
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Official"
         assignDetails={official}
         >
-      </AssignActionModal>
+      </AssignOfficialModal>
 
       <ActiveCasesModal 
         isOpen={isViewCasesOpen} 

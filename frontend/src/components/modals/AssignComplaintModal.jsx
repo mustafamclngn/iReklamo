@@ -31,10 +31,7 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
   // ===========
   // Complaint states
   const { StatusComplaintsByBarangayId, assignComplaints } = useComplaintsApi();
-  // const [complaints, setComplaints] = useState([]);
-  // const [selectedComplaints, setSelectedComplaints] = useState([]);
-  // commented out as we dont nedd these anymore, use array of complaint objets: selectedComplaints
-
+  // TODO: confirm complaints reassignment if they are currently pending
 
   // =============
   // Error and Success messages 
@@ -76,8 +73,7 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
     fetchOfficials();
   }, [assignBrgy]);
 
-  if (!isOpen) return null;
-  if(!selectedComplaints) return null;
+  if (!isOpen || !selectedComplaints) return null;
 
   // ==========
   // Submit 
@@ -109,6 +105,8 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
     }
   }
 
+  // ===========
+  // Component contents
   return (
     <>
       <div className="popup-overlay">

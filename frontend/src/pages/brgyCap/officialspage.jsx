@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BrgyCapOfficialCard from '../../components/cards/offcardBrgyCap';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
-
-import { useNavigate } from 'react-router-dom';
 import useOfficialsApi from '../../api/officialsApi';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
 
 const BC_OfficialsPage = () => {
   const { auth } = useAuth();
@@ -225,13 +223,12 @@ const BC_OfficialsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
+      <AssignOfficialModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Official"
-        assignDetails={officialData}
+        onClose={() => setIsAssignOpen(false)}
+        officialDetails={officialData}
         >
-      </AssignActionModal>
+      </AssignOfficialModal>
     </>
   );
 }

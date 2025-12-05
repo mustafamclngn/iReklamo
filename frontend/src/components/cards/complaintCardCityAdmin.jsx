@@ -17,7 +17,9 @@ const ComplaintCardCityAdmin = ({
   onViewDetails,
   onStatusUpdate,
   onPriorityUpdate,
-  onAssignOfficial
+  onAssignOfficial,
+  onSelect,
+  isSelected
 }) => {
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
@@ -82,6 +84,14 @@ const ComplaintCardCityAdmin = ({
           >
             <i className="bi bi-person-check text-xl"></i>
           </button>
+          
+          {/* Select for Assignment */}
+          <input
+            type="checkbox"
+            id="selectCheckbox"
+            checked={!!isSelected}
+            onChange={(e) => onSelect(complaint, e.target.checked)}
+          />
         </div>
       </div>
     </div>

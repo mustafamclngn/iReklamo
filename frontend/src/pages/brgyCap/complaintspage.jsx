@@ -13,6 +13,8 @@ const BC_ComplaintsPage = () => {
   const location = useLocation();
 
   const { auth } = useAuth();
+  const user = auth?.user
+  const userId = user?.user_id
     
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
   
@@ -51,14 +53,7 @@ const BC_ComplaintsPage = () => {
     try {
       setLoading(true);
       setError(null);
-
-      // Get authenticated user ID
-      const userId = auth?.user?.user_id;
-      if (!userId) {
-        setError('User not authenticated');
-        return;
-      }
-
+      
       // Use role-based endpoint for barangay captain - gets only their barangay complaints
       const response = await getBarangayCaptainComplaints(userId);
 
@@ -299,7 +294,7 @@ const BC_ComplaintsPage = () => {
       </div>
       <AssignComplaintModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        onClose={() => setIsAssignOpen(false)}
         selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>

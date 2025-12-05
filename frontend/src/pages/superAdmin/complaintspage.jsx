@@ -5,26 +5,30 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import useAuth from '../../hooks/useAuth';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 
 const SA_ComplaintsPage = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [complaints, setComplaints] = useState([]);
+  const location = useLocation();
+
+  const { auth } = useAuth();
+
+  const [complaints, setComplaints] = useState([]); // All complaints under barangay
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
-  const [refresh, setRefresh] = useState(false);
 
   const { getAllComplaints } = useComplaintsApi();
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
-  const [complaintData, setComplaintData] = useState(null);
-  const complaintsApi = useComplaintsApi();
-  const location = useLocation();
+
   const defaultStatus = location.state?.defaultStatus || 'all';
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
@@ -130,12 +134,47 @@ const SA_ComplaintsPage = () => {
     console.log('Update priority for:', complaint);
     // Open priority modal
   };
+  
+    // Selection
+      const [selectAll, setSelectAll] = useState(false);
+      const [selected, setSelected] = useState(new Map()); // selected complaints for assignment
 
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    console.log('Assign complaint to:', complaint);
-    setComplaintData(complaint);
+    if(complaint) {
+      setSelected(prev => {
+        const map = new Map(prev);
+        map.set(complaint.id, complaint);   
+        return map;
+      });
+    }
     setIsAssignOpen(true);
+  };
+  
+  useEffect(() => {
+    console.log("Selected changed:", [...selected.values()]);
+  }, [selected]);
+
+
+  const handleSelect = (complaint, isChecked) => {
+    setSelected(prev => {
+      const map = new Map(prev);
+      if (isChecked) map.set(complaint.id, complaint);
+      else map.delete(complaint.id);
+      return map;
+    });
+  };
+
+  const handleSelAll = () => {
+    if (selectAll) {
+      setSelectAll(false);
+      setSelected(new Map()); 
+    } else {
+      const map = new Map();
+      filteredComplaints.forEach(c => map.set(c.id, c));
+      setSelected(map);
+      setSelectAll(true); 
+    }
   };
 
   // Pagination logic
@@ -215,6 +254,23 @@ const SA_ComplaintsPage = () => {
                   <option key={priority} value={priority}>{priority}</option>
                 ))}
               </select>
+
+              {/* Select for Assignment */}
+              <button
+                onClick={handleSelAll}
+                className={`
+                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
+
+                  ${selectAll
+                    ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
+                    : "bg-gray-400 border-gray-400 text-black hover:bg-blue-300"}
+                `}
+                title="Select All for assignment"
+              >
+                {selectAll ? "Unselect All" : "Select All"}
+              </button>
+
+
             </div>
             {/* Loading State */}
             {loading && <LoadingSpinner message="Loading complaints..." />}
@@ -234,6 +290,8 @@ const SA_ComplaintsPage = () => {
                       onStatusUpdate={handleStatusUpdate}
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
+                      onSelect={handleSelect}
+                      isSelected={selected.has(complaint.id)}
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
@@ -261,13 +319,12 @@ const SA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
+      <AssignComplaintModal 
         isOpen={isAssignOpen} 
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Complaint"
-        assignDetails={complaintData}
+        selectedComplaints={[...selected.values()]}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
     </>
   );
 };

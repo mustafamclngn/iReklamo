@@ -56,7 +56,7 @@ const BrgyCapOfficialCard = ({ official, onViewDetails, onUserAction }) => {
             View Details
           </button>
           <button 
-            onClick={() => onUserAction && onUserAction(official)}
+            onClick={() => {onUserAction && onUserAction(official); console.log("LOGS FROM CARD: ", official)}}
             className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
             title="Assign official to complaint"
           >
