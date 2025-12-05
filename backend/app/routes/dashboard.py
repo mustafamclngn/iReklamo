@@ -425,7 +425,7 @@ def get_unassigned_officials():
 def get_annual_complaint_counts():
     """
     Returns the total number of complaints for a given year.
-    Query params: year (e.g., '2025')
+    Query params: year (e.g., '2025'), barangay_id (optional)
     Example response:
     [
         {"count": 186}
@@ -433,14 +433,19 @@ def get_annual_complaint_counts():
     """
     try:
         year = request.args.get('year', '2025')
+        barangay_id = request.args.get('barangay_id')
         
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
+        where_clauses = [f"created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'"]
+        if barangay_id:
+            where_clauses.append(f"barangay_id = {barangay_id}")
+        
         query = f"""
             SELECT COUNT(*) as count
             FROM complaints
-            WHERE created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'
+            WHERE {' AND '.join(where_clauses)}
         """
 
         cursor.execute(query)
@@ -461,7 +466,7 @@ def get_annual_complaint_counts():
 def get_monthly_complaint_counts():
     """
     Returns the number of complaints for each month in a given year.
-    Query params: year (e.g., '2025')
+    Query params: year (e.g., '2025'), barangay_id (optional)
     Example response:
     [
         {"month": "January", "count": 20},
@@ -471,9 +476,14 @@ def get_monthly_complaint_counts():
     """
     try:
         year = request.args.get('year', '2025')
+        barangay_id = request.args.get('barangay_id')
         
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        where_clauses = [f"created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'"]
+        if barangay_id:
+            where_clauses.append(f"barangay_id = {barangay_id}")
 
         query = f"""
             SELECT 
@@ -481,7 +491,7 @@ def get_monthly_complaint_counts():
                 DATE_PART('month', created_at) AS month_num,
                 COUNT(*) AS count
             FROM complaints
-            WHERE created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'
+            WHERE {' AND '.join(where_clauses)}
             GROUP BY month, month_num
             ORDER BY month_num;
         """
@@ -504,7 +514,7 @@ def get_monthly_complaint_counts():
 def get_top_case_types():
     """
     Returns the top 3 most frequent case types in a given year.
-    Query params: year (e.g., '2025')
+    Query params: year (e.g., '2025'), barangay_id (optional)
     Example response:
     [
         {"case_type": "Noise Complaint", "count": 50},
@@ -514,16 +524,21 @@ def get_top_case_types():
     """
     try:
         year = request.args.get('year', '2025')
+        barangay_id = request.args.get('barangay_id')
         
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        where_clauses = [f"created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'"]
+        if barangay_id:
+            where_clauses.append(f"barangay_id = {barangay_id}")
 
         query = f"""
             SELECT 
                 case_type,
                 COUNT(*) AS count
             FROM complaints
-            WHERE created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'
+            WHERE {' AND '.join(where_clauses)}
             GROUP BY case_type
             ORDER BY count DESC
             LIMIT 3;

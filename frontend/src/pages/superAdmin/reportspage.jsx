@@ -128,12 +128,14 @@ export default function ReportsPage() {
 
 
 function CaseTypeBreakdownperBrgy(){
-    const [selectedMonth, setSelectedMonth] = useState('November');
+    const currentDate = new Date();
+    const currentMonth = MONTHS[currentDate.getMonth()];
+    
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [caseTypes, setCaseTypes] = useState([]);
     const [barangayData, setBarangayData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [topMonthlyTypes, setTopMonthlyTypes] = useState([]);
-    const [selectedTopMonth, setSelectedTopMonth] = useState('November');
 
     const mainColors = {
         'Infrastructure & Utilities': '#3b82f6',
@@ -159,22 +161,8 @@ function CaseTypeBreakdownperBrgy(){
 
                 setCaseTypes(chartSeries);
                 setBarangayData(data.barangays.map(b => b.barangay_name));
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching case type breakdown:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [selectedMonth]);
-
-    useEffect(() => {
-        const fetchTopMonthlyTypes = async () => {
-            try {
-                const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedTopMonth, '2025');
                 
-                // Calculate totals for each case type across all barangays
+                // Calculate totals for each case type across all barangays for Top 3
                 const typeTotals = data.case_types.map((caseType, idx) => {
                     const total = data.barangays.reduce((sum, b) => sum + (b.case_type_counts[idx] || 0), 0);
                     return { case_type: caseType, count: total };
@@ -186,13 +174,16 @@ function CaseTypeBreakdownperBrgy(){
                     .slice(0, 3);
                 
                 setTopMonthlyTypes(top3);
+                
+                setLoading(false);
             } catch (error) {
-                console.error('Error fetching top monthly case types:', error);
+                console.error('Error fetching case type breakdown:', error);
+                setLoading(false);
             }
         };
-        
-        fetchTopMonthlyTypes();
-    }, [selectedTopMonth]);
+
+        fetchData();
+    }, [selectedMonth]);
 
     const maxTopCount = topMonthlyTypes.length > 0 
         ? Math.max(...topMonthlyTypes.map(item => item.count)) 
@@ -202,7 +193,7 @@ function CaseTypeBreakdownperBrgy(){
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Case Type Breakdown per Barangay</p>
+                    <p className="event-title">Monthly Case Type Breakdown per Barangay (2025)</p>
                     <select 
                         className='border border-gray-300 rounded-lg p-1 text-xs'
                         value={selectedMonth}
@@ -248,7 +239,7 @@ function CaseTypeBreakdownperBrgy(){
                         </div>
 
                         {/* Legend */}
-                        <div className='w-2/3 flex flex-wrap gap-3 text-xs justify-center items-center text-center mx-auto'>
+                        <div className='w-4/5 flex flex-wrap gap-3 text-xs justify-center items-center text-center mx-auto'>
                             {caseTypes.map((ct, idx) => (
                                 <div key={idx} className='flex items-center gap-1 justify-center -mt-2'>
                                     <div 
@@ -268,17 +259,8 @@ function CaseTypeBreakdownperBrgy(){
 
                 <div className='flex flex-row border rounded-lg mt-4'>
                     <div className='w-full'>
-                        <div className='flex flex-row justify-between p-4 gap-5'>
+                        <div className='p-4'>
                             <h1 className="text-sm text-gray-500 font-medium">Top 3 Monthly Case Type</h1>
-                            <select 
-                                className='border border-gray-300 rounded-lg p-1 text-xs h-7'
-                                value={selectedTopMonth}
-                                onChange={(e) => setSelectedTopMonth(e.target.value)}
-                            >
-                                {MONTHS.map((month, idx) => (
-                                    <option key={idx} value={month}>{month}</option>
-                                ))}
-                            </select>
                         </div>
 
                         <div className='px-4 pb-4'>
@@ -315,10 +297,13 @@ function CaseTypeBreakdownperBrgy(){
 
 
 function UrgentBarangays() {
+    const currentDate = new Date();
+    const currentMonth = MONTHS[currentDate.getMonth()];
+    
     const [urgentBarangays, setUrgentBarangays] = useState([]);
     const [moderateBarangays, setModerateBarangays] = useState([]);
     const [lowBarangays, setLowBarangays] = useState([]);
-    const [selectedMonth, setSelectedMonth] = useState('November');
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [priorityData, setPriorityData] = useState([]);
     const [barangayNames, setBarangayNames] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -548,7 +533,10 @@ function UrgentBarangays() {
 
 
 function ResolvedComplaintsperBrgy({ barangays }){
-    const [selectedMonth, setSelectedMonth] = useState('November');
+    const currentDate = new Date();
+    const currentMonth = MONTHS[currentDate.getMonth()];
+    
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [statusTypes, setStatusTypes] = useState([]);
     const [barangayData, setBarangayData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -817,8 +805,10 @@ function ResolvedComplaintsperBrgy({ barangays }){
 
 
 function LeadingCaseType() {
+    const currentYear = new Date().getFullYear().toString();
+    
     const [caseData, setCaseData] = useState([]);
-    const [selectedYear, setSelectedYear] = useState('2025');
+    const [selectedYear, setSelectedYear] = useState(currentYear);
     const [maxCount, setMaxCount] = useState(100);
 
     useEffect(() => {
@@ -892,9 +882,11 @@ function LeadingCaseType() {
 
 // connected to backend
 function AnnualComplaintCount() {
+    const currentYear = new Date().getFullYear().toString();
+    
     const [annualCount, setAnnualCount] = useState('...');
     const [monthlyData, setMonthlyData] = useState([]);
-    const [selectedYear, setSelectedYear] = useState('2025');
+    const [selectedYear, setSelectedYear] = useState(currentYear);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -999,12 +991,12 @@ function SatisfactionLevel() {
                     </div>
                     <div className='w-2/3 ml-4'>
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>1</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>5</p>
                             <div className='h-3 w-4/5 bg-yellow-500 rounded-full'></div>
                         </div>
                         
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>2</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>4</p>
                             <div className='h-3 w-3/6 bg-yellow-500 rounded-full'></div>
                         </div>
                         
@@ -1014,12 +1006,12 @@ function SatisfactionLevel() {
                         </div>
                         
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>4</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>2</p>
                             <div className='h-3 w-1/5 bg-yellow-500 rounded-full'></div>
                         </div>
                         
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>5</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>1</p>
                             <div className='h-3 w-1/6 bg-yellow-500 rounded-full'></div>
                         </div>
                     </div>

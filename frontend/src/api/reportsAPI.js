@@ -1,26 +1,29 @@
 import { axiosPrivate } from "./axios";
 
-const getAnnualComplaintCounts = async (year) => {
+const getAnnualComplaintCounts = async (year, barangayId) => {
     const params = new URLSearchParams();
     if (year) params.append('year', year);
+    if (barangayId) params.append('barangay_id', barangayId);
 
     const response = await axiosPrivate.get(`/api/dashboard/annual_complaint_counts?${params.toString()}`);
     return response.data; 
 };
 
 
-const getMonthlyComplaintCounts = async (year) => {
+const getMonthlyComplaintCounts = async (year, barangayId) => {
     const params = new URLSearchParams();
     if (year) params.append('year', year);
+    if (barangayId) params.append('barangay_id', barangayId);
 
     const response = await axiosPrivate.get(`/api/dashboard/monthly_complaint_counts?${params.toString()}`);
     return response.data;
 };
 
 
-const getTop3CaseTypes = async (year) => {
+const getTop3CaseTypes = async (year, barangayId) => {
     const params = new URLSearchParams();
     if (year) params.append('year', year);
+    if (barangayId) params.append('barangay_id', barangayId);
 
     const response = await axiosPrivate.get(`/api/dashboard/top_case_types?${params.toString()}`);
     return response.data;
