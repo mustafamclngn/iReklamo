@@ -350,6 +350,9 @@ def track_complaint(complaint_code):
                 complaints.priority,
                 complaints.created_at,
                 complaints.updated_at,
+                -- Rejection audit fields
+                complaints.rejection_reason,
+                complaints.rejected_at,
                 barangays.name as barangay_name,
                 CONCAT(complainants.first_name, ' ', complainants.last_name) as complainant_name,
                 CASE
@@ -467,6 +470,9 @@ def get_complaint(complaint_id):
                 complaints.created_at,
                 complaints.updated_at,
                 complaints.complainant_id,
+                -- Rejection audit fields
+                complaints.rejection_reason,
+                complaints.rejected_at,
                 -- Joined barangay data
                 barangays.name as barangay,
                 -- Joined complainant data
@@ -621,6 +627,10 @@ def get_barangay_captain_complaints(user_id):
     Get complaints for a barangay captain - only complaints from their barangay
     """
     try:
+        # Get query parameters for filtering
+        status_filter = request.args.get('status')
+        priority_filter = request.args.get('priority')
+
         # Get user's barangay_id from users table
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -640,7 +650,6 @@ def get_barangay_captain_complaints(user_id):
         user_barangay_id = user_result['barangay_id']
 
         # Get complaints for this barangay with official names resolved
-        # Exclude rejected complaints from default view for consistency
         query = """
             SELECT
                 complaints.id,
@@ -664,11 +673,32 @@ def get_barangay_captain_complaints(user_id):
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
-            WHERE complaints.barangay_id = %s AND complaints.status != 'Rejected'
-            ORDER BY complaints.created_at DESC
+            WHERE complaints.barangay_id = %s
         """
 
-        cursor.execute(query, (user_barangay_id,))
+        # Add WHERE conditions based on filters
+        conditions = []
+        params = [user_barangay_id]
+
+        if status_filter:
+            conditions.append("complaints.status = %s")
+            params.append(status_filter)
+
+        if priority_filter:
+            conditions.append("complaints.priority = %s")
+            params.append(priority_filter)
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += " ORDER BY complaints.created_at DESC"
+
+        cursor.execute(query, params)
         results = cursor.fetchall()
         cursor.close()
         conn.close()

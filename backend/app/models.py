@@ -40,14 +40,7 @@ class Complaint(db.Model):
 
     # Rejection audit fields
     rejection_reason = db.Column(db.Text)
-    rejected_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     rejected_at = db.Column(db.DateTime)
-
-    # Relationship for the user who rejected the complaint
-    rejected_by = db.relationship('User',
-                                  foreign_keys=[rejected_by_id],
-                                  backref='rejected_complaints',
-                                  lazy=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

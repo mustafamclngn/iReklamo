@@ -18,7 +18,6 @@ const BC_ComplaintsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const complaintsApi = useComplaintsApi();
   const itemsPerPage = 5;
 
   const { getBarangayCaptainComplaints } = useComplaintsApi();
@@ -43,14 +42,19 @@ const BC_ComplaintsPage = () => {
     priority: defaultPriority
   });
 
-  // Define filter options
+  // Define filter options - Statuses include Rejected for filtering
   const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
 
-  // Fetch complaints - filtered by barangay captain's barangay on backend
+  // Fetch complaints - server-side filtering for status, client-side for priority
   useEffect(() => {
     fetchComplaints();
   }, [refresh]);
+
+  // Refetch when status filter changes (server-side filtering)
+  useEffect(() => {
+    fetchComplaints();
+  }, [filters.status]);
 
   const fetchComplaints = async () => {
     try {
@@ -64,8 +68,14 @@ const BC_ComplaintsPage = () => {
         return;
       }
 
+      // Prepare server-side filters (only status, priority will be client-side)
+      const serverFilters = {};
+      if (filters.status !== 'all') {
+        serverFilters.status = filters.status;
+      }
+
       // Use role-based endpoint for barangay captain - gets only their barangay complaints
-      const response = await getBarangayCaptainComplaints(userId);
+      const response = await getBarangayCaptainComplaints(userId, serverFilters);
 
       if (response.success) {
         setComplaints(response.data);
@@ -88,7 +98,7 @@ const BC_ComplaintsPage = () => {
     }));
   };
 
-  // Filter logic - Status and Priority only (Barangay already filtered by backend)
+  // Filter logic - Status now server-side, Priority only client-side (Barangay already filtered by backend)
   const filteredComplaints = complaints.filter(complaint => {
     // Search filter
     const searchLower = searchTerm.toLowerCase();
@@ -99,17 +109,12 @@ const BC_ComplaintsPage = () => {
       complaint.id?.toString().includes(searchLower) ||
       (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower));
 
-    // Status filter
-    const matchesStatus = 
-      filters.status === 'all' || 
-      complaint.status === filters.status;
-
-    // Priority filter
-    const matchesPriority = 
-      filters.priority === 'all' || 
+    // Priority filter (client-side)
+    const matchesPriority =
+      filters.priority === 'all' ||
       complaint.priority === filters.priority;
-    
-    return matchesSearch && matchesStatus && matchesPriority;
+
+    return matchesSearch && matchesPriority;
   });
 
   // View Details
