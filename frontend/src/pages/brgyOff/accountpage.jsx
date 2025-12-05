@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import useLogOut from '../../hooks/useLogout';
 import { useNavigate, Link } from 'react-router-dom';
@@ -36,6 +37,8 @@ const BO_AccountPage = () => {
     );
   }
 =======
+=======
+>>>>>>> main
 import React, { useState, useEffect } from "react";
 import { Camera, Save, X, AlertCircle, CheckCircle } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
@@ -63,6 +66,9 @@ const BO_AccountPage = () => {
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [imageError, setImageError] = useState(false);
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
   const [formData, setFormData] = useState({

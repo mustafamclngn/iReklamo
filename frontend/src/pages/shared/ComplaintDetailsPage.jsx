@@ -5,6 +5,8 @@ import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 
 const formatDate = (dateString) => {
@@ -82,15 +84,31 @@ const ComplaintDetailsPage = () => {
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
 
-  // Assign 
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Assign
   const handleAssign = () => {
     setIsAssignOpen(true);
-  };  
+  };
 
-  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
+  // Priority
+  const handlePriorityClick = () => {
+    setIsPriorityOpen(true);
+  };
+
+  const handlePriorityUpdate = (newPriority) => {
+    setComplaint(prev => prev ? { ...prev, priority: newPriority } : null);
+    setToastMessage('Priority updated successfully');
+    setToastVisible(true);
+  };
+
+  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh]);
   const fetchComplaintDetails = async () => {
     setLoading(true);
     if (!complaint_id || isNaN(Number(complaint_id))) {
@@ -107,7 +125,8 @@ const ComplaintDetailsPage = () => {
   if (loading) return <LoadingSpinner message="Loading complaint details..." />;
 
   const userRole = auth?.role?.[0];
-  const canEdit = userRole === 1 || userRole === 2 || userRole === 3;
+  const canEditPriority = userRole === 2 || userRole === 3; // Only City Admin and Brgy Captain can set priority
+  const canEdit = userRole === 1 || userRole === 2 || userRole === 3; // For status and assignment (including superadmin)
 
 
 
@@ -277,9 +296,21 @@ const ComplaintDetailsPage = () => {
                         </div>
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Priority Level:</label>
-                          <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
-                            {complaint.priority}
-                          </span>
+                          {canEditPriority ? (
+                            <button
+                              className="px-4 py-1 rounded-full font-semibold text-white flex items-center gap-2 hover:opacity-90 transition-opacity"
+                              style={{ backgroundColor: priorityColors[complaint.priority] }}
+                              onClick={handlePriorityClick}
+                              title="Click to change priority"
+                            >
+                              {complaint.priority}
+                              <i className="bi bi-chevron-down text-sm"></i>
+                            </button>
+                          ) : (
+                            <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
+                              {complaint.priority}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Last Updated:</label>
@@ -293,13 +324,24 @@ const ComplaintDetailsPage = () => {
                     </div>
                   </div>
                 </div>
-                <AssignActionModal 
-                  isOpen={isAssignOpen} 
+                <AssignActionModal
+                  isOpen={isAssignOpen}
                   onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
                   Action="Assign Complaint"
                   assignDetails={complaint}
                   >
                 </AssignActionModal>
+                <SetPriorityModal
+                  isOpen={isPriorityOpen}
+                  onClose={() => setIsPriorityOpen(false)}
+                  complaint={complaint}
+                  onPriorityUpdate={handlePriorityUpdate}
+                />
+                <Toast
+                  message={toastMessage}
+                  isVisible={toastVisible}
+                  onClose={() => setToastVisible(false)}
+                />
               </>
             );
           };

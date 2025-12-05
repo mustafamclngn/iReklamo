@@ -147,7 +147,6 @@ def create_complaint():
             conn.close()
 
 
-
 # LIST OF ALL COMPLAINTS
 @complaints_bp.route('/all_complaints', methods=['GET'])
 def get_complaints():
