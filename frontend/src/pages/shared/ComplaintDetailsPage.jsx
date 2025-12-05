@@ -70,8 +70,6 @@ const statusColors = {
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
   Rejected: "#DC2626"
-  Resolved: "#43B174",
-  Rejected: "#DC2626"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -89,9 +87,7 @@ const ComplaintDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
-  const [isRejectConfirmOpen, setIsRejectConfirmOpen] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
 
