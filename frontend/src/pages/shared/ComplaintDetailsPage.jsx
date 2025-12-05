@@ -6,7 +6,6 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignActionModal from '../../components/modals/AssignActionModal';
 import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
-import ConfirmRejectModal from '../../components/modals/ConfirmRejectModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
 
@@ -88,9 +87,6 @@ const ComplaintDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
-  const [isRejectConfirmOpen, setIsRejectConfirmOpen] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
@@ -109,19 +105,41 @@ const ComplaintDetailsPage = () => {
     setIsRejectOpen(true);
   };
 
-  const handleRejectConfirm = (reason) => {
-    setRejectionReason(reason);
-    setIsRejectOpen(false);
-    setIsRejectConfirmOpen(true);
-  };
-
-  const handleRejectionSuccess = () => {
-    // Update local complaint state after successful rejection
+  const handleRejectConfirm = () => {
+    // Update local complaint state to rejected
     setComplaint(prev => prev ? { ...prev, status: 'Rejected' } : null);
 
-    // Close the rejection modal
-    setIsRejectConfirmOpen(false);
-    setRefresh(prev => !prev); // Trigger refetch
+    // Close the rejection modal and show success toast
+    setIsRejectOpen(false);
+    setToastMessage('Complaint rejected successfully!');
+    setToastVisible(true);
+
+    // Trigger refetch after a delay
+    setTimeout(() => {
+      setRefresh(prev => !prev);
+    }, 1000);
+  };
+
+  // Priority handlers
+  const handlePriorityClick = () => {
+    if (canEditPriority) {
+      setIsPriorityOpen(true);
+    }
+  };
+
+  const handlePriorityUpdate = async (updatedComplaint) => {
+    // Update local complaint state
+    setComplaint(prev => ({ ...prev, ...updatedComplaint }));
+
+    // Close modal and show success toast
+    setIsPriorityOpen(false);
+    setToastMessage('Priority updated successfully');
+    setToastVisible(true);
+
+    // Trigger refetch after a delay
+    setTimeout(() => {
+      setRefresh(prev => !prev);
+    }, 1000);
   };
 
   useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
@@ -228,7 +246,11 @@ const ComplaintDetailsPage = () => {
                         </h2>
                       </div>
                       <hr className="border-t border-gray-200 mt-4 mb-6" />
-                      {isAnonymous}
+                      {isAnonymous && (
+                        <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-white-800 border border-yellow-200">
+                          This complaint is filed as Anonymous.
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Name:</label>
@@ -353,12 +375,7 @@ const ComplaintDetailsPage = () => {
                                   <p className="text-gray-900 font-medium text-base">{formatDate(complaint.rejected_at)}</p>
                                 </div>
                               )}
-                              {complaint.rejectedBy && (
-                                <div>
-                                  <label className="block text-md text-gray-600 mb-2">Rejected By:</label>
-                                  <p className="text-gray-900 font-medium text-base">{complaint.rejectedBy}</p>
-                                </div>
-                              )}
+                              {/* Rejected By section removed - functionality no longer tracked */}
                             </div>
                           </div>
                         </>
@@ -381,13 +398,7 @@ const ComplaintDetailsPage = () => {
                   onConfirm={handleRejectConfirm}
                 />
 
-                <ConfirmRejectModal
-                  isOpen={isRejectConfirmOpen}
-                  onClose={() => setIsRejectConfirmOpen(false)}
-                  onConfirm={handleRejectionSuccess}
-                  complaint={complaint}
-                  rejectionReason={rejectionReason}
-                />
+
                 <SetPriorityModal
                   isOpen={isPriorityOpen}
                   onClose={() => setIsPriorityOpen(false)}

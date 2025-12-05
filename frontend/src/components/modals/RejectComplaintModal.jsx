@@ -1,22 +1,45 @@
 import './modal.css';
 import { useState } from 'react';
+import useComplaintsApi from '../../api/complaintsAPI';
 
 const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
+  const { rejectComplaint } = useComplaintsApi();
   const [rejectionReason, setRejectionReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState('');
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!rejectionReason.trim()) {
-      alert('Please provide a reason for rejection');
+      setValidationError('Please provide a reason for rejection');
       return;
     }
 
-    onConfirm(rejectionReason);
-    setRejectionReason('');
+    setValidationError('');
+    setIsSubmitting(true);
+    try {
+      await rejectComplaint(complaint.id, rejectionReason);
+      // Call the parent callback to trigger refetch and close modal
+      onConfirm();
+    } catch (error) {
+      console.error('Rejection failed:', error);
+      setValidationError('Failed to reject complaint. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
     setRejectionReason('');
+    setValidationError('');
     onClose();
+  };
+
+  const handleReasonChange = (e) => {
+    setRejectionReason(e.target.value);
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError('');
+    }
   };
 
   if (!isOpen || !complaint) return null;
@@ -53,12 +76,26 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
             <textarea
               id="rejectionReason"
               value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
+              onChange={handleReasonChange}
               placeholder="Please explain why this complaint must be rejected..."
               rows="4"
-              className="reason-textarea"
+              className={`reason-textarea ${validationError ? 'error' : ''}`}
               required
             />
+            {validationError && (
+              <div style={{
+                color: '#dc2626',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginTop: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <i className="bi bi-exclamation-circle"></i>
+                {validationError}
+              </div>
+            )}
           </div>
 
           {/* Warning */}
@@ -69,10 +106,10 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
 
           {/* Footer */}
           <div className="popup-footer">
-            <button type="button" className="revoke-button" onClick={handleConfirm}>
-              Confirm Rejection
+            <button type="button" className="revoke-button" onClick={handleConfirm} disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : 'Confirm Rejection'}
             </button>
-            <button type="button" className="okay-button" onClick={handleClose}>
+            <button type="button" className="okay-button" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </button>
           </div>
