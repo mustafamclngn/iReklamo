@@ -72,17 +72,17 @@ const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) =>
 
   // Fetch barangay complaints
   useEffect(() => {
-    if (!assignBrgy) return
+    if (!assignBrgy || !officialDetails) return;
     const fetchComplaints = async () => {
       try {
 
         let res = null
 
         if(role === 1 || role === 2){
-          console.log("official barangay: ", officialDetails.barangay_id)
+          console.log("official barangay: ", officialDetails?.barangay_id)
           res = await getAllComplaints({
             "status":"Pending",
-            "barangay_id": officialDetails.barangay_id});
+            "barangay_id": officialDetails?.barangay_id});
 
           console.log("All complaints pending and barangay: ", res)
         }
@@ -168,7 +168,7 @@ const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) =>
                             type='button'
                             className='remove_complaint'
                             onClick={() => {handleSelect(complaint, false); setRefresh(prev => !prev)}}>
-                            <i class="bi bi-dash-circle"></i>
+                            <i className="bi bi-dash-circle"></i>
                           </button>
                         </div>
                       </li>
@@ -206,7 +206,7 @@ const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) =>
                     className='add_complaint'
                     disabled = {!clickedComplaint}
                     onClick={() => {handleSelect(clickedComplaint, true); setRefresh(prev => !prev)}}>
-                    <i class="bi bi-plus-circle"></i>
+                    <i className="bi bi-plus-circle"></i>
                   </button>
                 </div>
               </div>

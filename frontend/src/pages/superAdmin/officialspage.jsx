@@ -268,6 +268,7 @@ const SA_OfficialsPage = () => {
       <AssignOfficialModal 
         isOpen={isAssignOpen} 
         onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
         officialDetails={officialData}
         >
       </AssignOfficialModal>

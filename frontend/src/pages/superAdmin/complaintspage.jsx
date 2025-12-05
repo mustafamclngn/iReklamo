@@ -320,6 +320,7 @@ const SA_ComplaintsPage = () => {
       <AssignComplaintModal 
         isOpen={isAssignOpen} 
         onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
         selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>

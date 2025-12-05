@@ -14,6 +14,7 @@ const CA_ComplaintsPage = () => {
   const location = useLocation();
     
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
+    const [complaintData, setComplaintData] = useState(null)
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -332,6 +333,7 @@ const CA_ComplaintsPage = () => {
       <AssignComplaintModal 
         isOpen={isAssignOpen} 
         onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
         selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>

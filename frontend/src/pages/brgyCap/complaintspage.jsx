@@ -19,6 +19,7 @@ const BC_ComplaintsPage = () => {
   const userId = user?.user_id
     
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
+  const [complaintData, setComplaintData] = useState(null)
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -315,6 +316,7 @@ const BC_ComplaintsPage = () => {
       <AssignComplaintModal 
         isOpen={isAssignOpen} 
         onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
         selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>
