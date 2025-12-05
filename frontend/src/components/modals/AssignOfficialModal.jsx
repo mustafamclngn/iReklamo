@@ -111,9 +111,9 @@ const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
   const handleAssign = async () => {
       try {
       const responses = await Promise.all(
-        selectedComplaints.map(c =>
-          assignComplaints(c.id, officialDetails?.user_id)
-        )
+        [...selectedComplaints.entries()].map(([id, complaint], index) => (
+          assignComplaints(complaint.id, officialDetails?.user_id)
+        ))
       );
       setSuccessMessage("All complaints assigned successfully!");
       setIsSuccessOpen(true);
