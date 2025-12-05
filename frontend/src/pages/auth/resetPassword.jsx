@@ -127,8 +127,9 @@ const ResetPassword = () => {
                 id="pwdnote"
                 className={pwdFocus && pwd && !validPwd ? "instructions" : "offscreen"}>
                 <FontAwesomeIcon icon={faInfoCircle} />
-                    Password must be 8 to 24 characters
-                    and must uppercase and lowercase letters, and atleast one number. 
+                    Password must be 8 to 24 characters,
+                    contain uppercase and lowercase letters, 
+                    and includes atleast one number. 
             </p>
             {/* ========== */}
             {/* Confirm New Password */}
