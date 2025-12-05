@@ -678,7 +678,6 @@ def get_monthly_status_per_barangay():
         return jsonify({"success": False, "error": str(e)}), 500
     
 
-
 # GET AVG RESOLUTION TIME PER BARANGAY FOR 2025
 @dashboard_bp.route('/avg_resolution_time_per_barangay', methods=['GET'])
 def get_avg_resolution_time_per_barangay():
@@ -725,7 +724,6 @@ def get_avg_resolution_time_per_barangay():
         print(f"Error fetching avg resolution time per barangay: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
     
-
 
 # GET TOP 3 BARANGAYS WITH MOST URGENT COMPLAINTS
 @dashboard_bp.route('/top_urgent_barangays', methods=['GET'])
@@ -975,3 +973,6 @@ def get_priority_counts_per_barangay():
         print(f"Error fetching priority counts per barangay: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+
+# REPORTS PAGE FOR BRGY CAPT
