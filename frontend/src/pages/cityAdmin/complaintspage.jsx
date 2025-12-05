@@ -5,14 +5,11 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
-import useAuth from '../../hooks/useAuth';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const { auth } = useAuth();
     
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
 
@@ -314,7 +311,7 @@ const CA_ComplaintsPage = () => {
       </div>
       <AssignComplaintModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        onClose={() => setIsAssignOpen(false)}
         selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>

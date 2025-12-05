@@ -136,8 +136,8 @@ const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
       <div className="popup-overlay">
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
-          <h2 className="title">Assign Official</h2>
-          <p className='subtitle'>{assignBrgy.name}</p>
+          <h2 className="title">Assign Official</h2> 
+          <p className='subtitle'>{assignBrgy?.name}</p>
           <form onSubmit={handleSubmit} className="form">
             
             <label>Selected Complaints: </label>

@@ -43,7 +43,6 @@ const OfficialDetailsPage = () => {
         setActive(activeCases?.complaints?.length || 0);
         setResolved(resolvedCases?.complaints?.length || 0);
       } catch (error) {
-        console.error("Error fetching case data:", error);
         setActive(0);
         setResolved(0);
       }
@@ -51,7 +50,7 @@ const OfficialDetailsPage = () => {
 
     fetchOfficialDetails();
     fetchCases();
-  }, [user_id, refresh, isAssignOpen]);
+  }, [user_id, refresh]);
 
   const fetchOfficialDetails = async () => {
     try {
@@ -406,9 +405,8 @@ const OfficialDetailsPage = () => {
 
       <AssignOfficialModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Official"
-        assignDetails={official}
+        onClose={() => setIsAssignOpen(false)}
+        officialDetails={official}
         >
       </AssignOfficialModal>
 

@@ -60,7 +60,6 @@ const BC_OfficialsPage = () => {
       setLoading(true);
       setError(null);
       const response = await getOfficialsByBarangay(userBarangay);
-      console.log(response);
       
       if (response.success) {
         setOfficials(response.data);
@@ -69,7 +68,6 @@ const BC_OfficialsPage = () => {
       }
     } catch (err) {
       setError('Error connecting to server. Please try again.');
-      console.error('Error fetching officials:', err);
     } finally {
       setLoading(false);
     }

@@ -219,8 +219,8 @@ const CA_OfficialsPage = () => {
       </div>
       <AssignOfficialModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        assignDetails={officialData}
+        onClose={() => setIsAssignOpen(false)}
+        officialDetails={officialData}
         >
       </AssignOfficialModal>
     </>

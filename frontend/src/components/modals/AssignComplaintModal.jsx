@@ -30,8 +30,7 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
 
   // ===========
   // Complaint states
-  const { StatusComplaintsByBarangayId, assignComplaints } = useComplaintsApi();
-  // TODO: confirm complaints reassignment if they are currently pending
+  const { assignComplaints } = useComplaintsApi();
 
   // =============
   // Error and Success messages 

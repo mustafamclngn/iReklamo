@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SuperAdminOfficialCard from "../../components/cards/offcardSuperAdmin";
-import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import ErrorAlert from "../../components/common/ErrorAlert";
 import Pagination from "../../components/common/Pagination";
@@ -12,7 +11,6 @@ import CreateAdmin from "../../components/modals/CreateAdmin";
 import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
 
 const SA_OfficialsPage = () => {
-  const { auth } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -64,7 +62,6 @@ const SA_OfficialsPage = () => {
       }
     } catch (err) {
       setError("Error connecting to server. Please try again.");
-      console.error("Error fetching officials:", err);
     } finally {
       setLoading(false);
     }
@@ -270,8 +267,8 @@ const SA_OfficialsPage = () => {
       ></DeleteModal>
       <AssignOfficialModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        assignDetails={officialData}
+        onClose={() => setIsAssignOpen(false)}
+        officialDetails={officialData}
         >
       </AssignOfficialModal>
     </>
