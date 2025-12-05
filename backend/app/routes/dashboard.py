@@ -424,20 +424,23 @@ def get_unassigned_officials():
 @dashboard_bp.route('/annual_complaint_counts', methods=['GET'])
 def get_annual_complaint_counts():
     """
-    Returns the total number of complaints for 2025.
+    Returns the total number of complaints for a given year.
+    Query params: year (e.g., '2025')
     Example response:
     [
         {"count": 186}
     ]
     """
     try:
+        year = request.args.get('year', '2025')
+        
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        query = """
+        query = f"""
             SELECT COUNT(*) as count
             FROM complaints
-            WHERE created_at >= '2025-01-01' AND created_at < '2026-01-01'
+            WHERE created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'
         """
 
         cursor.execute(query)
@@ -453,11 +456,12 @@ def get_annual_complaint_counts():
         return jsonify({"success": False, "error": str(e)}), 500
     
 
-# GET MONTHLY COMPLAINT COUNTS FOR YEAR 2025
+# GET MONTHLY COMPLAINT COUNTS FOR YEAR
 @dashboard_bp.route('/monthly_complaint_counts', methods=['GET'])
 def get_monthly_complaint_counts():
     """
-    Returns the number of complaints for each month in 2025.
+    Returns the number of complaints for each month in a given year.
+    Query params: year (e.g., '2025')
     Example response:
     [
         {"month": "January", "count": 20},
@@ -466,16 +470,18 @@ def get_monthly_complaint_counts():
     ]
     """
     try:
+        year = request.args.get('year', '2025')
+        
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        query = """
+        query = f"""
             SELECT 
                 TO_CHAR(created_at, 'Month') AS month,
                 DATE_PART('month', created_at) AS month_num,
                 COUNT(*) AS count
             FROM complaints
-            WHERE created_at >= '2025-01-01' AND created_at < '2026-01-01'
+            WHERE created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'
             GROUP BY month, month_num
             ORDER BY month_num;
         """
@@ -493,11 +499,12 @@ def get_monthly_complaint_counts():
         return jsonify({"success": False, "error": str(e)}), 500
     
 
-# GET THE TOP 3 COMPLAINTS BY CASE TYPE FOR 2025
+# GET THE TOP 3 COMPLAINTS BY CASE TYPE FOR YEAR
 @dashboard_bp.route('/top_case_types', methods=['GET'])
 def get_top_case_types():
     """
-    Returns the top 3 most frequent case types in 2025.
+    Returns the top 3 most frequent case types in a given year.
+    Query params: year (e.g., '2025')
     Example response:
     [
         {"case_type": "Noise Complaint", "count": 50},
@@ -506,15 +513,17 @@ def get_top_case_types():
     ]
     """
     try:
+        year = request.args.get('year', '2025')
+        
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        query = """
+        query = f"""
             SELECT 
                 case_type,
                 COUNT(*) AS count
             FROM complaints
-            WHERE created_at >= '2025-01-01' AND created_at < '2026-01-01'
+            WHERE created_at >= '{year}-01-01' AND created_at < '{int(year)+1}-01-01'
             GROUP BY case_type
             ORDER BY count DESC
             LIMIT 3;
@@ -689,11 +698,11 @@ def get_avg_resolution_time_per_barangay():
             SELECT 
                 b.id AS barangay_id,
                 b.name AS barangay_name,
-                AVG(EXTRACT(EPOCH FROM (c.resolved_at - c.created_at)) / 86400) AS avg_resolution_time_days
+                AVG(EXTRACT(EPOCH FROM (c.updated_at - c.created_at)) / 86400) AS avg_resolution_time_days
             FROM barangays b
             LEFT JOIN complaints c ON b.id = c.barangay_id 
                 AND c.status = 'Resolved'
-                AND c.resolved_at IS NOT NULL
+                AND c.updated_at IS NOT NULL
                 AND c.created_at >= '2025-01-01' AND c.created_at < '2026-01-01'
             GROUP BY b.id, b.name
             ORDER BY b.name;

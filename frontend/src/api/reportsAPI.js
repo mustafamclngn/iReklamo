@@ -1,20 +1,16 @@
 import { axiosPrivate } from "./axios";
 
-const getAnnualComplaintCounts = async (role, userId) => {
+const getAnnualComplaintCounts = async (year) => {
     const params = new URLSearchParams();
-    if (role) params.append('role', role);
-    if (userId) params.append('user_id', userId);
+    if (year) params.append('year', year);
 
     const response = await axiosPrivate.get(`/api/dashboard/annual_complaint_counts?${params.toString()}`);
     return response.data; 
 };
 
 
-const getMonthlyComplaintCounts = async (role, barangayId, userId, year) => {
+const getMonthlyComplaintCounts = async (year) => {
     const params = new URLSearchParams();
-    if (role) params.append('role', role);
-    if (barangayId) params.append('barangay_id', barangayId);
-    if (userId) params.append('user_id', userId);
     if (year) params.append('year', year);
 
     const response = await axiosPrivate.get(`/api/dashboard/monthly_complaint_counts?${params.toString()}`);
@@ -22,11 +18,8 @@ const getMonthlyComplaintCounts = async (role, barangayId, userId, year) => {
 };
 
 
-const getTop3CaseTypes = async (role, barangayId, userId, year) => {
+const getTop3CaseTypes = async (year) => {
     const params = new URLSearchParams();
-    if (role) params.append('role', role);
-    if (barangayId) params.append('barangay_id', barangayId);
-    if (userId) params.append('user_id', userId);
     if (year) params.append('year', year);
 
     const response = await axiosPrivate.get(`/api/dashboard/top_case_types?${params.toString()}`);

@@ -6,7 +6,7 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { Box } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
-import { Ellipsis, HandHelping, Megaphone, MessageCircleMore, Pin, TrendingUp, TrendingDown, Star } from 'lucide-react';
+import { Ellipsis, HandHelping, Megaphone, MessageCircleMore, Pin, TrendingUp, TrendingDown, Star, AlertOctagon, AlertTriangle, CheckCircle, CircleCheck } from 'lucide-react';
 import '/src/assets/css/eventcard.css';
 import useUserInfoApi from '../../api/userInfo';
 import reportsAPI from '../../api/reportsAPI';
@@ -23,8 +23,13 @@ export default function ReportsPage() {
     useEffect(() => {
         const fetchBarangays = async () => {
             try {
-                const data = await getBarangays();
-                setBarangays(data);
+                const response = await getBarangays();
+                console.log('Fetched barangays data:', response);
+                // Extract the data array from the response object
+                const barangayList = response.data || response;
+                console.log('Barangay list:', barangayList);
+                console.log('Is array?', Array.isArray(barangayList));
+                setBarangays(barangayList);
             } catch (error) {
                 console.error('Failed to fetch barangays:', error);
             }
@@ -59,7 +64,7 @@ export default function ReportsPage() {
                         <CaseTypeBreakdownperBrgy barangays={barangays} />
                     </div>
                     <div className='w-1/2 border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
-                        <ResolvedComplaintsperBrgy />
+                        <ResolvedComplaintsperBrgy barangays={barangays} />
                     </div>
                 </div>
 
@@ -78,9 +83,9 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Announcements */}
-                <div className='mt-4 border border-gray-200 rounded-2xl px-5 py-6'>
+                <div className='mt-4 border border-gray-200 shadow-md rounded-2xl px-5 py-4'>
                     <div className='flex flex-row justify-between'>
-                        <h1 className='text-xl font-semibold mb-5'>
+                        <h1 className='text-xl font-semibold'>
                             <Megaphone size={20} strokeWidth={'2.25px'} className='inline-block mr-2'/>
                             Announcements
                         </h1>
@@ -96,8 +101,6 @@ export default function ReportsPage() {
                             details="All councilors are requested to attend the meeting this Friday at 3PM in the session hall." 
                         />
                         
-                        <div className='bg-gray-400 h-[1px] w-full my-7'/>
-                        
                         <AnnouncementCard 
                             author='Mayor S. Rodriguez' 
                             logo={<HandHelping size={15} strokeWidth={'2.25px'} />} 
@@ -105,8 +108,6 @@ export default function ReportsPage() {
                             title="Outreach Program at Brgy. San Miguel" 
                             details="All councilors are requested to attend the meeting this Friday at 3PM in the session hall." 
                         />
-                        
-                        <div className='bg-gray-400 h-[1px] w-full my-7'/>
                         
                         <AnnouncementCard 
                             author='Councilor J.A. Perez' 
@@ -133,15 +134,6 @@ function CaseTypeBreakdownperBrgy(){
     const [loading, setLoading] = useState(true);
     const [topMonthlyTypes, setTopMonthlyTypes] = useState([]);
     const [selectedTopMonth, setSelectedTopMonth] = useState('November');
-
-    const mainCaseTypes = [
-        'Infrastructure & Utilities',
-        'Environment & Sanitation',
-        'Peace & Order',
-        'Government Service & Conduct',
-        'Consumer & Business Complaints',
-        'Public Safety & Welfare'
-    ];
 
     const mainColors = {
         'Infrastructure & Utilities': '#3b82f6',
@@ -206,19 +198,6 @@ function CaseTypeBreakdownperBrgy(){
         ? Math.max(...topMonthlyTypes.map(item => item.count)) 
         : 100;
 
-    useEffect(() => {
-        const fetchUrgentBarangays = async () => {
-            try {
-                const data = await reportsAPI.getTopUrgentBarangays();
-                setUrgentBarangays(data);
-            } catch (error) {
-                console.error('Error fetching urgent barangays:', error);
-            }
-        };
-        
-        fetchUrgentBarangays();
-    }, []);
-
     return (
         <div className="event-card">
             <div className="event-content">
@@ -243,7 +222,7 @@ function CaseTypeBreakdownperBrgy(){
                     <>
                         <div className='mt-4'>
                             <BarChart
-                                height={250}
+                                height={210}
                                 series={caseTypes.map(ct => ({
                                     data: ct.data,
                                     label: ct.label,
@@ -448,7 +427,7 @@ function UrgentBarangays() {
                         ) : priorityData.length > 0 ? (
                             <>
                                 <BarChart
-                                    height={200}
+                                    height={150}
                                     series={priorityData}
                                     xAxis={[{
                                         scaleType: 'band',
@@ -489,16 +468,22 @@ function UrgentBarangays() {
 
                     <div className='flex flex-row border rounded-xl w-3/5'>
                         <div className='w-1/3 border-r p-4'>
-                            <h1 className="text-sm text-gray-500 font-medium mb-6 text-center">Barangays that Needs <h1 className='text-red-500'>Urgent Attention</h1></h1>
+                            <div className='flex flex-row gap-3 mb-6 items-center'>
+                                <AlertOctagon className="text-red-600" size={23} strokeWidth={2} />
+                                <div className="text-sm text-gray-500 font-medium leading-tight">
+                                    Barangays that Needs
+                                    <h1 className='text-red-500'>Urgent Attention</h1>
+                                </div>
+                            </div>
                             {urgentBarangays.length > 0 ? (
                                 urgentBarangays.map((brgy, idx) => (
                                     <div key={idx} className='mb-2'>
-                                        <p className='text-sm'>
+                                        <div className='text-sm'>
                                             <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
                                             <h1 className='ml-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full w-fit inline-block'>
                                                 {brgy.urgent_count} urgent
                                             </h1>
-                                        </p>
+                                        </div>
                                     </div>
                                 ))
                             ) : (
@@ -507,16 +492,22 @@ function UrgentBarangays() {
                         </div>
 
                         <div className='w-1/3 border-r p-4'>
-                            <h1 className="text-sm text-gray-500 font-medium mb-6 text-center">Barangays that Needs <h1 className='text-yellow-500'>Moderate Attention</h1></h1>
+                            <div className='flex flex-row gap-3 mb-6 items-center '>
+                                <AlertTriangle className="text-yellow-600" size={23} strokeWidth={2} />
+                                <div className="text-sm text-gray-500 font-medium leading-tight">
+                                    Barangays that Needs
+                                    <h1 className='text-yellow-500'>Moderate Attention</h1>
+                                </div>
+                            </div>
                             {moderateBarangays.length > 0 ? (
                                 moderateBarangays.map((brgy, idx) => (
                                     <div key={idx} className='mb-2'>
-                                        <p className='text-sm'>
+                                        <div className='text-sm'>
                                             <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
                                             <h1 className='ml-2 text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full w-fit inline-block'>
                                                 {brgy.moderate_count} moderate
                                             </h1>
-                                        </p>
+                                        </div>
                                     </div>
                                 ))
                             ) : (
@@ -524,16 +515,22 @@ function UrgentBarangays() {
                             )}
                         </div>
                         <div className='w-1/3 p-4'>
-                            <h1 className="text-sm text-gray-500 font-medium mb-6 text-center">Barangays that Needs <h1 className='text-blue-500'>Low Attention</h1></h1>
+                            <div className='flex flex-row gap-3 mb-6 items-center'>
+                                <CircleCheck className="text-green-600" size={23} strokeWidth={2} />
+                                <div className="text-sm text-gray-500 font-medium leading-tight">
+                                    Barangays that Needs
+                                    <h1 className='text-green-500'>Low Attention</h1>
+                                </div>
+                            </div>
                             {lowBarangays.length > 0 ? (
                                 lowBarangays.map((brgy, idx) => (
                                     <div key={idx} className='mb-2'>
-                                        <p className='text-sm'>
+                                        <div className='text-sm'>
                                             <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
-                                            <h1 className='ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full w-fit inline-block'>
+                                            <h1 className='ml-2 text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full w-fit inline-block'>
                                                 {brgy.low_count} low
                                             </h1>
-                                        </p>
+                                        </div>
                                     </div>
                                 ))
                             ) : (
@@ -550,7 +547,7 @@ function UrgentBarangays() {
 
 
 
-function ResolvedComplaintsperBrgy(){
+function ResolvedComplaintsperBrgy({ barangays }){
     const [selectedMonth, setSelectedMonth] = useState('November');
     const [statusTypes, setStatusTypes] = useState([]);
     const [barangayData, setBarangayData] = useState([]);
@@ -558,32 +555,61 @@ function ResolvedComplaintsperBrgy(){
     const [highestResolved, setHighestResolved] = useState({ name: '', count: 0 });
     const [lowestResolved, setLowestResolved] = useState({ name: '', count: 0 });
     const [selectedBarangay, setSelectedBarangay] = useState('');
-    const [avgResolutionTime, setAvgResolutionTime] = useState('...');
-    const [resolutionTimeData, setResolutionTimeData] = useState([]);
+    const [avgResolutionTime, setAvgResolutionTime] = useState(0);
+
+    // Static sample resolution times for each barangay (in days)
+    const sampleResolutionTimes = {
+        'Abuno': 5.1,
+        'Acmac-Mariano Badelles Sr.': 6.4,
+        'Bagong Silang': 7.2,
+        'Bonbonon': 6.0,
+        'Bunawan': 5.7,
+        'Buru-un': 5.0,
+        'Dalipuga': 7.6,
+        'Del Carmen': 6.8,
+        'Digkilaan': 7.5,
+        'Ditucalan': 6.6,
+        'Dulag': 5.3,
+        'Hinaplanon': 4.0,
+        'Hindang': 7.1,
+        'Kabacsanan': 6.9,
+        'Kalilangan': 8.1,
+        'Kiwalan': 5.9,
+        'Lanipao': 6.7,
+        'Luinab': 7.4,
+        'Mahayahay': 6.2,
+        'Mainit': 5.8,
+        'Mandulog': 7.0,
+        'Maria Cristina': 4.6,
+        'Pala-o': 8.0,
+        'Panoroganan': 6.3,
+        'Poblacion': 8.2,
+        'Puga-an': 6.5,
+        'Rogongon': 7.9,
+        'San Miguel': 5.5,
+        'San Roque': 6.1,
+        'Santa Elena': 6.0,
+        'Santa Filomena': 7.3,
+        'Santo Rosario': 5.6,
+        'Saray': 6.4,
+        'Suarez': 8.5,
+        'Tambacan': 7.7,
+        'Tibanga': 7.0,
+        'Tipanoy': 5.4,
+        'Tominobo Proper': 8.0,
+        'Upper Hinaplanon': 6.0,
+        'Upper Tominobo': 8.0,
+        'Villa Verde': 4.3
+    };
+
 
     useEffect(() => {
-        const fetchResolutionTime = async () => {
-            try {
-                console.log('Fetching resolution time data...');
-                const data = await reportsAPI.getAvgResolutionTimePerBarangay();
-                console.log('Resolution time data received:', data);
-                setResolutionTimeData(data);
-                
-                // Set default to first barangay
-                if (data.length > 0) {
-                    setSelectedBarangay(data[0].barangay_name);
-                    setAvgResolutionTime(data[0].avg_resolution_time_days || 0);
-                    console.log('Set default barangay:', data[0].barangay_name, 'Time:', data[0].avg_resolution_time_days);
-                } else {
-                    console.log('No resolution time data available');
-                }
-            } catch (error) {
-                console.error('Error fetching resolution time:', error);
-            }
-        };
-        
-        fetchResolutionTime();
-    }, []);
+        if (barangays && barangays.length > 0) {
+            const firstBrgy = barangays[0].name || barangays[0].barangay_name;
+            setSelectedBarangay(firstBrgy);
+            setAvgResolutionTime(sampleResolutionTimes[firstBrgy] || 5);
+        }
+    }, [barangays]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -662,7 +688,7 @@ function ResolvedComplaintsperBrgy(){
                     <>
                         <div className='mt-4'>
                             <BarChart
-                                height={250}
+                                height={210}
                                 series={statusTypes.map(ct => ({
                                     data: ct.data,
                                     label: ct.label,
@@ -711,31 +737,29 @@ function ResolvedComplaintsperBrgy(){
                                     Avg. Resolution Time per Barangay
                                 </p>
 
-                                <div className='border-2 rounded-xl mt-6'>
-                                    <h2 className="w-full text-3xl font-bold text-gray-900 mt-4 text-center p-2 mb-2">
-                                        {avgResolutionTime === '...' 
-                                            ? '...' 
-                                            : avgResolutionTime === null || avgResolutionTime === 0
-                                            ? 'N/A'
-                                            : `${avgResolutionTime} days`}
-                                    </h2>
-                                </div>
-
                                 <select 
-                                    className='w-3/4 border bg-white rounded-lg text-xs font-semibold text-blue-500 -mt-[90px] p-1'
+                                    className='w-full border bg-white rounded-t-lg text-xs font-semibold text-blue-500 p-1 px-2 mt-5'
                                     value={selectedBarangay}
                                     onChange={(e) => {
                                         const selected = e.target.value;
                                         setSelectedBarangay(selected);
-                                        const brgyData = resolutionTimeData.find(b => b.barangay_name === selected);
-                                        console.log('Selected barangay:', selected, 'Data:', brgyData);
-                                        setAvgResolutionTime(brgyData?.avg_resolution_time_days || null);
+                                        setAvgResolutionTime(sampleResolutionTimes[selected] || 0);
                                     }}
                                 >
-                                    {resolutionTimeData.map((brgy, idx) => (
-                                        <option key={idx} value={brgy.barangay_name}>{brgy.barangay_name}</option>
-                                    ))}
+                                    {!Array.isArray(barangays) || barangays.length === 0 ? (
+                                        <option value="">Loading barangays...</option>
+                                    ) : (
+                                        barangays.map((brgy, idx) => (
+                                            <option key={idx} value={brgy.name || brgy.barangay_name}>
+                                                {brgy.name || brgy.barangay_name}
+                                            </option>
+                                        ))
+                                    )}
                                 </select>
+
+                                <h2 className="w-full border rounded-b-xl text-3xl font-bold text-gray-900 text-center p-2 mb-2">
+                                    {avgResolutionTime} days
+                                </h2>
                             </div>
                         </div>
                     </div>
@@ -800,7 +824,7 @@ function LeadingCaseType() {
     useEffect(() => {
         const fetchTopCaseTypes = async () => {
             try {
-                const data = await reportsAPI.getTop3CaseTypes();
+                const data = await reportsAPI.getTop3CaseTypes(selectedYear);
                 setCaseData(data);
                 
                 // Calculate max count for percentage calculation
@@ -870,21 +894,22 @@ function LeadingCaseType() {
 function AnnualComplaintCount() {
     const [annualCount, setAnnualCount] = useState('...');
     const [monthlyData, setMonthlyData] = useState([]);
+    const [selectedYear, setSelectedYear] = useState('2025');
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const annualData = await reportsAPI.getAnnualComplaintCounts();
+                const annualData = await reportsAPI.getAnnualComplaintCounts(selectedYear);
                 setAnnualCount(annualData[0]?.count || 0);
 
-                const monthly = await reportsAPI.getMonthlyComplaintCounts();
+                const monthly = await reportsAPI.getMonthlyComplaintCounts(selectedYear);
                 setMonthlyData(monthly);
             } catch (error) {
                 console.error('Failed to fetch complaint data:', error);
             }
         };
         fetchData();
-    }, []);
+    }, [selectedYear]);
 
     // Extract counts for each month, defaulting to 0 if no data
     const getMonthlyValues = () => {
@@ -901,7 +926,11 @@ function AnnualComplaintCount() {
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
                     <p className="event-title">Annual Total Complaints</p>
-                    <select className='border border-gray-300 rounded-lg p-1 text-xs'>
+                    <select 
+                        className='border border-gray-300 rounded-lg p-1 text-xs'
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                    >
                         <option>2025</option>
                         <option>2024</option>
                         <option>2023</option>
@@ -1004,8 +1033,7 @@ function SatisfactionLevel() {
 function BasicDateCalendar() {
     return (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <div className='flex flex-row bg-gray-100 border border-gray-300 shadow rounded-2xl mt-2 px-5 py-3 text-sm gap-5 justify-center items-center
-                    hover:bg-gray-200 transition ease-in-out duration-200'>
+                <div className='flex flex-row border border-gray-200 shadow-md rounded-2xl mt-2 px-5 py-3 text-sm gap-5 justify-center items-center'>
                     <DateCalendar showDaysOutsideCurrentMonth fixedWeekNumber={6} />
                 </div>
             </LocalizationProvider>
@@ -1014,10 +1042,10 @@ function BasicDateCalendar() {
 
 function AnnouncementCard({logo, category, title, details}) {
     return (
-        <div>
+        <div className='border rounded-lg my-3 hover:bg-gray-100 py-4 px-3'>
             <div className='flex flex-row items-center justify-between mb-4'>
                 <div>
-                    <h1 className='font-semibold text-lg leading-none'>{title}</h1>
+                    <h1 className='font-semibold text-lg leading-none pr-3'>{title}</h1>
                     <div className='flex flex-row items-center italic text-sm text-gray-600 gap-1'>
                         <div className='inline-block'>{logo}</div><div>{category}</div>
                     </div>
@@ -1027,7 +1055,7 @@ function AnnouncementCard({logo, category, title, details}) {
                     <h1>Pinned</h1>
                 </div>
             </div>
-            <p className='leading-none'>{details}</p>
+            <p className='leading-none border-l-[3px] border-blue-300 pl-3 ml-2'>{details}</p>
         </div>
     );
 }
