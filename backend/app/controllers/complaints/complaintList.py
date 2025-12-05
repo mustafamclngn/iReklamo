@@ -55,7 +55,6 @@ def reject_complaint(complaint_id, rejected_by_id, rejection_reason):
         complaint_updates = {
             "status": "Rejected",
             "rejection_reason": rejection_reason,
-            "rejected_by_id": rejected_by_id,
             "rejected_at": datetime.utcnow()
         }
 

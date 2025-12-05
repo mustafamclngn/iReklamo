@@ -123,8 +123,9 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
-  const getBarangayCaptainComplaints = async (userId) => {
-    const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}`);
+  const getBarangayCaptainComplaints = async (userId, filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}?${params}`);
     return response.data;
   };
 

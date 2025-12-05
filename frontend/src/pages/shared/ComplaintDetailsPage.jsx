@@ -337,6 +337,34 @@ const ComplaintDetailsPage = () => {
                           <p className="text-gray-900 font-medium text-lg">{getDaysSinceFiled(complaint.created_at)}</p>
                         </div>
                       </div>
+
+                      {/* Rejection Reason Section */}
+                      {complaint.status === 'Rejected' && (
+                        <>
+                          <hr className="border-t border-gray-200 my-6" />
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-red-800 mb-4">Rejection Details</h3>
+                            <div className="grid grid-cols-1 gap-y-4">
+                              <div>
+                                <label className="block text-md text-gray-600 mb-2">Reason for Rejection:</label>
+                                <p className="text-gray-900 font-medium text-base leading-relaxed">{complaint.rejection_reason || 'No reason provided'}</p>
+                              </div>
+                              {complaint.rejected_at && (
+                                <div>
+                                  <label className="block text-md text-gray-600 mb-2">Rejected On:</label>
+                                  <p className="text-gray-900 font-medium text-base">{formatDate(complaint.rejected_at)}</p>
+                                </div>
+                              )}
+                              {complaint.rejectedBy && (
+                                <div>
+                                  <label className="block text-md text-gray-600 mb-2">Rejected By:</label>
+                                  <p className="text-gray-900 font-medium text-base">{complaint.rejectedBy}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
