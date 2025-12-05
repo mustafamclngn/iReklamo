@@ -9,12 +9,13 @@ import ConfirmAssign from './ConfirmAssignModal';
 import useAuth from '../../hooks/useAuth';
 
 // This modal is for assigning complaints to an official
-const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
+const AssignComplaintModal = ({ isOpen, onClose, onConfirm, selectedComplaints }) => {
 
   // selectedComplaintsIds is an array of the selected complaints for assignment. NOTE: These are objects, not ids
 
   const { auth } = useAuth();
   const user = auth.user
+  const role = auth.role[0]
   const brgyId = user.barangay_id // User brgy id, cap can only assign complaints under their brgy
 
   // ===========
@@ -24,7 +25,7 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
 
   // ===========
   // Official states
-  const { getOfficialsByBarangay } = useOfficialsApi();
+  const { getAllOfficials, getOfficialsByBarangay } = useOfficialsApi();
   const [officials, setOfficials] = useState([]); // for dropdown
   const [selectedOfficial, setSelectedOfficial] = useState(null); // selected
 
@@ -61,16 +62,25 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
     if (!assignBrgy) return
     const fetchOfficials = async () => {
       try {
-        const res = await getOfficialsByBarangay(assignBrgy.id);
-        setOfficials(res.data || []);
+
+        let res = null
+
+        if(role === 1 || role === 2){
+          res = await getAllOfficials();
+        }
+        else{
+          res = await getOfficialsByBarangay(assignBrgy.id); 
+        }
+
+        setOfficials(res?.data || []);
       } catch (err) {
-        setErrMsg("Error fetching officials:", err);
+        setErrMsg(`Error fetching officials: ${err}`);
         setIsErrorOpen(true);
       }
     };
 
     fetchOfficials();
-  }, [assignBrgy]);
+  }, [assignBrgy, user]);
 
   if (!isOpen || !selectedComplaints) return null;
 
@@ -112,7 +122,7 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
           <h2 className="title">Assign Complaint</h2>
-          <p className='subtitle'>{assignBrgy.name}</p>
+          <p className='subtitle'>{(role === 1 || role === 2) ? "Admin" : assignBrgy?.name}</p>
           <form onSubmit={handleSubmit} className="form">
 
             <label>Selected Complaints: </label>
@@ -181,7 +191,7 @@ const AssignComplaintModal = ({ isOpen, onClose, selectedComplaints }) => {
       <SuccessModal
         isOpen={isSuccessOpen}
         onClose={() => setIsSuccessOpen(false)}
-        onConfirm={onClose}
+        onConfirm={onConfirm}
         message={successMessage}
       />
 

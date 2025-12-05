@@ -8,12 +8,13 @@ import ErrorModal from './ErrorModal';
 import ConfirmAssign from './ConfirmAssignModal';
 
 //  for assigning official to complaints
-const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
+const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) => {
 
   // ===========
   // User states
   const { auth } = useAuth();
   const user = auth.user
+  const role = auth.role[0]
   const brgyId = user.barangay_id
 
   // ===========
@@ -23,7 +24,7 @@ const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
 
   // ===========
   // Complaint states
-  const { StatusComplaintsByBarangayId, assignComplaints } = useComplaintsApi();
+  const { StatusComplaintsByBarangayId, assignComplaints, getAllComplaints } = useComplaintsApi();
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
   const [availableComplaints, setAvailableComplaints] = useState([])
 
@@ -74,10 +75,25 @@ const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
     if (!assignBrgy) return
     const fetchComplaints = async () => {
       try {
-        const res = await StatusComplaintsByBarangayId(assignBrgy.id, "Pending");
-        setComplaints(res.data || []);
+
+        let res = null
+
+        if(role === 1 || role === 2){
+          console.log("official barangay: ", officialDetails.barangay_id)
+          res = await getAllComplaints({
+            "status":"Pending",
+            "barangay_id": officialDetails.barangay_id});
+
+          console.log("All complaints pending and barangay: ", res)
+        }
+        else{
+          res = await StatusComplaintsByBarangayId(assignBrgy.id, "Pending");
+          console.log("All complaints pending and barangay: ", res)
+        }
+
+        setComplaints(res?.data || []);
       } catch (err) {
-        setErrMsg("Error fetching complaints:", err);
+        setErrMsg(`Error fetching complaints: ${err}`);
         setIsErrorOpen(true);
       }
     };
@@ -137,7 +153,7 @@ const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
           <h2 className="title">Assign Official</h2> 
-          <p className='subtitle'>{assignBrgy?.name}</p>
+          <p className='subtitle'>{(role === 1 || role === 2) ? "Admin" : assignBrgy?.name}</p>
           <form onSubmit={handleSubmit} className="form">
             
             <label>Selected Complaints: </label>
@@ -221,7 +237,7 @@ const AssignOfficialModal = ({ isOpen, onClose, officialDetails }) => {
       <SuccessModal
         isOpen={isSuccessOpen}
         onClose={() => setIsSuccessOpen(false)}
-        onConfirm={onClose}
+        onConfirm={onConfirm}
         message={successMessage}
       />
 

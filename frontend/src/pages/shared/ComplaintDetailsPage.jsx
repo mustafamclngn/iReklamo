@@ -269,9 +269,10 @@ const ComplaintDetailsPage = () => {
                             </button>
                             <button
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
-                              onClick={handleAssign}>
+                              onClick={handleAssign}
+                              disabled={complaint.status === "Resolved"}>
                               <i className="bi bi-person-check text-lg"></i>
-                              Assign Official
+                              {complaint.status === "Pending" ? "Assign Official" : "Reassign Official"}
                             </button>
                           </div>
                         )}
@@ -311,6 +312,7 @@ const ComplaintDetailsPage = () => {
                 <AssignComplaintModal
                   isOpen={isAssignOpen} 
                   onClose={() => setIsAssignOpen(false)}
+                  onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
                   selectedComplaints={[complaint]}
                   >
                 </AssignComplaintModal>

@@ -406,6 +406,7 @@ const OfficialDetailsPage = () => {
       <AssignOfficialModal 
         isOpen={isAssignOpen} 
         onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
         officialDetails={official}
         >
       </AssignOfficialModal>

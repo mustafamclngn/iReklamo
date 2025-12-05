@@ -79,8 +79,13 @@ const ComplaintCardSuperAdmin = ({
           {/* Assign Official Icon Button */}
           <button 
             onClick={() => onAssignOfficial(complaint)}
-            className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
+            className={`p-2 rounded-lg border transition-colors 
+                ${complaint.status !== "Pending" 
+                  ? "bg-gray-300 text-gray-400 border-gray-300 cursor-not-allowed"
+                  : "bg-[#E3E3E3] text-gray-700 border-[#767676] hover:bg-gray-200"  
+                }`}            
             title="Assign official to complaint"
+            disabled={complaint.status !== "Pending"}
           >
             <i className="bi bi-person-check text-xl"></i>
           </button>
@@ -89,8 +94,9 @@ const ComplaintCardSuperAdmin = ({
           <input
             type="checkbox"
             id="selectCheckbox"
-            checked={!!isSelected}
+            checked={complaint.status === "Pending" && !!isSelected}
             onChange={(e) => onSelect(complaint, e.target.checked)}
+            disabled={complaint.status !== "Pending"}
           />
         </div>
       </div>
