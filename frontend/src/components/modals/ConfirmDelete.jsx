@@ -109,7 +109,6 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
       <ErrorModal
         isOpen={isErrorOpen}
         onClose={() => setIsErrorOpen(false)}
-        onConfirm={handleConfirm}
         message={errMsg}
       />
     </>

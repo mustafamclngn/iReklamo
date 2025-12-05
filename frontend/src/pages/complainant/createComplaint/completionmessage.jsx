@@ -39,19 +39,27 @@ export default function Completion() {
 
                 <div>
                     <h1 className="font-bold mb-2">Instructions:</h1>
+
                     <div className="flex flex-row ml-5 text-sm">
                         <Check size={20} style={{ width: "23px", height: "23px", marginTop:"1px", paddingRight: "8px" }} />
                         <div>
-                            <p>Please, keep a copy of your Tracking ID for it will be used to access the progress of your complaint.</p>
+                            <p>You can also check your email for the tracking ID.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-row ml-5 text-sm">
+                        <Check size={20} style={{ width: "23px", height: "23px", marginTop:"1px", paddingRight: "8px" }} />
+                        <div className="flex flex-row gap-1">
+                            <p>Your Tracking ID will be used to access the progress of your complaint.</p>
                             <a href="/track-complaint" className="text-blue-400 hover:underline">Track your complaint here.</a>
                         </div>
                     </div>
 
                     <div className="flex flex-row ml-5 text-sm">
                         <Check size={20} style={{ width: "23px", height: "23px", marginTop:"1px", paddingRight: "8px" }} />
-                        <div classname="flex flex-row">
+                        <div className="flex flex-row gap-1">
                             <p>If you think there is a problem, reach out to us: </p>
-                            <p className="text-blue-400 hover:underline">iliganComplaints@gmail.com</p>
+                            <p className="text-blue-400 hover:underline">iReklamo@gmail.com</p>
                         </div>
                     </div>
                 </div>
@@ -60,7 +68,7 @@ export default function Completion() {
                 
 
                 <button
-                    className="mt-6 px-6 py-2 bg-blue-400 rounded-lg text-white font-bold hover:bg-blue-500 transition"
+                    className="mt-6 px-6 py-2 my-4 bg-blue-400 rounded-lg text-white font-bold hover:bg-blue-500 transition"
                     onClick={() => navigate("/")}
                 >
                     Return to Home

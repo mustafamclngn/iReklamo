@@ -52,6 +52,7 @@ export default function CU_ComplaintSummaryPage() {
         contact_number: "",
         email: "",
         barangay: "",
+        is_anonymous: false,
         complaint_title: "",
         case_type: "",
         description: "",
@@ -91,9 +92,11 @@ export default function CU_ComplaintSummaryPage() {
                 return;
             }
 
-            const complaintCode = resData.complaint_code || resData.complaintCode;
-            const complaintId = resData.complaint_id || resData.complaintId;
-            const complainantId = resData.complainant_id || resData.complainantId;
+            //start change
+            const complaintId = resData.complaint_id || resData.complaintId || resData.id || null;
+            const complainantId = resData.complainant_id || resData.complainantId || null;
+            const complaintCode = resData.complaint_code || resData.tracking_code || null;
+            //end change
 
             // Add a check in case the backend fails to send the code
             if (!complaintCode) {
@@ -121,9 +124,8 @@ export default function CU_ComplaintSummaryPage() {
                 {/* PROGRESS BAR */}
                 <div className='w-full flex justify-center mb-8'>
                     <div className="mx-auto max-w-[1500px] w-[80%]">
-                        {/* <h1 className='font-bold text-xl text-blue-400 pb-3 ml-40'>Create Complaint</h1> */}
                         <div>
-                            <div className='flex flex-row justify-between place-items-center gap-3'>
+                            <div className='flex flex-row justify-between place-items-center gap-3 mx-44 px-3'>
                                 <CircleCheckBig size={32} color='#60A5FA' />
                                 <div className='flex-grow h-[3px] bg-[#60A5FA]'></div>
                                 <CircleCheckBig size={32} color='#60A5FA' />
@@ -175,6 +177,12 @@ export default function CU_ComplaintSummaryPage() {
                                 {/* info */}
                             <div className='grid grid-cols-2 gap-x-20 ml-12 text-base'>
                                 <div className='flex flex-col gap-2'>
+                                    <div className='flex flex-row'>
+                                        <span className='text-gray-600 w-40'>Anonymous</span>
+                                        <span className='font-medium'>
+                                            {formData.is_anonymous ? "Yes" : "No"}
+                                        </span>
+                                    </div>
                                     <div className='flex flex-row'>
                                         <span className='text-gray-600 w-40'>First name</span>
                                         <span className='font-medium'>{formData.first_name || "Not provided"}</span>

@@ -6,6 +6,8 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -25,6 +27,11 @@ const CA_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const defaultStatus = location.state?.defaultStatus || 'all';
 
@@ -121,8 +128,8 @@ const CA_ComplaintsPage = () => {
 
   // Update Priority
   const handlePriorityUpdate = (complaint) => {
-    console.log('Update priority for:', complaint);
-    // Open priority modal
+    setComplaintData(complaint);
+    setIsPriorityOpen(true);
   };
 
   // Selection
@@ -165,6 +172,19 @@ const CA_ComplaintsPage = () => {
       setSelected(map);
       setSelectAll(true); 
     }
+  };
+
+  // Priority Update Handler
+  const handlePriorityChange = (newPriority) => {
+    setComplaints(prevComplaints =>
+      prevComplaints.map(complaint =>
+        complaint.id === complaintData?.id
+          ? { ...complaint, priority: newPriority }
+          : complaint
+      )
+    );
+    setToastMessage('Priority updated successfully!');
+    setToastVisible(true);
   };
 
   // Pagination logic
@@ -315,6 +335,17 @@ const CA_ComplaintsPage = () => {
         selectedComplaints={[...selected.values()]}
         >
       </AssignComplaintModal>
+      <SetPriorityModal
+        isOpen={isPriorityOpen}
+        onClose={() => setIsPriorityOpen(false)}
+        complaint={complaintData}
+        onPriorityUpdate={handlePriorityChange}
+      />
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
+      />
     </>
   );
 };
