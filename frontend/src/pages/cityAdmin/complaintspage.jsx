@@ -285,7 +285,7 @@ const CA_ComplaintsPage = () => {
 
               {/* Select for Assignment */}
               <button
-                onClick={handleAssignOfficial}
+                onClick={() => handleAssignOfficial(null)}
                 className={`
                   ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200 
                   bg-green-500 border-green-500 text-white hover:bg-green-800
