@@ -6,10 +6,8 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
-import SetPriorityModal from '../../components/modals/SetPriorityModal';
-import Toast from '../../components/common/Toast';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -35,7 +33,6 @@ const BC_ComplaintsPage = () => {
   // modal states
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [refresh, setRefresh] = useState(false);
@@ -347,24 +344,13 @@ const BC_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignComplaintModal 
-        isOpen={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)}
-        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-        selectedComplaints={[...selected.values()]}
+      <AssignActionModal
+        isOpen={isAssignOpen}
+        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        Action="Assign Complaint"
+        assignDetails={complaintData}
         >
-      </AssignComplaintModal>
-      <SetPriorityModal
-        isOpen={isPriorityOpen}
-        onClose={() => setIsPriorityOpen(false)}
-        complaint={complaintData}
-        onPriorityUpdate={handlePriorityChange}
-      />
-      <Toast
-        message={toastMessage}
-        isVisible={toastVisible}
-        onClose={() => setToastVisible(false)}
-      />
+      </AssignActionModal>
 
       <StatusUpdateModal
         isOpen={isStatusModalOpen}

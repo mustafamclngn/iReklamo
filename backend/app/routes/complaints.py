@@ -840,7 +840,6 @@ def get_resolved_cases(assigned_official_id):
 
 
 @complaints_bp.route('/<int:complaint_id>/update-status', methods=['POST'])
-@verify_jwt
 def update_complaint_status(complaint_id):
     """
     Update complaint status with mandatory remarks and history logging
@@ -853,10 +852,6 @@ def update_complaint_status(complaint_id):
 
         user_id = user_info.get('user_id')
         user_role = user_info.get('role')
-
-        # Extract role from array if it's an array (e.g., [3])
-        if isinstance(user_role, list) and user_role:
-            user_role = user_role[0]
 
         if not user_id or not user_role:
             return jsonify({"error": "Invalid user credentials"}), 401
@@ -874,8 +869,6 @@ def update_complaint_status(complaint_id):
                 'success': False,
                 'message': 'Status and remarks are required'
             }), 400
-
-
 
         # Validate status values
         valid_statuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected']
@@ -900,19 +893,11 @@ def update_complaint_status(complaint_id):
             conn.close()
             return jsonify({'success': False, 'message': 'Complaint not found'}), 404
 
-        can_update = False
-
-        if user_role in [1, 2]:
-            can_update = True
-
-        elif user_role == 3:
-            cursor.execute("SELECT barangay_id FROM users WHERE user_id = %s", (user_id,))
-            captain_result = cursor.fetchone()
-            captain_barangay_id = captain_result['barangay_id'] if captain_result else None
-            can_update = (captain_barangay_id is not None and complaint['barangay_id'] == captain_barangay_id)
-
-        elif user_role == 4:
-            can_update = (complaint['assigned_official_id'] == user_id)
+        # Permission check: Must be assigned official OR higher role
+        can_update = (
+            complaint['assigned_official_id'] == user_id or
+            user_role in [1, 2, 3]  # super_admin, city_admin, brgy_cap
+        )
 
         if not can_update:
             cursor.close()
@@ -965,39 +950,3 @@ def update_complaint_status(complaint_id):
     except Exception as e:
         print(f"Error updating complaint status: {e}")
         return jsonify({'success': False, 'message': 'Internal server error'}), 500
-
-@complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])
-@verify_jwt
-@verify_roles(1, 2, 3)  # Super Admin, City Admin, Barangay Captain
-def reject_complaint_route(complaint_id):
-    """
-    Reject a complaint with audit trail
-    """
-    try:
-        data = request.get_json()
-
-        # Validate required fields
-        rejection_reason = data.get('rejection_reason', '').strip()
-        if not rejection_reason:
-            return jsonify({
-                'success': False,
-                'error': 'Rejection reason is required'
-            }), 400
-
-        # Get authenticated user ID
-        user_id = request.user.get('user_id')
-        if not user_id:
-            return jsonify({
-                'success': False,
-                'error': 'Invalid user authentication'
-            }), 401
-
-        # Call controller function
-        return reject_complaint(complaint_id, user_id, rejection_reason)
-
-    except Exception as e:
-        print(f"Error in reject complaint route: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to process rejection request'
-        }), 500

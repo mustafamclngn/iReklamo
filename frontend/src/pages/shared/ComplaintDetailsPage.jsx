@@ -57,6 +57,8 @@ const statusColors = {
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
   Rejected: "#DC3545"
+  Resolved: "#43B174",
+  Rejected: "#DC3545"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -407,7 +409,7 @@ const ComplaintDetailsPage = () => {
                                   {entry.remarks || "No remarks provided"}
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  by {entry.actor_name || "Unknown"}
+                                  by {entry.actor_name ? `${entry.actor_name} (${entry.actor_role})` : "Unknown"}
                                 </p>
                               </div>
                             </div>
@@ -422,7 +424,7 @@ const ComplaintDetailsPage = () => {
                     </div>
                   </div>
                 </div>
-                <AssignComplaintModal
+                <AssignActionModal
                   isOpen={isAssignOpen} 
                   onClose={() => setIsAssignOpen(false)}
                   onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}

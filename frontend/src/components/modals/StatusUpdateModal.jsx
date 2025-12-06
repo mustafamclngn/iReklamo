@@ -127,7 +127,7 @@ const StatusUpdateModal = ({ isOpen, onClose, complaint, onRefresh }) => {
                 placeholder="Explain the status change..."
                 required
                 rows={4}
-                maxLength="500"
+                maxlength="500"
                 className="w-full p-2 border border-gray-300 rounded-md resize-none"
               ></textarea>
               <p className="text-sm text-gray-500 mt-1">
