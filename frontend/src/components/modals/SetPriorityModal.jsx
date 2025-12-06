@@ -9,7 +9,7 @@ const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
   const [isErrorOpen, setIsErrorOpen] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-  const { updateComplaint } = useComplaintsApi()
+  const { setPriority } = useComplaintsApi()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,7 +17,7 @@ const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
 
     setIsSubmitting(true)
     try {
-      const response = await updateComplaint(complaint.id, { priority: selectedPriority })
+      const response = await setPriority(complaint.id, selectedPriority)
       if (response.success) {
         onPriorityUpdate?.(selectedPriority)
         onClose()

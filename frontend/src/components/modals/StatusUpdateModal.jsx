@@ -22,8 +22,9 @@ const StatusUpdateModal = ({ isOpen, onClose, complaint, onRefresh }) => {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Status options based on user role
+  // Note: "Rejected" removed from status dropdown - use "Reject Complaint" button instead
   const brgyOfficialStatuses = ['Pending', 'In-Progress', 'Resolved'];
-  const brgyCaptainStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
+  const brgyCaptainStatuses = ['Pending', 'In-Progress', 'Resolved'];
 
   // Available statuses for current user
   const availableStatuses = userRole === 3 ? brgyCaptainStatuses : brgyOfficialStatuses;

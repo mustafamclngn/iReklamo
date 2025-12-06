@@ -351,6 +351,17 @@ const BC_ComplaintsPage = () => {
         assignDetails={complaintData}
         >
       </AssignActionModal>
+      <SetPriorityModal
+        isOpen={isPriorityOpen}
+        onClose={() => setIsPriorityOpen(false)}
+        complaint={complaintData}
+        onPriorityUpdate={handlePriorityChange}
+      />
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
+      />
 
       <StatusUpdateModal
         isOpen={isStatusModalOpen}

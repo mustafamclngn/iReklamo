@@ -31,7 +31,7 @@ def list_by_assignee(assignee):
 
 def reject_complaint(complaint_id, rejected_by_id, rejection_reason):
     try:
-        # Check if complaint exists
+        # Check if complaint exists and get current status
         complaint_selector = Select()
         complaint_data = complaint_selector\
             .table("complaints")\
@@ -51,26 +51,61 @@ def reject_complaint(complaint_id, rejected_by_id, rejection_reason):
                 'error': 'Complaint is already rejected'
             }), 400
 
-        # Update complaint with rejection details
-        complaint_updates = {
-            "status": "Rejected",
-            "rejection_reason": rejection_reason,
-            "rejected_at": datetime.utcnow()
-        }
+        current_status = complaint_data.get('status')
 
-        complaint_update = Update()
-        complaint_update.table("complaints")\
-            .set(complaint_updates)\
-            .where("id", complaint_id)\
-            .execute()
+        # Use SAME database connection pattern as update_complaint_status
+        from app.config import DB_CONFIG
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
 
-        return jsonify({
-            'success': True,
-            'message': 'Complaint rejected successfully'
-        }), 200
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        try:
+            # Update complaint with rejection details
+            complaint_updates = {
+                "status": "Rejected",
+                "rejection_reason": rejection_reason,
+                "rejected_at": datetime.utcnow()
+            }
+
+            cursor.execute("""
+                UPDATE complaints
+                SET status = %s, rejection_reason = %s, rejected_at = %s, updated_at = NOW()
+                WHERE id = %s
+            """, ("Rejected", rejection_reason, datetime.utcnow(), complaint_id))
+
+            # Log to status history FIRST before commit
+            cursor.execute("""
+                INSERT INTO complaint_status_history
+                (complaint_id, old_status, new_status, remarks, actor_id, changed_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+            """, (complaint_id, current_status, "Rejected", rejection_reason, rejected_by_id))
+
+            # DEBUG: Log rejection audit
+            print(f"AUDIT LOG: Rejection logged - complaint_id={complaint_id}, old_status='{current_status}', new_status='Rejected', actor_id={rejected_by_id}")
+
+            # Single commit for both operations
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Complaint rejected successfully'
+            }), 200
+
+        except Exception as inner_error:
+            conn.rollback()
+            print(f"Error in reject complaint transaction: {inner_error}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to reject complaint'
+            }), 500
+        finally:
+            cursor.close()
+            conn.close()
 
     except Exception as e:
-        print(f"Error rejecting complaint: {e}")
+        print(f"Error in reject complaint outer handler: {e}")
         return jsonify({
             'success': False,
             'error': 'Failed to reject complaint'

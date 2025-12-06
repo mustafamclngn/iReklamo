@@ -149,6 +149,13 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
+  const setPriority = async (complaintId, priority) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/set-priority`, {
+      priority
+    });
+    return response.data;
+  };
+
 return {
     complaintsByBarangayId,
     StatusComplaintsByBarangayId,
@@ -165,7 +172,8 @@ return {
     getBarangayOfficialComplaints,
     getActiveCases,
     getResolvedCases,
-    rejectComplaint
+    rejectComplaint,
+    setPriority
   };
 
 };
