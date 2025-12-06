@@ -1,5 +1,7 @@
 from flask import jsonify, request
+from datetime import datetime
 from app.functions.Select import Select
+from app.functions.Update import Update
 
 def list_by_assignee(assignee):
     try:
@@ -25,6 +27,53 @@ def list_by_assignee(assignee):
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+def reject_complaint(complaint_id, rejected_by_id, rejection_reason):
+    try:
+        # Check if complaint exists
+        complaint_selector = Select()
+        complaint_data = complaint_selector\
+            .table("complaints")\
+            .search("id", complaint_id)\
+            .execute().retDict()
+
+        if not complaint_data:
+            return jsonify({
+                'success': False,
+                'error': 'Complaint not found'
+            }), 404
+
+        # Check if complaint is already rejected
+        if complaint_data.get('status') == 'Rejected':
+            return jsonify({
+                'success': False,
+                'error': 'Complaint is already rejected'
+            }), 400
+
+        # Update complaint with rejection details
+        complaint_updates = {
+            "status": "Rejected",
+            "rejection_reason": rejection_reason,
+            "rejected_at": datetime.utcnow()
+        }
+
+        complaint_update = Update()
+        complaint_update.table("complaints")\
+            .set(complaint_updates)\
+            .where("id", complaint_id)\
+            .execute()
+
+        return jsonify({
+            'success': True,
+            'message': 'Complaint rejected successfully'
+        }), 200
+
+    except Exception as e:
+        print(f"Error rejecting complaint: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to reject complaint'
         }), 500
     
 def activeCases_official(assignee):
@@ -114,4 +163,3 @@ def get_all_unfiltered_complaints():
             'success': False,
             'error': str(e)
         }), 500
-    
