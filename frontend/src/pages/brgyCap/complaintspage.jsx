@@ -251,9 +251,25 @@ const BC_ComplaintsPage = () => {
 
               {/* Select for Assignment */}
               <button
+                onClick={handleAssignOfficial}
+                className={`
+                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200 
+                  bg-green-500 border-green-500 text-white hover:bg-green-800
+
+                  disabled:bg-gray-400 disabled:border-gray-400
+                  disabled:text-gray-500 disabled:cursor-not-allowed
+                  disabled:hover:bg-gray-400    
+                `}
+                title="Assign selected"
+                disabled={selected.size === 0}
+              >
+                Batch Assign
+              </button>
+              
+              <button
                 onClick={handleSelAll}
                 className={`
-                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
+                  ml-1 px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
 
                   ${selectAll
                     ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
