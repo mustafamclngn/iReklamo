@@ -7,6 +7,9 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
 import { calculateProfileCompletion } from "../../utils/profileHelpers";
 import { toTitleCase } from "../../utils/stringHelpers";
+import useLogOut from '../../hooks/useLogout';
+import { useNavigate, Link } from 'react-router-dom';
+import LogOutModal from '../../components/modals/ConfirmLogOut';
 import { getImageURL } from "../../utils/imageHelpers";
 import {
   ProfilePictureSection,
@@ -86,6 +89,17 @@ const AccountPage = () => {
 
     return calculateProfileCompletion(profileData, profileFields);
   };
+
+
+  const logout = useLogOut();
+  const navigate = useNavigate();
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  const signout = async () => {
+    await logout();
+    navigate('/home');
+  }
 
   if (loading) {
     return <LoadingSpinner message="Loading account details..." />;
@@ -250,8 +264,21 @@ const AccountPage = () => {
             saving={profileEditor.saving}
             onChange={profileEditor.handleInputChange}
           />
+          <button
+            onClick={() => setIsConfirmOpen(true)}
+            className="px-4 py-2 mt-8 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+          >
+            Log Out
+          </button>
         </div>
       </div>
+
+      <LogOutModal 
+        isOpen={isConfirmOpen} 
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => signout()}
+        >
+      </LogOutModal>
     </div>
   );
 };

@@ -103,6 +103,7 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="complaints" element={<ComplaintsPage />} />
+              <Route path="account" element={<AccountPage />} />
               <Route
                 path="complaints/:complaint_id"
                 element={<ComplaintDetailsPage />}
@@ -137,6 +138,7 @@ function App() {
               <Route path="barangays" element={<BarangaysPage />} />
               <Route path="departments" element={<DepartmentsPage />} />
               <Route path="hotline" element={<HotlinePage />} />
+              <Route path="account" element={<AccountPage />} />
               <Route path="officials" element={<CA_OfficialsPage />} />
               <Route
                 path="officials/:user_id"
