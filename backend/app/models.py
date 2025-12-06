@@ -37,6 +37,11 @@ class Complaint(db.Model):
     location = db.Column(db.String(255))  # Optional location of the complaint
     image_url = db.Column(db.String(500))  # Optional image evidence
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    # Rejection audit fields
+    rejection_reason = db.Column(db.Text)
+    rejected_at = db.Column(db.DateTime)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -109,3 +109,10 @@ INSERT INTO roles (name, description) VALUES
     ('brgy_off', 'Barangay Official'),
     ('on_hold', 'Account on hold')
 ON CONFLICT (name) DO NOTHING;
+
+-- Add rejection support to complaints table
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS rejected_at TIMESTAMP;
+ALTER TABLE complaints DROP CONSTRAINT complaints_status_check;
+ALTER TABLE complaints ADD CONSTRAINT complaints_status_check 
+CHECK (status IN ('Pending', 'In-Progress', 'Resolved', 'Rejected'));
