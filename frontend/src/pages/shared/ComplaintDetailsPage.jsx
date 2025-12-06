@@ -69,7 +69,7 @@ const statusColors = {
   Pending: "#FFB300",
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
-  Rejected: "#DC2626"
+  Rejected: "#DC3545"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -358,28 +358,49 @@ const ComplaintDetailsPage = () => {
                           <p className="text-gray-900 font-medium text-lg">{getDaysSinceFiled(complaint.created_at)}</p>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Rejection Reason Section */}
-                      {complaint.status === 'Rejected' && (
-                        <>
-                          <hr className="border-t border-gray-200 my-6" />
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-red-800 mb-4">Rejection Details</h3>
-                            <div className="grid grid-cols-1 gap-y-4">
-                              <div>
-                                <label className="block text-md text-gray-600 mb-2">Reason for Rejection:</label>
-                                <p className="text-gray-900 font-medium text-base leading-relaxed">{complaint.rejection_reason || 'No reason provided'}</p>
-                              </div>
-                              {complaint.rejected_at && (
-                                <div>
-                                  <label className="block text-md text-gray-600 mb-2">Rejected On:</label>
-                                  <p className="text-gray-900 font-medium text-base">{formatDate(complaint.rejected_at)}</p>
+                    {/* complaint status history */}
+                    <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                          Complaint Status History
+                        </h2>
+                      </div>
+                      <hr className="border-t border-gray-200 mt-4 mb-6" />
+                      {complaint.status_history && complaint.status_history.length > 0 ? (
+                        <div className="space-y-4">
+                          {complaint.status_history.map((entry, index) => (
+                            <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                              <div className="flex-shrink-0">
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                  <i className="bi bi-clock-history text-white text-sm"></i>
                                 </div>
-                              )}
-                              {/* Rejected By section removed - functionality no longer tracked */}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <span className="px-3 py-1 rounded-full font-semibold text-white text-sm" style={{ backgroundColor: statusColors[entry.status] || "#AEAEAE" }}>
+                                    {entry.status}
+                                  </span>
+                                  <span className="text-sm text-gray-600">
+                                    {entry.changed_at ? formatDate(entry.changed_at) : "N/A"}
+                                  </span>
+                                </div>
+                                <p className="text-gray-900 font-medium mb-1">
+                                  {entry.remarks || "No remarks provided"}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  by {entry.actor_name ? `${entry.actor_name} (${entry.actor_role})` : "Unknown"}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <i className="bi bi-info-circle text-3xl mb-2"></i>
+                          <p>No status changes have been recorded yet.</p>
+                        </div>
                       )}
                     </div>
                   </div>

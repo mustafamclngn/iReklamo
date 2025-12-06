@@ -9,18 +9,19 @@ blinker==1.9.0
 
 # CORS
 Flask-Cors==6.0.1
+Flask-Mail==0.9.1
 
 # Environment Variables
 python-dotenv==1.0.1
 
 # Security & Cryptography
 cryptography==46.0.3
-cffi==1.17.1
+# cffi== conflicts resolved by pip
 pycparser==2.22
 PyJWT==2.10.1
 
 # PostgreSQL (Database Driver)
-psycopg2==2.9.9
+psycopg2-binary==2.9.9
 
 # Email
 Flask-Mail==0.10.0

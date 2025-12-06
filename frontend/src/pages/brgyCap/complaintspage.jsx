@@ -7,6 +7,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
 
@@ -23,9 +24,11 @@ const BC_ComplaintsPage = () => {
   const { getBarangayCaptainComplaints } = useComplaintsApi();
 
   // modal states
-  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   // toast state
@@ -124,8 +127,8 @@ const BC_ComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    console.log('Update status for:', complaint);
-    // Open status modal
+    setSelectedComplaint(complaint);
+    setIsStatusModalOpen(true);
   };
 
   // Update Priority
@@ -283,6 +286,16 @@ const BC_ComplaintsPage = () => {
         message={toastMessage}
         isVisible={toastVisible}
         onClose={() => setToastVisible(false)}
+      />
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
       />
     </>
   );
