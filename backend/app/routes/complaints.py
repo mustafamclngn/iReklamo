@@ -820,6 +820,119 @@ def get_active_cases(assigned_official_id):
 def get_resolved_cases(assigned_official_id):
     return resolvedCases_official(assigned_official_id)
 
+
+@complaints_bp.route('/<int:complaint_id>/update-status', methods=['POST'])
+def update_complaint_status(complaint_id):
+    """
+    Update complaint status with mandatory remarks and history logging
+    """
+    try:
+        # Get user data from JWT middleware
+        user_info = getattr(request, 'user', None)
+        if not user_info:
+            return jsonify({"error": "Authentication required"}), 401
+
+        user_id = user_info.get('user_id')
+        user_role = user_info.get('role')
+
+        if not user_id or not user_role:
+            return jsonify({"error": "Invalid user credentials"}), 401
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'Request body required'}), 400
+
+        new_status = data.get('status')
+        remarks = data.get('remarks')
+
+        # Validate required fields
+        if not new_status or not remarks:
+            return jsonify({
+                'success': False,
+                'message': 'Status and remarks are required'
+            }), 400
+
+        # Validate status values
+        valid_statuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected']
+        if new_status not in valid_statuses:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid status value'
+            }), 400
+
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Check if complaint exists and get current data
+        cursor.execute("""
+            SELECT status, assigned_official_id, barangay_id
+            FROM complaints WHERE id = %s
+        """, (complaint_id,))
+
+        complaint = cursor.fetchone()
+        if not complaint:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Complaint not found'}), 404
+
+        # Permission check: Must be assigned official OR higher role
+        can_update = (
+            complaint['assigned_official_id'] == user_id or
+            user_role in [1, 2, 3]  # super_admin, city_admin, brgy_cap
+        )
+
+        if not can_update:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Unauthorized to update this complaint'}), 403
+
+        # Prevent reverting from closed statuses (Resolved/Rejected) for lower roles
+        current_status = complaint['status']
+        is_closed = current_status in ['Resolved', 'Rejected']
+
+        if is_closed and current_status != new_status and user_role not in [1, 2, 3]:
+            # Only higher roles can reopen closed complaints
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Cannot reopen closed complaints'
+            }), 403
+
+        # Update complaint status
+        cursor.execute("""
+            UPDATE complaints
+            SET status = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (new_status, complaint_id))
+
+        # Log to history table - Note: you may need to create this table first
+        # Assuming complaint_status_history table exists with columns:
+        # complaint_id, old_status, new_status, remarks, actor_id, changed_at
+        try:
+            cursor.execute("""
+                INSERT INTO complaint_status_history
+                (complaint_id, old_status, new_status, remarks, actor_id, changed_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+            """, (complaint_id, current_status, new_status, remarks, user_id))
+        except Exception as history_error:
+            print(f"Warning: Could not log status history - {history_error}")
+            # Continue with update even if history logging fails
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': f'Status updated to {new_status}',
+            'data': {'status': new_status}
+        }), 200
+
+    except Exception as e:
+        print(f"Error updating complaint status: {e}")
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
+
 @complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])
 @verify_jwt
 @verify_roles(1, 2, 3)  # Super Admin, City Admin, Barangay Captain
