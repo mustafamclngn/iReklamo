@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardSuperAdmin from '../../components/cards/complaintCardSuperAdmin';
-import useComplaintsApi from '../../api/complaintsAPI'; 
+import useComplaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 
 const SA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -21,7 +22,9 @@ const SA_ComplaintsPage = () => {
   const { getAllComplaints } = useComplaintsApi();
 
   // modal states
-  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [complaintData, setComplaintData] = useState(null);
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
@@ -36,7 +39,7 @@ const SA_ComplaintsPage = () => {
   // Define filter options
   const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
-  
+
   // Extract unique barangays from complaints data
   const uniqueBarangays = [...new Set(
     complaints
@@ -55,22 +58,6 @@ const SA_ComplaintsPage = () => {
     // Clear search when filters change to avoid confusion with new results
     setSearchTerm('');
   }, [filters]);
-
-  // Check for refresh trigger from navigation state
-  useEffect(() => {
-    if (location.state?.refresh) {
-      setRefresh(prev => !prev);
-      // Clear the navigation state
-      window.history.replaceState({}, document.title, location.pathname);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    return () => {
-      // Clear location state on unmount
-      window.history.replaceState({}, document.title)
-    };
-  }, []);
 
   const fetchComplaints = async (currentFilters = {}) => {
     try {
@@ -137,8 +124,8 @@ const SA_ComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    console.log('Update status for:', complaint);
-    // Open status modal
+    setSelectedComplaint(complaint);
+    setIsStatusModalOpen(true);
   };
 
   // Update Priority
@@ -206,7 +193,7 @@ const SA_ComplaintsPage = () => {
               >
                 <option value="all">All Barangays</option>
                 {uniqueBarangays.map(barangay => (
-                  <option key={barangay} value={barangay}>{barangay}</option>
+                  <option key={barangay} value={barangay}></option>
                 ))}
               </select>
               {/* Status Filter */}
@@ -277,13 +264,23 @@ const SA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
-        isOpen={isAssignOpen} 
+      <AssignActionModal
+        isOpen={isAssignOpen}
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >
       </AssignActionModal>
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
+      />
     </>
   );
 };
