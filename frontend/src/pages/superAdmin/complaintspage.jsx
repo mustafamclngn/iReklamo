@@ -26,7 +26,7 @@ const SA_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
-
+  const [complaintData, setComplaintData] = useState(null);
   const defaultStatus = location.state?.defaultStatus || 'all';
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
@@ -37,7 +37,7 @@ const SA_ComplaintsPage = () => {
   });
 
   // Define filter options
-  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved'];
+  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
   
   // Extract unique barangays from complaints data
@@ -52,6 +52,22 @@ const SA_ComplaintsPage = () => {
     fetchComplaints();
   }, [refresh]);
 
+  // Fetch complaints when server-side filters change
+  useEffect(() => {
+    fetchComplaints(filters);
+    // Clear search when filters change to avoid confusion with new results
+    setSearchTerm('');
+  }, [filters]);
+
+  // Check for refresh trigger from navigation state
+  useEffect(() => {
+    if (location.state?.refresh) {
+      setRefresh(prev => !prev);
+      // Clear the navigation state
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+  }, [location.state]);
+
   useEffect(() => {
     return () => {
       // Clear location state on unmount
@@ -59,12 +75,25 @@ const SA_ComplaintsPage = () => {
     };
   }, []);
 
-  const fetchComplaints = async () => {
+  const fetchComplaints = async (currentFilters = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllComplaints();
-      
+
+      // Build server filters - exclude search which is handled client-side
+      const serverFilters = {};
+      if (currentFilters.barangay && currentFilters.barangay !== 'all') {
+        serverFilters.barangay = currentFilters.barangay;
+      }
+      if (currentFilters.status && currentFilters.status !== 'all') {
+        serverFilters.status = currentFilters.status;
+      }
+      if (currentFilters.priority && currentFilters.priority !== 'all') {
+        serverFilters.priority = currentFilters.priority;
+      }
+
+      const response = await getAllComplaints(serverFilters);
+
       if (response.success) {
         setComplaints(response.data);
       } else {
@@ -86,9 +115,11 @@ const SA_ComplaintsPage = () => {
     }));
   };
 
-  // Comprehensive filter logic - ALL THREE FILTERS
+  // Client-side filtering - only search since status/barangay/priority are server-side
   const filteredComplaints = complaints.filter(complaint => {
-    // Search filter
+    if (!searchTerm) return true;
+
+    // Search filter - check multiple fields for matches
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       complaint.title?.toLowerCase().includes(searchLower) ||
@@ -96,24 +127,10 @@ const SA_ComplaintsPage = () => {
       complaint.complaint_code?.toLowerCase().includes(searchLower) ||
       complaint.id?.toString().includes(searchLower) ||
       (complaint.barangay && complaint.barangay.toLowerCase().includes(searchLower)) ||
-      (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower));
-    
-    // Barangay filter
-    const matchesBarangay = 
-      filters.barangay === 'all' || 
-      complaint.barangay === filters.barangay;
+      (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower)) ||
+      complaint.status?.toLowerCase().includes(searchLower);
 
-    // Status filter
-    const matchesStatus = 
-      filters.status === 'all' || 
-      complaint.status === filters.status;
-
-    // Priority filter
-    const matchesPriority = 
-      filters.priority === 'all' || 
-      complaint.priority === filters.priority;
-    
-    return matchesSearch && matchesBarangay && matchesStatus && matchesPriority;
+    return matchesSearch;
   });
 
   // View Details

@@ -49,9 +49,9 @@ const LogInPage = () => {
     // =============
     // Password states
     const [pwd, setPwd] = useState('');
-    const [incPwd, setincPwd] = useState(false)
     const [showPwd, setShowPwd] = useState(false);
     const { forgotPassword } = useUsersApi();
+    const [forgotCooldown, setForgotCooldown] = useState(0);
 
     // =============
     // Error and Success messages 
@@ -74,6 +74,35 @@ const LogInPage = () => {
         localStorage.setItem("persist", JSON.stringify(persistChecked));
     }, [persistChecked, setPersist]);
 
+    useEffect(() => {
+        const stored = localStorage.getItem("forgotCooldown");
+        if (stored) {
+            const expiresAt = Number(stored);
+            const now = Date.now();
+
+            if (expiresAt > now) {
+                setForgotCooldown(Math.floor((expiresAt - now) / 1000));
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (forgotCooldown <= 0) return;
+
+        const interval = setInterval(() => {
+            setForgotCooldown(prev => {
+                if (prev <= 1) {
+                    localStorage.removeItem("forgotCooldown");
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [forgotCooldown]);
+
+
     // user reference state
     useEffect(() => {
         userRef.current.focus();
@@ -88,7 +117,7 @@ const LogInPage = () => {
     // Sumission handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setLoading(true);
         try {
 
             const { role, user } = await login(identity, pwd)
@@ -128,7 +157,6 @@ const LogInPage = () => {
             } else if (err.response?.status) {
                 if(err?.response?.data?.error === "Incorrect password") {
                     console.log("Password error")
-                    setincPwd(true);
                 }
                 console.log(err?.response?.data)
                 setErrMsg(err?.response?.data?.error);
@@ -137,7 +165,6 @@ const LogInPage = () => {
             } else if (err.response?.status) {
                 if(err?.response?.data?.error === "Incorrect password") {
                     console.log("Password error")
-                    setincPwd(true);
                 }
                 console.log(err?.response?.data)
                 setErrMsg(err?.response?.data?.error);
@@ -148,6 +175,8 @@ const LogInPage = () => {
                 setIsErrorOpen(true)
             }
             errRef.current.focus();
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -155,13 +184,19 @@ const LogInPage = () => {
     // Forgot Password handler
     const handleForgot = async (e) => {
         e.preventDefault();
+
+        if (forgotCooldown > 0) return;
+
         setLoading(true)
         try{
             const response = await forgotPassword(identity)
-            if (response.success) {
-                setSuccessMessage(response?.data?.message)
-                setIsSuccessOpen(true)
-            }
+            setSuccessMessage(response?.data?.message)
+            setIsSuccessOpen(true)
+            
+            const expiresAt = Date.now() + 15 * 60 * 1000; 
+            localStorage.setItem("forgotCooldown", expiresAt);
+            setForgotCooldown(15 * 60);
+
         } catch (err) {
             if (!err?.response) {
                 console.log(err)
@@ -175,7 +210,6 @@ const LogInPage = () => {
             } 
         } finally {
             setLoading(false);
-            setincPwd(false);
         }
         
     }
@@ -252,21 +286,22 @@ const LogInPage = () => {
                     <button
                         className="auth-button"
                         disabled={!pwd || !identity}>
-                            Login
+                        {loading ? 
+                            (<LoadingSpinner message="" scale={0.45}/>)
+                                    : (<p>Login</p>)}
+                            
                     </button>
                 </div>
                 {/* ========== */}     
                 
                 {/* ========== */}
                 {/* Forgot Password */}
-                {incPwd && !loading && (
-                    <p className="forget_password" onClick={handleForgot}>
-                        Forgot Password?
-                    </p>
-                )}
-                {loading && incPwd && (
-                    <LoadingSpinner message="Sending password reset request..." scale={0.75}/>
-                )}
+                {(forgotCooldown <= 0) ? 
+                            (<button className="forget_password" onClick={handleForgot} disabled={!identity || forgotCooldown > 0}>
+                                Forgot Password?
+                            </button>)
+                                        :
+                            <p className="forgot_pressed">Request to reset password has already been sent to your email.</p>}
                 {/* ========== */}           
             </form>
         </div>

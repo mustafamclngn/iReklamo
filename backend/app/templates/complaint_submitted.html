@@ -1,3 +1,55 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+{% extends "base_email.html" %}
+
+{% block content %}
+
+<p>Hello <strong>{{ greeting_name }}</strong>,</p>
+
+<p>
+  Your complaint has been successfully submitted to <strong>iReklamo</strong>.
+</p>
+
+<p>
+  Use the tracking ID below to monitor the progress of your complaint:
+</p>
+
+<div style="
+  background:#f1f5f9;
+  border:2px dashed #2563eb;
+  padding:14px;
+  border-radius:6px;
+  text-align:center;
+  margin:18px 0;
+  font-size:18px;
+  font-weight:bold;
+  color:#2563eb;
+">
+  {{ complaint_id }}
+</div>
+
+<p style="text-align:center;">
+  <a href="{{ tracking_url }}" class="btn">
+    📍 Track My Complaint
+  </a>
+</p>
+
+<p>
+  You may click the button above or manually copy the tracking ID.
+</p>
+
+<p>
+  Thank you for helping us improve our community!
+</p>
+
+<p>
+  – <strong>iReklamo Support Team</strong>
+</p>
+
+{% endblock %}
+=======
+=======
+>>>>>>> main
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,3 +151,7 @@
     </div>
 </body>
 </html>
+<<<<<<< HEAD
+>>>>>>> main
+=======
+>>>>>>> main

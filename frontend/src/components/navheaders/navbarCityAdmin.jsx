@@ -4,7 +4,7 @@ import IliganLogo from "./iliganLogo";
 
 // CityAdminNavBar Component
 const CityAdminNavBar = () => {
-  const links = ["Dashboard", "Complaints", "Barangays", "Officials", "Reports"];
+  const links = ["Dashboard", "Complaints", "Barangays", "Officials", "Reports", "Account"];
 
   return (
     <nav className="bg-white py-6 font-[Inter] font-black">

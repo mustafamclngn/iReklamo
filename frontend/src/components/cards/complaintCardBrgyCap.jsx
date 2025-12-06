@@ -4,6 +4,7 @@ const statusColors = {
   Pending: "#FFB300",
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
+  Rejected: "#DC2626",
 };
 
 const priorityColors = {
