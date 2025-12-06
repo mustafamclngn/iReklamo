@@ -1,31 +1,31 @@
 import './modal.css';
 import { useState } from 'react';
-import useComplaintsApi from '../../api/complaintsAPI';
+import ConfirmRejectModal from './ConfirmRejectModal';
 
 const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
-  const { rejectComplaint } = useComplaintsApi();
   const [rejectionReason, setRejectionReason] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const handleConfirm = async () => {
+  const handleNextStep = () => {
     if (!rejectionReason.trim()) {
       setValidationError('Please provide a reason for rejection');
       return;
     }
 
     setValidationError('');
-    setIsSubmitting(true);
-    try {
-      await rejectComplaint(complaint.id, rejectionReason);
-      // Call the parent callback to trigger refetch and close modal
-      onConfirm();
-    } catch (error) {
-      console.error('Rejection failed:', error);
-      setValidationError('Failed to reject complaint. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsConfirmOpen(true); // Open confirmation modal
+  };
+
+  const handleConfirmClose = () => {
+    setIsConfirmOpen(false);
+  };
+
+  const handleConfirmSuccess = () => {
+    // Close both modals and trigger parent callback
+    setIsConfirmOpen(false);
+    onClose();
+    onConfirm();
   };
 
   const handleClose = () => {
@@ -106,15 +106,24 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
 
           {/* Footer */}
           <div className="popup-footer">
-            <button type="button" className="revoke-button" onClick={handleConfirm} disabled={isSubmitting}>
-              {isSubmitting ? 'Processing...' : 'Confirm Rejection'}
+            <button type="button" className="revoke-button" onClick={handleNextStep}>
+              Confirm Rejection
             </button>
-            <button type="button" className="okay-button" onClick={handleClose} disabled={isSubmitting}>
+            <button type="button" className="okay-button" onClick={handleClose}>
               Cancel
             </button>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmRejectModal
+        isOpen={isConfirmOpen}
+        onClose={handleConfirmClose}
+        onConfirm={handleConfirmSuccess}
+        complaint={complaint}
+        rejectionReason={rejectionReason}
+      />
     </div>
   );
 };

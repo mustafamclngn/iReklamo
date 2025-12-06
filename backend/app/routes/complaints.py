@@ -818,8 +818,12 @@ def get_user_complaints(assignee):
     return list_by_assignee(assignee)
 
 @complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
+@verify_jwt
 def perform_assignment(complaint_id, assigned_official_id):
-    return assign_complaint(complaint_id, assigned_official_id)
+    # Get user info for audit logging
+    user_info = getattr(request, 'user', None)
+    user_id = user_info.get('user_id') if user_info else None
+    return assign_complaint(complaint_id, assigned_official_id, user_id)
 
 @complaints_bp.route('cases/active/<int:assigned_official_id>')
 def get_active_cases(assigned_official_id):
@@ -955,6 +959,81 @@ def update_complaint_status(complaint_id):
 
     except Exception as e:
         print(f"Error updating complaint status: {e}")
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
+
+@complaints_bp.route('/<int:complaint_id>/set-priority', methods=['POST'])
+@verify_jwt
+def update_priority(complaint_id):
+    """
+    Update complaint priority with audit logging
+    """
+    try:
+        # Get user data from JWT middleware
+        user_info = getattr(request, 'user', None)
+        if not user_info:
+            return jsonify({"error": "Authentication required"}), 401
+
+        user_id = user_info.get('user_id')
+
+        data = request.get_json()
+        if not data or 'priority' not in data:
+            return jsonify({'success': False, 'message': 'Priority is required'}), 400
+
+        new_priority = data['priority']
+        valid_priorities = ['Low', 'Moderate', 'Urgent']
+
+        if new_priority not in valid_priorities:
+            return jsonify({'success': False, 'message': 'Invalid priority value'}), 400
+
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        try:
+            # Get current priority and status for audit logging
+            cursor.execute("SELECT priority, status FROM complaints WHERE id = %s", (complaint_id,))
+            current_record = cursor.fetchone()
+
+            if not current_record:
+                cursor.close()
+                conn.close()
+                return jsonify({'success': False, 'message': 'Complaint not found'}), 404
+
+            current_priority = current_record['priority']
+            current_status = current_record['status']
+
+            # Update priority
+            cursor.execute("""
+                UPDATE complaints
+                SET priority = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (new_priority, complaint_id))
+
+            # Log priority change to status history
+            # Keep status the same, log as administrative action
+            remarks = f"Priority changed from {current_priority or 'None'} to {new_priority}"
+            cursor.execute("""
+                INSERT INTO complaint_status_history
+                (complaint_id, old_status, new_status, remarks, actor_id, changed_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+            """, (complaint_id, current_status or 'Pending', current_status or 'Pending', remarks, user_id))
+
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'Priority updated to {new_priority}'
+            }), 200
+
+        except Exception as inner_error:
+            conn.rollback()
+            print(f"Error updating priority: {inner_error}")
+            return jsonify({'success': False, 'message': 'Failed to update priority'}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
+    except Exception as e:
+        print(f"Error in update priority route: {e}")
         return jsonify({'success': False, 'message': 'Internal server error'}), 500
 
 @complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])

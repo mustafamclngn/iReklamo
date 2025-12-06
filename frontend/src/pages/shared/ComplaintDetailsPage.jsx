@@ -57,8 +57,6 @@ const statusColors = {
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
   Rejected: "#DC3545"
-  Resolved: "#43B174",
-  Rejected: "#DC3545"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
