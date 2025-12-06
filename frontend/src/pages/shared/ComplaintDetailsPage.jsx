@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
 
@@ -37,21 +38,7 @@ const getDaysSinceFiled = (dateString) => {
   return `${diffDays} days ago`;
 };
 
-// Helpers for masking PII
-const maskEmail = (email) => {
-  if (!email) return 'N/A';
-  const [user, domain] = email.split('@');
-  if (!user || !domain) return email;
-  const maskedUser = user[0] + user.slice(1).replace(/./g, '*');
-  return `${maskedUser}@${domain}`;
-};
-
-const maskPhone = (phone) => {
-  if (!phone) return 'N/A';
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length < 4) return '****';
-  return phone.replace(/\d(?=\d{4})/g, '*');
-};
+// Helpers for formatting phone numbers
 
 const formatPhone = (num) => {
   if (!num) return 'N/A';
@@ -81,12 +68,13 @@ const ComplaintDetailsPage = () => {
   const { complaint_id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const { getComplaintById, updateComplaint } = useComplaintsApi();
+  const { getComplaintById } = useComplaintsApi();
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
@@ -113,6 +101,22 @@ const ComplaintDetailsPage = () => {
     // Close the rejection modal and show success toast
     setIsRejectOpen(false);
     setToastMessage('Complaint rejected successfully!');
+    setToastVisible(true);
+
+    // Trigger refetch after a delay
+    setTimeout(() => {
+      setRefresh(prev => !prev);
+    }, 1000);
+  };
+
+  // Status update handlers
+  const handleStatusUpdate = async (updatedComplaint) => {
+    // Update local complaint state
+    setComplaint(prev => ({ ...prev, ...updatedComplaint }));
+
+    // Close modal and show success toast
+    setIsStatusUpdateOpen(false);
+    setToastMessage('Status updated successfully!');
     setToastVisible(true);
 
     // Trigger refetch after a delay
@@ -161,17 +165,17 @@ const ComplaintDetailsPage = () => {
 
   const userRole = auth?.role?.[0];
   const canEditPriority = userRole === 2 || userRole === 3; // Only City Admin and Brgy Captain can set priority
-  const canEdit = userRole === 1 || userRole === 2 || userRole === 3; // For status and assignment (including superadmin)
+
+  // Role-based permissions:
+  // Super Admin (1), City Admin (2), Brgy Captain (3): Can reject, assign, AND update status via clickable status
+  // Brgy Official (4): Can ONLY update status via clickable status (no reject/assign)
+  const canManageComplaints = userRole === 1 || userRole === 2 || userRole === 3; // Reject and Assign
+  const canUpdateStatus = userRole === 1 || userRole === 2 || userRole === 3 || userRole === 4; // Clickable status for updates
 
 
 
   // Complainant info logic - backend already handles role-based filtering
   const isAnonymous = complaint?.is_anonymous || false;
-
-  const isAssignedToYou =
-    complaint?.assigned_official_id === auth?.id ||
-    complaint?.assignedOfficialId === auth?.id ||
-    false;
 
   // Use backend-provided data directly (it already applies role-based filtering)
   const rawFullName = `${complaint.complainant_first_name || ''} ${complaint.complainant_last_name || ''}`.trim();
@@ -298,7 +302,7 @@ const ComplaintDetailsPage = () => {
                         <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
                           Complaint Status
                         </h2>
-                        {canEdit && (
+                        {canManageComplaints && (
                           <div className="flex gap-4">
                             <button
                               className="px-8 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-lg flex items-center gap-2 font-medium"
@@ -328,9 +332,21 @@ const ComplaintDetailsPage = () => {
                         </div>
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Current Status:</label>
-                          <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: statusColors[complaint.status] }}>
-                            {complaint.status}
-                          </span>
+                          {canUpdateStatus ? (
+                            <button
+                              className="px-4 py-1 rounded-full font-semibold text-white flex items-center gap-2 hover:opacity-90 transition-opacity"
+                              style={{ backgroundColor: statusColors[complaint.status] }}
+                              onClick={() => setIsStatusUpdateOpen(true)}
+                              title="Click to update status"
+                            >
+                              {complaint.status}
+                              <i className="bi bi-chevron-down text-sm"></i>
+                            </button>
+                          ) : (
+                            <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: statusColors[complaint.status] }}>
+                              {complaint.status}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Priority Level:</label>
@@ -391,7 +407,7 @@ const ComplaintDetailsPage = () => {
                                   {entry.remarks || "No remarks provided"}
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  by {entry.actor_name ? `${entry.actor_name} (${entry.actor_role})` : "Unknown"}
+                                  by {entry.actor_name || "Unknown"}
                                 </p>
                               </div>
                             </div>
@@ -428,6 +444,14 @@ const ComplaintDetailsPage = () => {
                   complaint={complaint}
                   onPriorityUpdate={handlePriorityUpdate}
                 />
+
+                <StatusUpdateModal
+                  isOpen={isStatusUpdateOpen}
+                  onClose={() => setIsStatusUpdateOpen(false)}
+                  complaint={complaint}
+                  onRefresh={() => handleStatusUpdate(complaint)}
+                />
+
                 <Toast
                   message={toastMessage}
                   isVisible={toastVisible}

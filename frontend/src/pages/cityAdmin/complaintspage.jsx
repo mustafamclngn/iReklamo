@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
 
@@ -27,8 +28,11 @@ const CA_ComplaintsPage = () => {
   const { getAllComplaints } = useComplaintsApi();
 
   // modal states
-  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [complaintData, setComplaintData] = useState(null);
 
   // toast state
   const [toastVisible, setToastVisible] = useState(false);
@@ -140,8 +144,8 @@ const CA_ComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    console.log('Update status for:', complaint);
-    // Open status modal
+    setSelectedComplaint(complaint);
+    setIsStatusModalOpen(true);
   };
 
   // Update Priority
@@ -376,6 +380,16 @@ const CA_ComplaintsPage = () => {
         complaint={complaintData}
         onPriorityUpdate={handlePriorityChange}
       />
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
+      />
+
       <Toast
         message={toastMessage}
         isVisible={toastVisible}

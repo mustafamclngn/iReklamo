@@ -502,7 +502,25 @@ def get_complaint(complaint_id):
                 COALESCE(
                     NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
                     'Unassigned'
-                ) as "assignedOfficial"
+                ) as "assignedOfficial",
+                -- STATUS HISTORY: JSON array of status changes
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'status', csh.new_status,
+                                'changed_at', csh.changed_at,
+                                'remarks', csh.remarks,
+                                'actor_name', CONCAT(hist_actor.first_name, ' ', hist_actor.last_name)
+                            )
+                            ORDER BY csh.changed_at DESC
+                        )
+                        FROM complaint_status_history csh
+                        LEFT JOIN users hist_actor ON csh.actor_id = hist_actor.user_id
+                        WHERE csh.complaint_id = complaints.id
+                    ),
+                    '[]'::json
+                ) as status_history
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN complainants ON complaints.complainant_id = complainants.id
@@ -822,6 +840,7 @@ def get_resolved_cases(assigned_official_id):
 
 
 @complaints_bp.route('/<int:complaint_id>/update-status', methods=['POST'])
+@verify_jwt
 def update_complaint_status(complaint_id):
     """
     Update complaint status with mandatory remarks and history logging
@@ -834,6 +853,10 @@ def update_complaint_status(complaint_id):
 
         user_id = user_info.get('user_id')
         user_role = user_info.get('role')
+
+        # Extract role from array if it's an array (e.g., [3])
+        if isinstance(user_role, list) and user_role:
+            user_role = user_role[0]
 
         if not user_id or not user_role:
             return jsonify({"error": "Invalid user credentials"}), 401
@@ -851,6 +874,8 @@ def update_complaint_status(complaint_id):
                 'success': False,
                 'message': 'Status and remarks are required'
             }), 400
+
+
 
         # Validate status values
         valid_statuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected']
@@ -875,11 +900,19 @@ def update_complaint_status(complaint_id):
             conn.close()
             return jsonify({'success': False, 'message': 'Complaint not found'}), 404
 
-        # Permission check: Must be assigned official OR higher role
-        can_update = (
-            complaint['assigned_official_id'] == user_id or
-            user_role in [1, 2, 3]  # super_admin, city_admin, brgy_cap
-        )
+        can_update = False
+
+        if user_role in [1, 2]:
+            can_update = True
+
+        elif user_role == 3:
+            cursor.execute("SELECT barangay_id FROM users WHERE user_id = %s", (user_id,))
+            captain_result = cursor.fetchone()
+            captain_barangay_id = captain_result['barangay_id'] if captain_result else None
+            can_update = (captain_barangay_id is not None and complaint['barangay_id'] == captain_barangay_id)
+
+        elif user_role == 4:
+            can_update = (complaint['assigned_official_id'] == user_id)
 
         if not can_update:
             cursor.close()
