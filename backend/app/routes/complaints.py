@@ -53,14 +53,14 @@ def create_complaint():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
-            empty_to_null(data.get('first_name')),
-            empty_to_null(data.get('last_name')),
-            empty_to_null(data.get('sex')),
-            empty_to_null(data.get('age')),
+            empty_to_null(data['first_name']),
+            empty_to_null(data['last_name']),
+            empty_to_null(data['sex']),
+            empty_to_null(data['age']),
             data['contact_number'],
             data['email'],
             int(data.get('barangay')),
-            data.get('is_anonymous', False)
+            data.get('is_anonymous')
         ))
         complainant_id = cursor.fetchone()['id']
 
