@@ -64,9 +64,6 @@ export default function Completion() {
                     </div>
                 </div>
 
-                
-                
-
                 <button
                     className="mt-6 px-6 py-2 my-4 bg-blue-400 rounded-lg text-white font-bold hover:bg-blue-500 transition"
                     onClick={() => navigate("/")}

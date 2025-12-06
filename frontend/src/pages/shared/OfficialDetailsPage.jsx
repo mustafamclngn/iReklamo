@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Save, X } from "lucide-react";
 import useOfficialsApi from "../../api/officialsApi";
 import useAuth from "../../hooks/useAuth";
+import useProfileEditor from "../../hooks/useProfileEditor";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { getRoleBasePath } from "../../utils/roleUtils";
 import DeleteModal from "../../components/modals/DeleteUserModal";
 import AssignActionModal from "../../components/modals/AssignActionModal";
 import ActiveCasesModal from "../../components/modals/ActiveCasesModal";
+import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
 import useComplaintsApi from "../../api/complaintsAPI";
-import { formatDate, formatPhone } from "../../utils/formatters";
-import { getImageURL } from "../../utils/imageHelpers";
+import { formatDate } from "../../utils/formatters";
 import { calculateProfileCompletion } from "../../utils/profileHelpers";
+import {
+  ProfilePictureSection,
+  PersonalInfoSection,
+  AddressInfoSection,
+} from "../../components/common/ProfileFormSections";
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
   const { getActiveCases, getResolvedCases } = useComplaintsApi();
+  const { getOfficialById, updateOfficial } = useOfficialsApi();
 
   const [official, setOfficial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [imageError, setImageError] = useState(false);
-
-  const [active, setActive] = useState();
-  const [resolved, setResolved] = useState();
+  const [active, setActive] = useState(0);
+  const [resolved, setResolved] = useState(0);
 
   // modal states
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -32,8 +38,6 @@ const OfficialDetailsPage = () => {
   const [isViewCasesOpen, setIsViewCasesOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
-
-  const { getOfficialById } = useOfficialsApi();
 
   const profileFields = [
     "first_name",
@@ -48,7 +52,14 @@ const OfficialDetailsPage = () => {
     "profile_picture",
   ];
 
-  const hasValidImage = official?.profile_picture && !imageError;
+  const profileEditor = useProfileEditor(
+    official,
+    updateOfficial,
+    user_id,
+    async () => {
+      await fetchOfficialDetails();
+    }
+  );
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -69,12 +80,17 @@ const OfficialDetailsPage = () => {
     fetchCases();
   }, [user_id, refresh, isAssignOpen]);
 
+  useEffect(() => {
+    if (official) {
+      profileEditor.initializeForm();
+    }
+  }, [official]);
+
   const fetchOfficialDetails = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // validate user id
       if (!user_id || isNaN(Number(user_id))) {
         handleBack();
         return;
@@ -85,7 +101,6 @@ const OfficialDetailsPage = () => {
       if (response.success && response.data) {
         setOfficial(response.data);
       } else {
-        // if no official found, back to officials list page
         handleBack();
       }
     } catch (err) {
@@ -116,7 +131,7 @@ const OfficialDetailsPage = () => {
     const profileData = {
       ...official,
       profile_picture:
-        official.profile_picture && !imageError
+        official.profile_picture && !profileEditor.imageError
           ? official.profile_picture
           : null,
     };
@@ -130,18 +145,14 @@ const OfficialDetailsPage = () => {
     return <LoadingSpinner message="Loading official details..." />;
   }
 
-  if (error) {
-    return (
-      <ErrorAlert
-        message={error}
-        onRetry={fetchOfficialDetails}
-        onBack={handleBack}
-      />
-    );
-  }
-
   if (!official) {
-    return <ErrorAlert message="Official not found" onBack={handleBack} />;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 text-lg">Official not found</p>
+        </div>
+      </div>
+    );
   }
 
   // Revoke
@@ -171,7 +182,6 @@ const OfficialDetailsPage = () => {
   // Back
   const handleBack = () => {
     const basePath = getRoleBasePath(auth);
-    console.log(`${basePath}/officials`);
     navigate(`${basePath}/officials`, { replace: true });
   };
 
@@ -187,29 +197,21 @@ const OfficialDetailsPage = () => {
             Back to Officials
           </button>
 
+          {/* Profile Header Card */}
           <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
             <div className="flex items-center gap-6">
-              <div className="flex-shrink-0">
-                <div
-                  className={`w-32 h-32 bg-gray-200 ${
-                    hasValidImage
-                      ? "border-0"
-                      : "border-2 border-dashed border-gray-400"
-                  } rounded flex items-center justify-center overflow-hidden`}
-                >
-                  {hasValidImage ? (
-                    <img
-                      src={getImageURL(official.profile_picture)}
-                      alt={`${official.first_name} ${official.last_name}`}
-                      className="w-full h-full object-cover rounded"
-                      onError={() => setImageError(true)}
-                    />
-                  ) : (
-                    <i className="bi bi-person text-5xl text-gray-400"></i>
-                  )}
-                </div>
-              </div>
-              {/* basic information */}
+              <ProfilePictureSection
+                profilePicture={official.profile_picture}
+                previewImage={profileEditor.previewImage}
+                imageError={profileEditor.imageError}
+                editMode={profileEditor.editMode}
+                disabled={profileEditor.saving}
+                onImageChange={profileEditor.handleImageChange}
+                onRemoveImage={profileEditor.handleRemoveImage}
+                onImageError={profileEditor.setImageError}
+                size="small"
+              />
+
               <div className="flex-1">
                 <h1 className="text-2xl font-semibold text-gray-900 mb-1">
                   {official.first_name} {official.last_name}
@@ -218,7 +220,7 @@ const OfficialDetailsPage = () => {
                   {official.position || "N/A"}
                 </p>
                 <p className="text-gray-600 text-lg">
-                  {official.barangay_name || "N/A"}, Iligan City +9200
+                  {official.barangay_name || "N/A"}, Iligan City 9200
                 </p>
               </div>
 
@@ -261,153 +263,73 @@ const OfficialDetailsPage = () => {
               </div>
             </div>
           </div>
-          {/* personal information */}
+
+          {/* Personal Information Card */}
           <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">
                 Personal Information
               </h2>
-              <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2">
-                <i className="bi bi-pencil-square text-lg"></i>
-                Edit Details
-              </button>
+              {!profileEditor.editMode ? (
+                <button
+                  onClick={profileEditor.startEdit}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+                >
+                  <i className="bi bi-pencil-square text-lg"></i>
+                  Edit Details
+                </button>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={profileEditor.handleCancel}
+                    disabled={profileEditor.saving}
+                    className="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <X className="w-5 h-5" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={profileEditor.handleSaveClick}
+                    disabled={profileEditor.saving}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Save className="w-5 h-5" />
+                    Save Changes
+                  </button>
+                </div>
+              )}
             </div>
             <hr className="border-t border-gray-200 mt-4 mb-6" />
-            <div className="grid grid-cols-4 gap-x-8 gap-y-6">
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  First Name:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.first_name}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  Last Name:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.last_name}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">Sex:</label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.sex || "N/A"}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  Date of birth:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {formatDate(official.birthdate)}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  Email:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.email}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  Contact Number:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {formatPhone(official.contact_number)}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  User Role:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {getRoleLabel(official.role_id)}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-md text-gray-600 mb-2">
-                  Date registered:
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {formatDate(official.created_at)}
-                  </p>
-                </div>
-              </div>
-            </div>
+
+            <PersonalInfoSection
+              formData={profileEditor.formData}
+              userData={official}
+              editMode={profileEditor.editMode}
+              saving={profileEditor.saving}
+              onChange={profileEditor.handleInputChange}
+              showUsername={false}
+              showDateRegistered={true}
+              showRoleId={true}
+              getRoleLabel={getRoleLabel}
+            />
           </div>
 
-          {/* address information */}
+          {/* Address Information Card */}
           <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">
                 Address Information
               </h2>
-              <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2">
-                <i className="bi bi-pencil-square text-lg"></i>
-                Edit Address
-              </button>
             </div>
             <hr className="border-t border-gray-200 mt-4 mb-6" />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="block text-md text-gray-600 mb-2">
-                  Purok / House No:
-                </p>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.purok || "N/A"}
-                  </p>
-                </div>
-              </div>
 
-              <div>
-                <p className="block text-md text-gray-600 mb-2">
-                  Street / Sitio:
-                </p>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.street || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="block text-md text-gray-600 mb-2">Barangay:</p>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    {official.barangay_name || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="block text-md text-gray-600 mb-2">City:</p>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                  <p className="text-gray-900 font-medium text-lg">
-                    Iligan City
-                  </p>
-                </div>
-              </div>
-            </div>
+            <AddressInfoSection
+              formData={profileEditor.formData}
+              userData={official}
+              editMode={profileEditor.editMode}
+              saving={profileEditor.saving}
+              onChange={profileEditor.handleInputChange}
+            />
           </div>
 
           {/* Case Details Card */}
@@ -471,6 +393,13 @@ const OfficialDetailsPage = () => {
           )}
         </div>
       </div>
+
+      <ConfirmEditModal
+        isOpen={profileEditor.showConfirmModal}
+        onClose={() => profileEditor.setShowConfirmModal(false)}
+        onConfirm={profileEditor.handleConfirmSave}
+        isLoading={profileEditor.saving}
+      />
 
       <DeleteModal
         isOpen={isDeleteOpen}

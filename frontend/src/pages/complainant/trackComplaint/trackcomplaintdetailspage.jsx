@@ -11,7 +11,6 @@ const CU_TrackComplaintDetailsPage = () => {
   const [complaint, setComplaint] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const complaintsApi = useComplaintsApi();
 
   const {trackComplaint} = useComplaintsApi();
 
@@ -295,6 +294,36 @@ const CU_TrackComplaintDetailsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Rejection Reason Section */}
+        {complaint?.status === 'Rejected' && (
+          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                <i className="bi bi-x-circle-fill text-red-600"></i>
+                Rejection Details
+              </h2>
+            </div>
+            <hr className="border-t border-gray-200 mt-4 mb-6" />
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <div className="grid grid-cols-1 gap-y-4">
+                              <div>
+                                <label className="block text-md text-gray-600 mb-2">Reason for Rejection:</label>
+                                <p className="text-gray-900 font-medium text-base leading-relaxed">
+                                  {complaint.rejection_reason || 'No reason provided'}
+                                </p>
+                              </div>
+                              {complaint.rejected_at && (
+                                <div>
+                                  <label className="block text-md text-gray-600 mb-2">Rejected On:</label>
+                                  <p className="text-gray-900 font-medium text-base">{formatDate(complaint.rejected_at)}</p>
+                                </div>
+                              )}
+                            </div>
+            </div>
+          </div>
+        )}
 
         {/* footer */}
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">

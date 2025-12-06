@@ -9,8 +9,11 @@ from app.functions.Update import Update
 from app.functions.Delete import Delete
 from app.middleware.verifyJwt import verify_jwt
 
-from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
 from app.controllers.complaints.complaintAssignC import assign_complaint
+from app.middleware.verifyRoles import verify_roles
+from app.middleware.verifyJwt import verify_jwt
 
 
 # Create blueprint
@@ -50,14 +53,14 @@ def create_complaint():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
-            empty_to_null(data.get('first_name')),
-            empty_to_null(data.get('last_name')),
-            empty_to_null(data.get('sex')),
-            empty_to_null(data.get('age')),
+            empty_to_null(data['first_name']),
+            empty_to_null(data['last_name']),
+            empty_to_null(data['sex']),
+            empty_to_null(data['age']),
             data['contact_number'],
             data['email'],
             int(data.get('barangay')),
-            data.get('is_anonymous', False)
+            data.get('is_anonymous')
         ))
         complainant_id = cursor.fetchone()['id']
 
@@ -216,6 +219,16 @@ def get_all_complaints():
             conditions.append("complaints.assigned_official_id = %s")
             params.append(assigned_filter)
 
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
 
@@ -343,6 +356,9 @@ def track_complaint(complaint_code):
                 complaints.priority,
                 complaints.created_at,
                 complaints.updated_at,
+                -- Rejection audit fields
+                complaints.rejection_reason,
+                complaints.rejected_at,
                 barangays.name as barangay_name,
                 CONCAT(complainants.first_name, ' ', complainants.last_name) as complainant_name,
                 CASE
@@ -460,6 +476,9 @@ def get_complaint(complaint_id):
                 complaints.created_at,
                 complaints.updated_at,
                 complaints.complainant_id,
+                -- Rejection audit fields
+                complaints.rejection_reason,
+                complaints.rejected_at,
                 -- Joined barangay data
                 barangays.name as barangay,
                 -- Joined complainant data
@@ -614,6 +633,10 @@ def get_barangay_captain_complaints(user_id):
     Get complaints for a barangay captain - only complaints from their barangay
     """
     try:
+        # Get query parameters for filtering
+        status_filter = request.args.get('status')
+        priority_filter = request.args.get('priority')
+
         # Get user's barangay_id from users table
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -657,10 +680,31 @@ def get_barangay_captain_complaints(user_id):
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
             WHERE complaints.barangay_id = %s
-            ORDER BY complaints.created_at DESC
         """
 
-        cursor.execute(query, (user_barangay_id,))
+        # Add WHERE conditions based on filters
+        conditions = []
+        params = [user_barangay_id]
+
+        if status_filter:
+            conditions.append("complaints.status = %s")
+            params.append(status_filter)
+
+        if priority_filter:
+            conditions.append("complaints.priority = %s")
+            params.append(priority_filter)
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += " ORDER BY complaints.created_at DESC"
+
+        cursor.execute(query, params)
         results = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -697,6 +741,7 @@ def get_barangay_official_complaints(user_id):
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         # Get complaints assigned to this specific official
+        # Exclude rejected complaints from default view for consistency
         query = """
             SELECT
                 complaints.id,
@@ -720,7 +765,7 @@ def get_barangay_official_complaints(user_id):
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
-            WHERE complaints.assigned_official_id = %s
+            WHERE complaints.assigned_official_id = %s AND complaints.status != 'Rejected'
             ORDER BY complaints.created_at DESC
         """
 
@@ -765,3 +810,39 @@ def get_active_cases(assigned_official_id):
 @complaints_bp.route('cases/resolved/<int:assigned_official_id>')
 def get_resolved_cases(assigned_official_id):
     return resolvedCases_official(assigned_official_id)
+
+@complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])
+@verify_jwt
+@verify_roles(1, 2, 3)  # Super Admin, City Admin, Barangay Captain
+def reject_complaint_route(complaint_id):
+    """
+    Reject a complaint with audit trail
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        rejection_reason = data.get('rejection_reason', '').strip()
+        if not rejection_reason:
+            return jsonify({
+                'success': False,
+                'error': 'Rejection reason is required'
+            }), 400
+
+        # Get authenticated user ID
+        user_id = request.user.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid user authentication'
+            }), 401
+
+        # Call controller function
+        return reject_complaint(complaint_id, user_id, rejection_reason)
+
+    except Exception as e:
+        print(f"Error in reject complaint route: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process rejection request'
+        }), 500
