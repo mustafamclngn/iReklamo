@@ -12,7 +12,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
 import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,24}$/;
 
 const ResetPassword = () => {
  
@@ -127,15 +127,9 @@ const ResetPassword = () => {
                 id="pwdnote"
                 className={pwdFocus && pwd && !validPwd ? "instructions" : "offscreen"}>
                 <FontAwesomeIcon icon={faInfoCircle} />
-                    Password must be 8 to 24 characters
-                    and must uppercase and lowercase letters,
-                    a number and a special character. <br />
-                    Special characters allowed:
-                        <span aria-label="exclamation mark">!</span>
-                        <span aria-label="at symbol">@</span>
-                        <span aria-label="hashtag">#</span>
-                        <span aria-label="dollar sign">$</span>
-                        <span aria-label="percent">%</span>
+                    Password must be 8 to 24 characters,
+                    contain uppercase and lowercase letters, 
+                    and includes atleast one number. 
             </p>
             {/* ========== */}
             {/* Confirm New Password */}
@@ -186,7 +180,7 @@ const ResetPassword = () => {
             {/* ========== */}
             {/* Loading Update */}
             {loading && (
-                <LoadingSpinner message="Updating password..." scale={0.75}/>
+                <LoadingSpinner message="Updating password..." scale={0.95}/>
             )}
             {/* ========== */} 
             </form>

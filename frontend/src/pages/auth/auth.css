@@ -65,12 +65,33 @@
   color: #686868;
 }
 
-.forget_password {
+.forgot_pressed {
   margin-right: auto;
-  color: #ff2828;
+  margin-top: 5px;
+  color: #979797;
   font-size: small;
 }
 
+
+.forget_password {
+  margin-right: auto;
+  color: #ff6060;
+  font-size: small;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.forget_password:hover {
+  color: #fd0000;
+}
+
+.forget_password:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; 
+}
 
 /* Input fields */
 .auth-input {
@@ -124,6 +145,7 @@
   transition: background-color 0.2s ease;
   font-size: 1.1rem;
   margin-left: auto;
+  min-height: 50px;
 }
 
 .auth-button:hover {
