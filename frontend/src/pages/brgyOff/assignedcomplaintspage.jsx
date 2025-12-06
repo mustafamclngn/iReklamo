@@ -6,6 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 
 const BO_AssignedComplaintsPage = () => {
   const navigate = useNavigate();
@@ -14,10 +15,14 @@ const BO_AssignedComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const complaintsApi = useComplaintsApi();
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // Modal states
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [refresh, setRefresh] = useState(false);
 
   const { getBarangayOfficialComplaints } = useComplaintsApi();
 
@@ -105,8 +110,8 @@ const BO_AssignedComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    console.log('Update status for:', complaint);
-    // Open status modal
+    setSelectedComplaint(complaint);
+    setIsStatusModalOpen(true);
   };
 
   // Update Priority
@@ -231,6 +236,16 @@ const BO_AssignedComplaintsPage = () => {
           )}
         </div>
       </div>
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
+      />
     </div>
   );
 };

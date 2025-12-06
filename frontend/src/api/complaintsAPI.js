@@ -108,6 +108,14 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
+  const updateStatus = async (complaintId, status, remarks) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/update-status`, {
+      status,
+      remarks
+    });
+    return response.data;
+  };
+
   const getBarangays = async () => {
     const response = await axiosPrivate.get('/api/complaints/barangays');
     return response.data;
@@ -141,6 +149,7 @@ return {
     getAllComplaints,
     getComplaintById,
     updateComplaint,
+    updateStatus,
     getBarangays,
     getBarangayComplaints,
     getAssignedComplaints,

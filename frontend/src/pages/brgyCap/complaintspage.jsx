@@ -7,6 +7,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -16,14 +17,15 @@ const BC_ComplaintsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const complaintsApi = useComplaintsApi();
   const itemsPerPage = 5;
 
   const { getBarangayCaptainComplaints } = useComplaintsApi();
 
   // modal states
-  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   const location = useLocation();
@@ -112,8 +114,8 @@ const BC_ComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    console.log('Update status for:', complaint);
-    // Open status modal
+    setSelectedComplaint(complaint);
+    setIsStatusModalOpen(true);
   };
 
   // Update Priority
@@ -241,13 +243,23 @@ const BC_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
-        isOpen={isAssignOpen} 
+      <AssignActionModal
+        isOpen={isAssignOpen}
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >
       </AssignActionModal>
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
+      />
     </>
   );
 };
