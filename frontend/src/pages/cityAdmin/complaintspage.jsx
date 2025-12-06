@@ -6,6 +6,8 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -13,7 +15,6 @@ const CA_ComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const complaintsApi = useComplaintsApi();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -23,7 +24,12 @@ const CA_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
+
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
@@ -36,7 +42,7 @@ const CA_ComplaintsPage = () => {
   });
 
   // Define filter options
-  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved'];
+  const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
   
   // Extract unique barangays from complaints data
@@ -51,12 +57,41 @@ const CA_ComplaintsPage = () => {
     fetchComplaints();
   }, [refresh]);
 
-  const fetchComplaints = async () => {
+  // Fetch complaints when server-side filters change
+  useEffect(() => {
+    fetchComplaints(filters);
+    // Clear search when filters change to avoid confusion with new results
+    setSearchTerm('');
+  }, [filters]);
+
+  // Check for refresh trigger from navigation state
+  useEffect(() => {
+    if (location.state?.refresh) {
+      setRefresh(prev => !prev);
+      // Clear the navigation state
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+  }, [location.state]);
+
+  const fetchComplaints = async (currentFilters = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllComplaints();
-      
+
+      // Build server filters - exclude search which is handled client-side
+      const serverFilters = {};
+      if (currentFilters.barangay && currentFilters.barangay !== 'all') {
+        serverFilters.barangay = currentFilters.barangay;
+      }
+      if (currentFilters.status && currentFilters.status !== 'all') {
+        serverFilters.status = currentFilters.status;
+      }
+      if (currentFilters.priority && currentFilters.priority !== 'all') {
+        serverFilters.priority = currentFilters.priority;
+      }
+
+      const response = await getAllComplaints(serverFilters);
+
       if (response.success) {
         setComplaints(response.data);
       } else {
@@ -78,9 +113,11 @@ const CA_ComplaintsPage = () => {
     }));
   };
 
-  // UPDATED: Filter logic with all 3 filters
+  // Client-side filtering - only search since status/barangay/priority are server-side
   const filteredComplaints = complaints.filter(complaint => {
-    // Search filter
+    if (!searchTerm) return true;
+
+    // Search filter - check multiple fields for matches
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       complaint.title?.toLowerCase().includes(searchLower) ||
@@ -88,24 +125,10 @@ const CA_ComplaintsPage = () => {
       complaint.complaint_code?.toLowerCase().includes(searchLower) ||
       complaint.id?.toString().includes(searchLower) ||
       (complaint.barangay && complaint.barangay.toLowerCase().includes(searchLower)) ||
-      (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower));
-    
-    // Barangay filter
-    const matchesBarangay = 
-      filters.barangay === 'all' || 
-      complaint.barangay === filters.barangay;
+      (complaint.assignedOfficial && complaint.assignedOfficial.toLowerCase().includes(searchLower)) ||
+      complaint.status?.toLowerCase().includes(searchLower);
 
-    // Status filter
-    const matchesStatus = 
-      filters.status === 'all' || 
-      complaint.status === filters.status;
-
-    // Priority filter
-    const matchesPriority = 
-      filters.priority === 'all' || 
-      complaint.priority === filters.priority;
-    
-    return matchesSearch && matchesBarangay && matchesStatus && matchesPriority;
+    return matchesSearch;
   });
 
   // View Details
@@ -121,8 +144,8 @@ const CA_ComplaintsPage = () => {
 
   // Update Priority
   const handlePriorityUpdate = (complaint) => {
-    console.log('Update priority for:', complaint);
-    // Open priority modal
+    setComplaintData(complaint);
+    setIsPriorityOpen(true);
   };
 
   // Assign Official
@@ -130,6 +153,19 @@ const CA_ComplaintsPage = () => {
     console.log('Assign complaint to:', complaint);
     setComplaintData(complaint);
     setIsAssignOpen(true);
+  };
+
+  // Priority Update Handler
+  const handlePriorityChange = (newPriority) => {
+    setComplaints(prevComplaints =>
+      prevComplaints.map(complaint =>
+        complaint.id === complaintData?.id
+          ? { ...complaint, priority: newPriority }
+          : complaint
+      )
+    );
+    setToastMessage('Priority updated successfully!');
+    setToastVisible(true);
   };
 
   // Pagination logic
@@ -255,13 +291,24 @@ const CA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
-        isOpen={isAssignOpen} 
+      <AssignActionModal
+        isOpen={isAssignOpen}
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >
       </AssignActionModal>
+      <SetPriorityModal
+        isOpen={isPriorityOpen}
+        onClose={() => setIsPriorityOpen(false)}
+        complaint={complaintData}
+        onPriorityUpdate={handlePriorityChange}
+      />
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
+      />
     </>
   );
 };

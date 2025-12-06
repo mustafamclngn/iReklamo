@@ -1,5 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
-from flask_cors import CORS
+from flask import Blueprint, request, jsonify, current_app, render_template
 from flask_mail import Message
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -8,9 +7,14 @@ from app.config import DB_CONFIG
 from app.functions.Select import Select
 from app.functions.Update import Update
 from app.functions.Delete import Delete
+from app.middleware.verifyJwt import verify_jwt
 
-from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
+from app.controllers.complaints.complaintList import list_by_assignee, get_all_unfiltered_complaints, activeCases_official, resolvedCases_official, reject_complaint
 from app.controllers.complaints.complaintAssignC import assign_complaint
+from app.middleware.verifyRoles import verify_roles
+from app.middleware.verifyJwt import verify_jwt
+
 
 # Create blueprint
 complaints_bp = Blueprint('complaints', __name__, url_prefix='/api/complaints')
@@ -23,6 +27,10 @@ def generate_complaint_id(cursor):
     count_today = cursor.fetchone()['count'] + 1  # Start from 1
     sequential = str(count_today).zfill(4)  # Pad to 4 digits, e.g., 0001
     return f"CMP-{today}-{sequential}"
+
+def empty_to_null(value):
+    return value if value not in ("", None) else None
+
 
 # TO CREATE COMPLAINT
 @complaints_bp.route('/create_complaint', methods=['POST'])
@@ -41,17 +49,18 @@ def create_complaint():
 
         # Insert complainant
         cursor.execute("""
-            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO complainants (first_name, last_name, sex, age, contact_number, email, barangay_id, is_anonymous)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """, (
-            data['first_name'],
-            data['last_name'],
-            data['sex'],
-            data['age'],
+            empty_to_null(data['first_name']),
+            empty_to_null(data['last_name']),
+            empty_to_null(data['sex']),
+            empty_to_null(data['age']),
             data['contact_number'],
             data['email'],
-            int(data.get('barangay'))
+            int(data.get('barangay')),
+            data.get('is_anonymous')
         ))
         complainant_id = cursor.fetchone()['id']
 
@@ -92,16 +101,33 @@ def create_complaint():
         # Send confirmation email (safe: exceptions caught)
         try:
             if mail:
+                # Build greeting
+                first = data.get("first_name")
+                last = data.get("last_name")
+                is_anonymous = data.get("is_anonymous")
+
+                if is_anonymous or (not first and not last):
+                    greeting_name = "anonymous"
+                else:
+                    greeting_name = " ".join(p for p in [first, last] if p)
+
+                # Render HTML email
+                html_body = render_template(
+                    "complaint_submitted.html",
+                    greeting_name=greeting_name,
+                    complaint_id=complaint_id_str,
+                    year=datetime.now().year
+                )
+
+                # Create the message
                 message = Message(
                     subject='Complaint Submitted Successfully',
-                    sender='noreply@ireklamo.ph',
                     recipients=[data['email']],
-                    body=f'Hello {data["first_name"]} {data["last_name"]},\n\n'
-                         f'Your complaint has been submitted successfully.\n'
-                         f'Complaint Tracking ID: {complaint_id_str}\n\n'
-                         f'Thank you for using iReklamo!'
+                    html=html_body
                 )
                 mail.send(message)
+                print(f"Email sent successfully to {data['email']}")
+
         except Exception as mail_err:
             print(f"Warning: Failed to send email - {mail_err}")
 
@@ -192,6 +218,16 @@ def get_all_complaints():
         if assigned_filter:
             conditions.append("complaints.assigned_official_id = %s")
             params.append(assigned_filter)
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
 
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
@@ -320,6 +356,9 @@ def track_complaint(complaint_code):
                 complaints.priority,
                 complaints.created_at,
                 complaints.updated_at,
+                -- Rejection audit fields
+                complaints.rejection_reason,
+                complaints.rejected_at,
                 barangays.name as barangay_name,
                 CONCAT(complainants.first_name, ' ', complainants.last_name) as complainant_name,
                 CASE
@@ -406,11 +445,17 @@ def get_assigned_complaints(official_id):
 
 
 @complaints_bp.route('/<int:complaint_id>', methods=['GET'])
+@verify_jwt
 def get_complaint(complaint_id):
     """
     Get a specific complaint by ID with joined data
     """
     try:
+        # Get user role from JWT - it's stored as an array in 'role' field
+        user_roles = request.user.get('role', [])
+        user_role = user_roles[0] if user_roles else None
+        is_superadmin = (user_role == 1)
+        
         # Use raw SQL with JOINs to get complete complaint data
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -431,6 +476,9 @@ def get_complaint(complaint_id):
                 complaints.created_at,
                 complaints.updated_at,
                 complaints.complainant_id,
+                -- Rejection audit fields
+                complaints.rejection_reason,
+                complaints.rejected_at,
                 -- Joined barangay data
                 barangays.name as barangay,
                 -- Joined complainant data
@@ -440,6 +488,7 @@ def get_complaint(complaint_id):
                 complainants.age as complainant_age,
                 complainants.contact_number as complainant_contact_number,
                 complainants.email as complainant_email,
+                complainants.is_anonymous,
                 -- Joined assigned official data
                 COALESCE(
                     NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
@@ -465,6 +514,31 @@ def get_complaint(complaint_id):
 
         # Convert RealDictCursor result to regular dict
         complaint_data = dict(result)
+        
+        # Handle anonymous complaints based on role
+        if complaint_data.get('is_anonymous'):
+            if is_superadmin:
+                # Superadmin: Show actual data if provided, otherwise N/A
+                first_name = complaint_data.get('complainant_first_name')
+                last_name = complaint_data.get('complainant_last_name')
+                
+                # If both first and last name are empty/None, show N/A
+                if (not first_name or first_name.strip() == '') and (not last_name or last_name.strip() == ''):
+                    complaint_data['complainant_first_name'] = 'N/A'
+                    complaint_data['complainant_last_name'] = ''
+                # Otherwise keep the actual name that was provided
+                
+                if not complaint_data.get('complainant_sex') or complaint_data.get('complainant_sex').strip() == '':
+                    complaint_data['complainant_sex'] = 'N/A'
+                if not complaint_data.get('complainant_age'):
+                    complaint_data['complainant_age'] = 'N/A'
+            else:
+                # Other roles: Show "Anonymous" but keep email and contact
+                complaint_data['complainant_first_name'] = 'Anonymous'
+                complaint_data['complainant_last_name'] = ''
+                complaint_data['complainant_sex'] = None
+                complaint_data['complainant_age'] = None
+                # Email and contact_number are NOT censored - kept as-is
 
         return jsonify({
             'success': True,
@@ -559,6 +633,10 @@ def get_barangay_captain_complaints(user_id):
     Get complaints for a barangay captain - only complaints from their barangay
     """
     try:
+        # Get query parameters for filtering
+        status_filter = request.args.get('status')
+        priority_filter = request.args.get('priority')
+
         # Get user's barangay_id from users table
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -602,10 +680,31 @@ def get_barangay_captain_complaints(user_id):
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
             WHERE complaints.barangay_id = %s
-            ORDER BY complaints.created_at DESC
         """
 
-        cursor.execute(query, (user_barangay_id,))
+        # Add WHERE conditions based on filters
+        conditions = []
+        params = [user_barangay_id]
+
+        if status_filter:
+            conditions.append("complaints.status = %s")
+            params.append(status_filter)
+
+        if priority_filter:
+            conditions.append("complaints.priority = %s")
+            params.append(priority_filter)
+
+        # If no explicit status filter provided, exclude rejected complaints from default view
+        if not status_filter:
+            conditions.append("complaints.status != %s")
+            params.append("Rejected")
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += " ORDER BY complaints.created_at DESC"
+
+        cursor.execute(query, params)
         results = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -642,6 +741,7 @@ def get_barangay_official_complaints(user_id):
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         # Get complaints assigned to this specific official
+        # Exclude rejected complaints from default view for consistency
         query = """
             SELECT
                 complaints.id,
@@ -665,7 +765,7 @@ def get_barangay_official_complaints(user_id):
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN users ON complaints.assigned_official_id = users.user_id
-            WHERE complaints.assigned_official_id = %s
+            WHERE complaints.assigned_official_id = %s AND complaints.status != 'Rejected'
             ORDER BY complaints.created_at DESC
         """
 
@@ -710,3 +810,39 @@ def get_active_cases(assigned_official_id):
 @complaints_bp.route('cases/resolved/<int:assigned_official_id>')
 def get_resolved_cases(assigned_official_id):
     return resolvedCases_official(assigned_official_id)
+
+@complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])
+@verify_jwt
+@verify_roles(1, 2, 3)  # Super Admin, City Admin, Barangay Captain
+def reject_complaint_route(complaint_id):
+    """
+    Reject a complaint with audit trail
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        rejection_reason = data.get('rejection_reason', '').strip()
+        if not rejection_reason:
+            return jsonify({
+                'success': False,
+                'error': 'Rejection reason is required'
+            }), 400
+
+        # Get authenticated user ID
+        user_id = request.user.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid user authentication'
+            }), 401
+
+        # Call controller function
+        return reject_complaint(complaint_id, user_id, rejection_reason)
+
+    except Exception as e:
+        print(f"Error in reject complaint route: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process rejection request'
+        }), 500

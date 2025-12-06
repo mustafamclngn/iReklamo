@@ -7,7 +7,6 @@ from app.config import Config
 def verify_jwt(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        print("Authorization header:", request.headers.get("Authorization"))
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             return jsonify({"error": "Missing or invalid Authorization header"}), 401

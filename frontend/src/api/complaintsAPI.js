@@ -49,7 +49,7 @@ const useComplaintsApi = () => {
   const trackComplaint = async (complaintCode) => {
     try {
       console.log("Tracking complaint:", complaintCode)
-      const response = await axios.get(`/api/complaints/track/${complaintCode}`, { withCredentials: true });
+      const response = await axios.get(`/api/complaints/track/${complaintCode}`);
       console.log("Tracked: ", response.data)
       return response.data;
     } catch (error) {
@@ -123,13 +123,21 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
-  const getBarangayCaptainComplaints = async (userId) => {
-    const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}`);
+  const getBarangayCaptainComplaints = async (userId, filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const response = await axiosPrivate.get(`/api/complaints/barangay-captain/${userId}?${params}`);
     return response.data;
   };
 
   const getBarangayOfficialComplaints = async (userId) => {
     const response = await axiosPrivate.get(`/api/complaints/barangay-official/${userId}`);
+    return response.data;
+  };
+
+  const rejectComplaint = async (complaintId, rejectionReason) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/reject`, {
+      rejection_reason: rejectionReason
+    });
     return response.data;
   };
 
@@ -147,7 +155,8 @@ return {
     getBarangayCaptainComplaints,
     getBarangayOfficialComplaints,
     getActiveCases,
-    getResolvedCases
+    getResolvedCases,
+    rejectComplaint
   };
 
 };

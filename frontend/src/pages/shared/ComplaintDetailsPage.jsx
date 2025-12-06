@@ -5,6 +5,9 @@ import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignActionModal from '../../components/modals/AssignActionModal';
+import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 
 const formatDate = (dateString) => {
@@ -65,7 +68,8 @@ const formatPhone = (num) => {
 const statusColors = {
   Pending: "#FFB300",
   "In-Progress": "#FFD600",
-  Resolved: "#43B174"
+  Resolved: "#43B174",
+  Rejected: "#DC2626"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -77,18 +81,67 @@ const ComplaintDetailsPage = () => {
   const { complaint_id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const {getComplaintById} = useComplaintsApi();
+  const { getComplaintById, updateComplaint } = useComplaintsApi();
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
 
-  // Assign 
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Assign
+  // Assign
   const handleAssign = () => {
     setIsAssignOpen(true);
-  };  
+  };
+
+  // Reject handlers
+  const handleReject = () => {
+    setIsRejectOpen(true);
+  };
+
+  const handleRejectConfirm = () => {
+    // Update local complaint state to rejected
+    setComplaint(prev => prev ? { ...prev, status: 'Rejected' } : null);
+
+    // Close the rejection modal and show success toast
+    setIsRejectOpen(false);
+    setToastMessage('Complaint rejected successfully!');
+    setToastVisible(true);
+
+    // Trigger refetch after a delay
+    setTimeout(() => {
+      setRefresh(prev => !prev);
+    }, 1000);
+  };
+
+  // Priority handlers
+  const handlePriorityClick = () => {
+    if (canEditPriority) {
+      setIsPriorityOpen(true);
+    }
+  };
+
+  const handlePriorityUpdate = async (updatedComplaint) => {
+    // Update local complaint state
+    setComplaint(prev => ({ ...prev, ...updatedComplaint }));
+
+    // Close modal and show success toast
+    setIsPriorityOpen(false);
+    setToastMessage('Priority updated successfully');
+    setToastVisible(true);
+
+    // Trigger refetch after a delay
+    setTimeout(() => {
+      setRefresh(prev => !prev);
+    }, 1000);
+  };
 
   useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
   const fetchComplaintDetails = async () => {
@@ -107,37 +160,27 @@ const ComplaintDetailsPage = () => {
   if (loading) return <LoadingSpinner message="Loading complaint details..." />;
 
   const userRole = auth?.role?.[0];
-  const canEdit = userRole === 1 || userRole === 2 || userRole === 3;
+  const canEditPriority = userRole === 2 || userRole === 3; // Only City Admin and Brgy Captain can set priority
+  const canEdit = userRole === 1 || userRole === 2 || userRole === 3; // For status and assignment (including superadmin)
 
 
 
-  // Complainant info logic
-  // should set to complaint.is_anonymous
-  const isAnonymous =
-    complaint?.is_anonymous || complaint?.complainant?.is_anonymous || false;
+  // Complainant info logic - backend already handles role-based filtering
+  const isAnonymous = complaint?.is_anonymous || false;
 
   const isAssignedToYou =
     complaint?.assigned_official_id === auth?.id ||
     complaint?.assignedOfficialId === auth?.id ||
     false;
 
-  const canViewPII =
-    (userRole === 1 ||
-      userRole === 2 ||
-      userRole === 3 ||
-      (userRole === 4 && isAssignedToYou)) && !isAnonymous;
-
-  const complainant = complaint.complainant || {};
-  const rawFullName =
-    complainant.full_name ||
-    `${complainant.first_name || ''} ${complainant.last_name || ''}`.trim() ||
-    complaint.complainant_name ||
-    '';
-  const displayName = isAnonymous ? 'Anonymous' : (rawFullName || 'N/A');
-  const rawEmail = complainant.email || complaint.complainant_email || '';
-  const rawPhone = complainant.phone || complaint.complainant_phone || '';
-  const displayEmail = canViewPII ? (rawEmail || 'N/A') : maskEmail(rawEmail);
-  const displayPhone = canViewPII ? (formatPhone(rawPhone) || 'N/A') : maskPhone(rawPhone);
+  // Use backend-provided data directly (it already applies role-based filtering)
+  const rawFullName = `${complaint.complainant_first_name || ''} ${complaint.complainant_last_name || ''}`.trim();
+  const displayName = rawFullName || 'N/A';
+  const rawEmail = complaint.complainant_email || '';
+  const rawPhone = complaint.complainant_contact_number || '';
+  // Email and contact are NEVER censored - needed for communication
+  const displayEmail = rawEmail || 'N/A';
+  const displayPhone = formatPhone(rawPhone) || 'N/A';
 
   return (
     <>
@@ -205,8 +248,8 @@ const ComplaintDetailsPage = () => {
                       </div>
                       <hr className="border-t border-gray-200 mt-4 mb-6" />
                       {isAnonymous && (
-                        <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-200">
-                          This complaint is filed as Anonymous; contact details are hidden by design.
+                        <div className="mb-4 px-4 py-3 rounded-md bg-yellow-50 text-white-800 border border-yellow-200">
+                          This complaint is filed as Anonymous.
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-x-8 gap-y-6">
@@ -258,14 +301,12 @@ const ComplaintDetailsPage = () => {
                         {canEdit && (
                           <div className="flex gap-4">
                             <button
-                              className="px-4 py-2 font-medium transition-colors rounded-lg text-white whitespace-nowrap text-lg flex items-center gap-2 hover:opacity-90"
-                              style={{
-                                backgroundColor: statusColors[complaint.status] || "#AEAEAE",
-                              }}
-                              title="Click to change status"
+                              className="px-8 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-lg flex items-center gap-2 font-medium"
+                              onClick={handleReject}
+                              disabled={complaint.status === 'Rejected' || complaint.status === 'Resolved'}
                             >
-                              {complaint.status}
-                              <i className="bi bi-chevron-down text-base"></i>
+                              <i className="bi bi-x-circle text-lg"></i>
+                              Reject Complaint
                             </button>
                             <button
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
@@ -292,9 +333,21 @@ const ComplaintDetailsPage = () => {
                         </div>
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Priority Level:</label>
-                          <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
-                            {complaint.priority}
-                          </span>
+                          {canEditPriority ? (
+                            <button
+                              className="px-4 py-1 rounded-full font-semibold text-white flex items-center gap-2 hover:opacity-90 transition-opacity"
+                              style={{ backgroundColor: priorityColors[complaint.priority] }}
+                              onClick={handlePriorityClick}
+                              title="Click to change priority"
+                            >
+                              {complaint.priority}
+                              <i className="bi bi-chevron-down text-sm"></i>
+                            </button>
+                          ) : (
+                            <span className="px-4 py-1 rounded-full font-semibold text-white" style={{ backgroundColor: priorityColors[complaint.priority] }}>
+                              {complaint.priority}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <label className="block text-md text-gray-600 mb-2">Last Updated:</label>
@@ -305,18 +358,62 @@ const ComplaintDetailsPage = () => {
                           <p className="text-gray-900 font-medium text-lg">{getDaysSinceFiled(complaint.created_at)}</p>
                         </div>
                       </div>
+
+                      {/* Rejection Reason Section */}
+                      {complaint.status === 'Rejected' && (
+                        <>
+                          <hr className="border-t border-gray-200 my-6" />
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-red-800 mb-4">Rejection Details</h3>
+                            <div className="grid grid-cols-1 gap-y-4">
+                              <div>
+                                <label className="block text-md text-gray-600 mb-2">Reason for Rejection:</label>
+                                <p className="text-gray-900 font-medium text-base leading-relaxed">{complaint.rejection_reason || 'No reason provided'}</p>
+                              </div>
+                              {complaint.rejected_at && (
+                                <div>
+                                  <label className="block text-md text-gray-600 mb-2">Rejected On:</label>
+                                  <p className="text-gray-900 font-medium text-base">{formatDate(complaint.rejected_at)}</p>
+                                </div>
+                              )}
+                              {/* Rejected By section removed - functionality no longer tracked */}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
-                <AssignActionModal 
-                  isOpen={isAssignOpen} 
+                <AssignActionModal
+                  isOpen={isAssignOpen}
                   onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
                   Action="Assign Complaint"
                   assignDetails={complaint}
                   >
                 </AssignActionModal>
+
+                <RejectComplaintModal
+                  isOpen={isRejectOpen}
+                  onClose={() => setIsRejectOpen(false)}
+                  complaint={complaint}
+                  onConfirm={handleRejectConfirm}
+                />
+
+
+                <SetPriorityModal
+                  isOpen={isPriorityOpen}
+                  onClose={() => setIsPriorityOpen(false)}
+                  complaint={complaint}
+                  onPriorityUpdate={handlePriorityUpdate}
+                />
+                <Toast
+                  message={toastMessage}
+                  isVisible={toastVisible}
+                  onClose={() => setToastVisible(false)}
+                />
               </>
             );
           };
-          
+
+
           export default ComplaintDetailsPage;
