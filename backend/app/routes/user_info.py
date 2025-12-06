@@ -10,7 +10,7 @@ userinfo_bp = Blueprint('userinfo_bp', __name__, url_prefix='/api/user_info')
 def barangayList():
     id = request.args.get('barangay_id')
 
-    if id:
+    if id and id != 'null' and id != 'undefined':
         return brgy(id)
     else:        
         return brgy_list()
