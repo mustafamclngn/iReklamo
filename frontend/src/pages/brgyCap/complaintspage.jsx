@@ -29,6 +29,7 @@ const BC_ComplaintsPage = () => {
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [complaintData, setComplaintData] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   // toast state
@@ -286,6 +287,16 @@ const BC_ComplaintsPage = () => {
         message={toastMessage}
         isVisible={toastVisible}
         onClose={() => setToastVisible(false)}
+      />
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
       />
 
       <StatusUpdateModal

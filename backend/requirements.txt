@@ -10,6 +10,7 @@ blinker==1.9.0
 # CORS
 Flask-Cors==6.0.1
 Flask-Mail==0.9.1
+Flask-Mail==0.9.1
 
 # Environment Variables
 python-dotenv==1.0.1
