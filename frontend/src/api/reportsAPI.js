@@ -40,18 +40,42 @@ const getMonthlyCaseTypePerBarangay = async (month, year) => {
 };
 
 
-const getMonthlyStatusPerBarangay = async (month, year) => {
+const getMonthlyCaseTypePerOfficial = async (month, year, barangayId) => {
     const params = new URLSearchParams();
     if (month) params.append('month', month);
     if (year) params.append('year', year);
+    if (barangayId) params.append('barangay_id', barangayId);
+
+    const response = await axiosPrivate.get(`/api/dashboard/monthly_case_type_per_official?${params.toString()}`);
+    return response.data;
+};
+
+
+const getMonthlyStatusPerBarangay = async (month, year, barangayId) => {
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year);
+    if (barangayId) params.append('barangay_id', barangayId);
 
     const response = await axiosPrivate.get(`/api/dashboard/monthly_status_per_barangay?${params.toString()}`);
     return response.data;
 };
 
 
-const getAvgResolutionTimePerBarangay = async () => {
-    const response = await axiosPrivate.get('/api/dashboard/avg_resolution_time_per_barangay');
+const getAvgResolutionTimePerBarangay = async (month, year) => {
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year);
+
+    const response = await axiosPrivate.get(`/api/dashboard/avg_resolution_time_per_barangay?${params.toString()}`);
+    return response.data;
+};
+
+const getAvgResolutionTimePerOfficial = async (barangayId) => {
+    const params = new URLSearchParams();
+    if (barangayId) params.append('barangay_id', barangayId);
+
+    const response = await axiosPrivate.get(`/api/dashboard/avg_resolution_time_per_official?${params.toString()}`);
     return response.data;
 };
 
@@ -74,6 +98,33 @@ const getTopLowBarangays = async () => {
 };
 
 
+const getTopUrgentOfficials = async (barangayId) => {
+    const params = new URLSearchParams();
+    if (barangayId) params.append('barangay_id', barangayId);
+
+    const response = await axiosPrivate.get(`/api/dashboard/top_urgent_officials?${params.toString()}`);
+    return response.data;
+};
+
+
+const getTopModerateOfficials = async (barangayId) => {
+    const params = new URLSearchParams();
+    if (barangayId) params.append('barangay_id', barangayId);
+
+    const response = await axiosPrivate.get(`/api/dashboard/top_moderate_officials?${params.toString()}`);
+    return response.data;
+};
+
+
+const getTopLowOfficials = async (barangayId) => {
+    const params = new URLSearchParams();
+    if (barangayId) params.append('barangay_id', barangayId);
+
+    const response = await axiosPrivate.get(`/api/dashboard/top_low_officials?${params.toString()}`);
+    return response.data;
+};
+
+
 const getPriorityCountsPerBarangay = async (month, year) => {
     const params = new URLSearchParams();
     if (month) params.append('month', month);
@@ -84,15 +135,43 @@ const getPriorityCountsPerBarangay = async (month, year) => {
 };
 
 
+const getMonthlyStatusByBarangay = async (month, year) => {
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year);
+
+    const response = await axiosPrivate.get(`/api/dashboard/monthly_status_by_barangay?${params.toString()}`);
+    return response.data;
+};
+
+
+const getPriorityCountsPerOfficial = async (month, year, barangayId) => {
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year);
+    if (barangayId) params.append('barangay_id', barangayId);
+
+    const response = await axiosPrivate.get(`/api/dashboard/priority_counts_per_official?${params.toString()}`);
+    return response.data;
+};
+
+
 export default {
     getAnnualComplaintCounts,
     getMonthlyComplaintCounts,
     getTop3CaseTypes,
     getMonthlyCaseTypePerBarangay,
+    getMonthlyCaseTypePerOfficial,
     getMonthlyStatusPerBarangay,
+    getMonthlyStatusByBarangay,
     getAvgResolutionTimePerBarangay,
+    getAvgResolutionTimePerOfficial,
     getTopUrgentBarangays,
     getTopModerateBarangays,
     getTopLowBarangays,
-    getPriorityCountsPerBarangay
+    getTopUrgentOfficials,
+    getTopModerateOfficials,
+    getTopLowOfficials,
+    getPriorityCountsPerBarangay,
+    getPriorityCountsPerOfficial
 }

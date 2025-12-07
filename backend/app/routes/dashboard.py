@@ -629,24 +629,211 @@ def get_monthly_case_type_per_barangay():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# GET MONTHLY STATUS BREAKDOWN PER BARANGAY
-@dashboard_bp.route('/monthly_status_per_barangay', methods=['GET'])
-def get_monthly_status_per_barangay():
+# GET MONTHLY CASE TYPE BREAKDOWN PER OFFICIAL
+@dashboard_bp.route('/monthly_case_type_per_official', methods=['GET'])
+def get_monthly_case_type_per_official():
     """
-    Returns status counts (Pending, In-Progress, Resolved) for each barangay for a specific month.
-    Query params: month (e.g., 'November'), year (e.g., '2025')
+    Returns case type counts for each barangay official for a specific month.
+    Query params: month (e.g., 'November'), year (e.g., '2025'), barangay_id (optional)
     Example response:
     {
-        "statuses": ["Pending", "In-Progress", "Resolved"],
-        "barangays": [
-            {"barangay_id": 1, "barangay_name": "Abuno", "status_counts": [5, 3, 12]},
-            {"barangay_id": 2, "barangay_name": "Dalipuga", "status_counts": [8, 4, 20]}
+        "case_types": ["Noise Complaint", "Garbage Issue", "Street Light"],
+        "officials": [
+            {"user_id": 5, "official_name": "Juan Dela Cruz", "barangay_name": "Abuno", "case_type_counts": [5, 3, 2]},
+            {"user_id": 8, "official_name": "Maria Santos", "barangay_name": "Dalipuga", "case_type_counts": [8, 4, 1]}
         ]
     }
     """
     try:
         month = request.args.get('month', 'November')  # Default to November
         year = request.args.get('year', '2025')  # Default to 2025
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Get all case types for the specified month/year
+        cursor.execute("""
+            SELECT DISTINCT case_type 
+            FROM complaints 
+            WHERE TRIM(TO_CHAR(created_at, 'Month')) = %s 
+            AND EXTRACT(YEAR FROM created_at) = %s
+            ORDER BY case_type
+        """, (month.strip(), int(year)))
+        case_types_result = cursor.fetchall()
+        case_types = [ct['case_type'] for ct in case_types_result]
+
+        # Get all barangay officials (role_id = 4), optionally filtered by barangay
+        if barangay_id:
+            cursor.execute("""
+                SELECT 
+                    u.user_id,
+                    u.first_name || ' ' || u.last_name as official_name,
+                    b.name as barangay_name,
+                    b.id as barangay_id
+                FROM users u
+                LEFT JOIN barangays b ON u.barangay_id = b.id
+                WHERE u.role_id = 4 AND u.barangay_id = %s
+                ORDER BY b.name, u.first_name
+            """, (barangay_id,))
+        else:
+            cursor.execute("""
+                SELECT 
+                    u.user_id,
+                    u.first_name || ' ' || u.last_name as official_name,
+                    b.name as barangay_name,
+                    b.id as barangay_id
+                FROM users u
+                LEFT JOIN barangays b ON u.barangay_id = b.id
+                WHERE u.role_id = 4
+                ORDER BY b.name, u.first_name
+            """)
+        officials_result = cursor.fetchall()
+
+        # Build response
+        officials_data = []
+        for official in officials_result:
+            counts = []
+            for case_type in case_types:
+                cursor.execute("""
+                    SELECT COUNT(*) as count
+                    FROM complaints
+                    WHERE assigned_official_id = %s
+                    AND case_type = %s
+                    AND TRIM(TO_CHAR(created_at, 'Month')) = %s
+                    AND EXTRACT(YEAR FROM created_at) = %s
+                """, (official['user_id'], case_type, month.strip(), int(year)))
+                result = cursor.fetchone()
+                counts.append(result['count'] if result else 0)
+            
+            officials_data.append({
+                "user_id": official['user_id'],
+                "official_name": official['official_name'],
+                "barangay_name": official['barangay_name'] or 'Unassigned',
+                "barangay_id": official['barangay_id'],
+                "case_type_counts": counts
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "case_types": case_types,
+            "officials": officials_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching monthly case type per official: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# GET MONTHLY STATUS BREAKDOWN PER OFFICIAL
+@dashboard_bp.route('/monthly_status_per_barangay', methods=['GET'])
+def get_monthly_status_per_barangay():
+    """
+    Returns status counts (Pending, In-Progress, Resolved) for each barangay official for a specific month.
+    Query params: month (e.g., 'November'), year (e.g., '2025'), barangay_id (optional)
+    Example response:
+    {
+        "statuses": ["Pending", "In-Progress", "Resolved"],
+        "officials": [
+            {"user_id": 5, "official_name": "Juan Dela Cruz", "barangay_name": "Abuno", "status_counts": [5, 3, 12]},
+            {"user_id": 8, "official_name": "Maria Santos", "barangay_name": "Dalipuga", "status_counts": [8, 4, 20]}
+        ]
+    }
+    """
+    try:
+        month = request.args.get('month', 'November')  # Default to November
+        year = request.args.get('year', '2025')  # Default to 2025
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Define statuses in order
+        statuses = ['Pending', 'In-Progress', 'Resolved']
+
+        # Get all barangay officials (role_id = 4), optionally filtered by barangay
+        if barangay_id:
+            cursor.execute("""
+                SELECT 
+                    u.user_id,
+                    u.first_name || ' ' || u.last_name as official_name,
+                    b.name as barangay_name,
+                    b.id as barangay_id
+                FROM users u
+                LEFT JOIN barangays b ON u.barangay_id = b.id
+                WHERE u.role_id = 4 AND u.barangay_id = %s
+                ORDER BY b.name, u.first_name
+            """, (barangay_id,))
+        else:
+            cursor.execute("""
+                SELECT 
+                    u.user_id,
+                    u.first_name || ' ' || u.last_name as official_name,
+                    b.name as barangay_name,
+                    b.id as barangay_id
+                FROM users u
+                LEFT JOIN barangays b ON u.barangay_id = b.id
+                WHERE u.role_id = 4
+                ORDER BY b.name, u.first_name
+            """)
+        officials_result = cursor.fetchall()
+
+        # Build response
+        officials_data = []
+        for official in officials_result:
+            counts = []
+            for status in statuses:
+                cursor.execute("""
+                    SELECT COUNT(*) as count
+                    FROM complaints
+                    WHERE assigned_official_id = %s
+                    AND status = %s
+                    AND TRIM(TO_CHAR(created_at, 'Month')) = %s
+                    AND EXTRACT(YEAR FROM created_at) = %s
+                """, (official['user_id'], status, month.strip(), int(year)))
+                result = cursor.fetchone()
+                counts.append(result['count'] if result else 0)
+            
+            officials_data.append({
+                "user_id": official['user_id'],
+                "official_name": official['official_name'],
+                "barangay_name": official['barangay_name'] or 'Unassigned',
+                "barangay_id": official['barangay_id'],
+                "status_counts": counts
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "statuses": statuses,
+            "officials": officials_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching monthly status per official: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@dashboard_bp.route('/monthly_status_by_barangay', methods=['GET'])
+def get_monthly_status_by_barangay():
+    """
+    Returns status counts (Pending, In-Progress, Resolved) grouped by barangay for a specific month.
+    Query params: month (e.g., 'November'), year (e.g., '2025')
+    Example response:
+    {
+        "statuses": ["Pending", "In-Progress", "Resolved"],
+        "barangays": [
+            {"barangay_id": 1, "barangay_name": "Abuno", "status_counts": [15, 8, 25]},
+            {"barangay_id": 2, "barangay_name": "Dalipuga", "status_counts": [12, 6, 18]}
+        ]
+    }
+    """
+    try:
+        month = request.args.get('month', 'November')
+        year = request.args.get('year', '2025')
         
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -689,15 +876,79 @@ def get_monthly_status_per_barangay():
         }), 200
 
     except Exception as e:
-        print(f"Error fetching monthly status per barangay: {e}")
+        print(f"Error fetching monthly status by barangay: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
     
+
+# GET AVG RESOLUTION TIME PER OFFICIAL FOR 2025
+@dashboard_bp.route('/avg_resolution_time_per_official', methods=['GET'])
+def get_avg_resolution_time_per_official():
+    """
+    Returns the average resolution time (in days) for each barangay official for complaints resolved in 2025.
+    Query params: barangay_id (optional)
+    Example response:
+    [
+        {"user_id": 5, "official_name": "Juan Dela Cruz", "barangay_name": "Abuno", "avg_resolution_time_days": 5.2},
+        {"user_id": 8, "official_name": "Maria Santos", "barangay_name": "Dalipuga", "avg_resolution_time_days": 7.8}
+    ]
+    """
+    try:
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Build barangay filter
+        barangay_filter = "AND u.barangay_id = %s" if barangay_id else ""
+        
+        query = f"""
+            SELECT 
+                u.user_id,
+                u.first_name || ' ' || u.last_name AS official_name,
+                b.name AS barangay_name,
+                AVG(EXTRACT(EPOCH FROM (c.updated_at - c.created_at)) / 86400) AS avg_resolution_time_days
+            FROM users u
+            LEFT JOIN barangays b ON u.barangay_id = b.id
+            LEFT JOIN complaints c ON u.user_id = c.assigned_official_id 
+                AND c.status = 'Resolved'
+                AND c.updated_at IS NOT NULL
+                AND c.created_at >= '2025-01-01' AND c.created_at < '2026-01-01'
+            WHERE u.role_id = 4
+            {barangay_filter}
+            GROUP BY u.user_id, u.first_name, u.last_name, b.name
+            ORDER BY b.name, u.first_name;
+        """
+
+        if barangay_id:
+            cursor.execute(query, (barangay_id,))
+        else:
+            cursor.execute(query)
+            
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        # Format avg_resolution_time_days to 1 decimal place
+        for row in results:
+            if row['avg_resolution_time_days'] is not None:
+                row['avg_resolution_time_days'] = round(row['avg_resolution_time_days'], 1)
+            else:
+                row['avg_resolution_time_days'] = 0
+
+        return jsonify(results), 200
+
+    except Exception as e:
+        print(f"Error fetching avg resolution time per official: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 # GET AVG RESOLUTION TIME PER BARANGAY FOR 2025
 @dashboard_bp.route('/avg_resolution_time_per_barangay', methods=['GET'])
 def get_avg_resolution_time_per_barangay():
     """
-    Returns the average resolution time (in days) for each barangay for complaints resolved in 2025.
+    Returns the average resolution time (in days) for each barangay for complaints resolved in a specific month.
+    Query params: month (e.g., 'November'), year (e.g., '2025')
     Example response:
     [
         {"barangay_id": 1, "barangay_name": "Abuno", "avg_resolution_time_days": 5.2},
@@ -705,6 +956,9 @@ def get_avg_resolution_time_per_barangay():
     ]
     """
     try:
+        month = request.args.get('month', 'November')
+        year = request.args.get('year', '2025')
+        
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -717,12 +971,13 @@ def get_avg_resolution_time_per_barangay():
             LEFT JOIN complaints c ON b.id = c.barangay_id 
                 AND c.status = 'Resolved'
                 AND c.updated_at IS NOT NULL
-                AND c.created_at >= '2025-01-01' AND c.created_at < '2026-01-01'
+                AND TRIM(TO_CHAR(c.created_at, 'Month')) = %s
+                AND EXTRACT(YEAR FROM c.created_at) = %s
             GROUP BY b.id, b.name
             ORDER BY b.name;
         """
 
-        cursor.execute(query)
+        cursor.execute(query, (month.strip(), int(year)))
         results = cursor.fetchall()
 
         cursor.close()
@@ -887,6 +1142,155 @@ def get_top_low_barangays():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@dashboard_bp.route('/top_urgent_officials', methods=['GET'])
+def get_top_urgent_officials():
+    """
+    Returns the top 3 officials with the highest number of urgent complaints.
+    Query params: barangay_id (optional)
+    Example response:
+    [
+        {"official_name": "Juan Dela Cruz", "barangay_name": "Abuno", "urgent_count": 15},
+        {"official_name": "Maria Santos", "barangay_name": "Dalipuga", "urgent_count": 12}
+    ]
+    """
+    try:
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        barangay_filter = "AND u.barangay_id = %s" if barangay_id else ""
+        query = f"""
+            SELECT 
+                u.first_name || ' ' || u.last_name AS official_name,
+                b.name AS barangay_name,
+                COUNT(*) AS urgent_count
+            FROM users u
+            LEFT JOIN barangays b ON u.barangay_id = b.id
+            LEFT JOIN complaints c ON u.user_id = c.assigned_official_id 
+                AND c.priority = 'Urgent'
+                AND c.created_at >= '2025-01-01' 
+                AND c.created_at < '2026-01-01'
+            WHERE u.role_id = 4
+            {barangay_filter}
+            GROUP BY u.user_id, u.first_name, u.last_name, b.name
+            HAVING COUNT(*) > 0
+            ORDER BY urgent_count DESC
+            LIMIT 3;
+        """
+
+        if barangay_id:
+            cursor.execute(query, (barangay_id,))
+        else:
+            cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(results), 200
+
+    except Exception as e:
+        print(f"Error fetching top urgent officials: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@dashboard_bp.route('/top_moderate_officials', methods=['GET'])
+def get_top_moderate_officials():
+    """
+    Get top 3 officials with the most moderate priority complaints.
+    Query params: barangay_id (optional)
+    """
+    try:
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        barangay_filter = "AND u.barangay_id = %s" if barangay_id else ""
+        query = f"""
+            SELECT 
+                u.first_name || ' ' || u.last_name AS official_name,
+                b.name AS barangay_name,
+                COUNT(*) AS moderate_count
+            FROM users u
+            LEFT JOIN barangays b ON u.barangay_id = b.id
+            LEFT JOIN complaints c ON u.user_id = c.assigned_official_id 
+                AND c.priority = 'Moderate'
+                AND c.created_at >= '2025-01-01' 
+                AND c.created_at < '2026-01-01'
+            WHERE u.role_id = 4
+            {barangay_filter}
+            GROUP BY u.user_id, u.first_name, u.last_name, b.name
+            HAVING COUNT(*) > 0
+            ORDER BY moderate_count DESC
+            LIMIT 3;
+        """
+
+        if barangay_id:
+            cursor.execute(query, (barangay_id,))
+        else:
+            cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(results), 200
+
+    except Exception as e:
+        print(f"Error fetching top moderate officials: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@dashboard_bp.route('/top_low_officials', methods=['GET'])
+def get_top_low_officials():
+    """
+    Get top 3 officials with the most low priority complaints.
+    Query params: barangay_id (optional)
+    """
+    try:
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        barangay_filter = "AND u.barangay_id = %s" if barangay_id else ""
+        query = f"""
+            SELECT 
+                u.first_name || ' ' || u.last_name AS official_name,
+                b.name AS barangay_name,
+                COUNT(*) AS low_count
+            FROM users u
+            LEFT JOIN barangays b ON u.barangay_id = b.id
+            LEFT JOIN complaints c ON u.user_id = c.assigned_official_id 
+                AND c.priority = 'Low'
+                AND c.created_at >= '2025-01-01' 
+                AND c.created_at < '2026-01-01'
+            WHERE u.role_id = 4
+            {barangay_filter}
+            GROUP BY u.user_id, u.first_name, u.last_name, b.name
+            HAVING COUNT(*) > 0
+            ORDER BY low_count DESC
+            LIMIT 3;
+        """
+
+        if barangay_id:
+            cursor.execute(query, (barangay_id,))
+        else:
+            cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(results), 200
+
+    except Exception as e:
+        print(f"Error fetching top low officials: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @dashboard_bp.route('/priority_counts_per_barangay', methods=['GET'])
 def get_priority_counts_per_barangay():
     """
@@ -988,6 +1392,111 @@ def get_priority_counts_per_barangay():
         print(f"Error fetching priority counts per barangay: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+@dashboard_bp.route('/priority_counts_per_official', methods=['GET'])
+def get_priority_counts_per_official():
+    """
+    Get complaint counts by priority level (Urgent, Moderate, Low) for each barangay official.
+    Query params: month, year, barangay_id (optional)
+    
+    Returns:
+    {
+        "officials": ["Juan Dela Cruz", "Maria Santos", ...],
+        "priorities": ["Urgent", "Moderate", "Low"],
+        "data": [
+            {"official_name": "Juan Dela Cruz", "priority_counts": [15, 8, 5]},
+            {"official_name": "Maria Santos", "priority_counts": [12, 10, 3]}
+        ]
+    }
+    """
+    try:
+        month = request.args.get('month', '')
+        year = request.args.get('year', '2025')
+        barangay_id = request.args.get('barangay_id')  # Optional barangay filter
+        
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Build date filter
+        if month:
+            month_num = MONTHS.index(month) + 1 if month in MONTHS else None
+            if month_num:
+                date_filter = f"""
+                    AND EXTRACT(MONTH FROM c.created_at) = {month_num} 
+                    AND EXTRACT(YEAR FROM c.created_at) = {year}
+                """
+            else:
+                date_filter = f"""
+                    AND c.created_at >= '{year}-01-01' 
+                    AND c.created_at < '{int(year)+1}-01-01'
+                """
+        else:
+            date_filter = f"""
+                AND c.created_at >= '{year}-01-01' 
+                AND c.created_at < '{int(year)+1}-01-01'
+            """
+
+        # Build barangay filter
+        barangay_filter = f"AND u.barangay_id = {barangay_id}" if barangay_id else ""
+
+        query = f"""
+            SELECT 
+                u.first_name || ' ' || u.last_name AS official_name,
+                c.priority,
+                COUNT(*) AS count
+            FROM users u
+            LEFT JOIN complaints c ON u.user_id = c.assigned_official_id
+            WHERE u.role_id = 4
+            {barangay_filter}
+            AND c.priority IS NOT NULL
+            {date_filter}
+            GROUP BY u.user_id, u.first_name, u.last_name, c.priority
+            ORDER BY u.first_name, c.priority;
+        """
+
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        # Get unique officials and priorities
+        officials = []
+        priority_data = {}
+        
+        for row in results:
+            official = row['official_name']
+            priority = row['priority']
+            count = row['count']
+            
+            if official not in officials:
+                officials.append(official)
+                priority_data[official] = {'Urgent': 0, 'Moderate': 0, 'Low': 0}
+            
+            if priority in ['Urgent', 'Moderate', 'Low']:
+                priority_data[official][priority] = count
+
+        # Format data for frontend
+        formatted_data = []
+        for official in officials:
+            formatted_data.append({
+                'official_name': official,
+                'priority_counts': [
+                    priority_data[official]['Urgent'],
+                    priority_data[official]['Moderate'],
+                    priority_data[official]['Low']
+                ]
+            })
+
+        return jsonify({
+            'officials': officials,
+            'priorities': ['Urgent', 'Moderate', 'Low'],
+            'data': formatted_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching priority counts per official: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # REPORTS PAGE FOR BRGY CAPT

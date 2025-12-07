@@ -47,10 +47,6 @@ def init_extensions(app):
     supabase_key = app.config.get('SUPABASE_SERVICE_KEY')
     supabase_bucket = app.config.get('SUPABASE_BUCKET')
     
-    # for debugging purposes (pwede ni matangtang later if working na ang inyong supabase bucket)
-    print(f"DEBUG - SUPABASE_URL: {supabase_url}")
-    print(f"DEBUG - SUPABASE_KEY exists: {bool(supabase_key)}")
-    print(f"DEBUG - SUPABASE_BUCKET: {supabase_bucket}")
     
     if supabase_url and supabase_key and supabase_bucket:
         try:
