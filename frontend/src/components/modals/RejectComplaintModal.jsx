@@ -107,7 +107,7 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
           {/* Footer */}
           <div className="popup-footer">
             <button type="button" className="revoke-button" onClick={handleNextStep}>
-              Confirm Rejection
+              Next: Confirm Rejection
             </button>
             <button type="button" className="okay-button" onClick={handleClose}>
               Cancel

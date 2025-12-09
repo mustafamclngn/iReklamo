@@ -4,9 +4,8 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
-import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
+import AssignActionModal from '../../components/modals/AssignActionModal';
 import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
-import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
@@ -40,7 +39,6 @@ const getDaysSinceFiled = (dateString) => {
 };
 
 // Helpers for formatting phone numbers
-// Helpers for formatting phone numbers
 
 const formatPhone = (num) => {
   if (!num) return 'N/A';
@@ -59,7 +57,6 @@ const statusColors = {
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
   Rejected: "#DC3545"
-  Rejected: "#DC3545"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -72,13 +69,11 @@ const ComplaintDetailsPage = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const { getComplaintById } = useComplaintsApi();
-  const { getComplaintById } = useComplaintsApi();
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
-  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
@@ -319,10 +314,9 @@ const ComplaintDetailsPage = () => {
                             </button>
                             <button
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
-                              onClick={handleAssign}
-                              disabled={complaint.status === "Resolved"}>
+                              onClick={handleAssign}>
                               <i className="bi bi-person-check text-lg"></i>
-                              {complaint.status === "Pending" ? "Assign Official" : "Reassign Official"}
+                              Assign Official
                             </button>
                           </div>
                         )}
@@ -412,7 +406,7 @@ const ComplaintDetailsPage = () => {
                                   {entry.remarks || "No remarks provided"}
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  by {entry.actor_name ? `${entry.actor_name} (${entry.actor_role})` : "Unknown"}
+                                  by {entry.actor_name || "Unknown"}
                                 </p>
                               </div>
                             </div>
@@ -428,12 +422,12 @@ const ComplaintDetailsPage = () => {
                   </div>
                 </div>
                 <AssignActionModal
-                  isOpen={isAssignOpen} 
-                  onClose={() => setIsAssignOpen(false)}
-                  onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-                  selectedComplaints={[complaint]}
+                  isOpen={isAssignOpen}
+                  onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+                  Action="Assign Complaint"
+                  assignDetails={complaint}
                   >
-                </AssignComplaintModal>
+                </AssignActionModal>
 
                 <RejectComplaintModal
                   isOpen={isRejectOpen}
@@ -449,14 +443,6 @@ const ComplaintDetailsPage = () => {
                   complaint={complaint}
                   onPriorityUpdate={handlePriorityUpdate}
                 />
-
-                <StatusUpdateModal
-                  isOpen={isStatusUpdateOpen}
-                  onClose={() => setIsStatusUpdateOpen(false)}
-                  complaint={complaint}
-                  onRefresh={() => handleStatusUpdate(complaint)}
-                />
-
 
                 <StatusUpdateModal
                   isOpen={isStatusUpdateOpen}

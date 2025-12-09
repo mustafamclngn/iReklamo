@@ -66,12 +66,12 @@ const useComplaintsApi = () => {
 
   const getAllComplaints = async (filters = {}) => {
       try {
-        const params = new URLSearchParams(filters).toString();
+        const params = new URLSearchParams(filters);
         const response = await axiosPrivate.get(`/api/complaints/?${params}`);
         console.log(response)
         return response.data;
       } catch (error) {
-        console.error('Error fetching complaints', error);
+        console.error('Error assigning complaint to officer', error);
         throw error;
       }
   };
