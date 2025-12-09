@@ -29,6 +29,7 @@ const CA_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);

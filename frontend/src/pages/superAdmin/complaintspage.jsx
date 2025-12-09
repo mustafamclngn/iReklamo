@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardSuperAdmin from '../../components/cards/complaintCardSuperAdmin';
 import useComplaintsApi from '../../api/complaintsAPI';
+import useComplaintsApi from '../../api/complaintsAPI';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
@@ -251,7 +252,7 @@ const SA_ComplaintsPage = () => {
               >
                 <option value="all">All Barangays</option>
                 {uniqueBarangays.map(barangay => (
-                  <option key={barangay} value={barangay}>{barangay}</option>
+                  <option key={barangay} value={barangay}></option>
                 ))}
               </select>
               {/* Status Filter */}

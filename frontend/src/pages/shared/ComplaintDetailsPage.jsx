@@ -7,6 +7,7 @@ import { getRoleBasePath } from '../../utils/roleUtils';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
 
@@ -39,6 +40,7 @@ const getDaysSinceFiled = (dateString) => {
 };
 
 // Helpers for formatting phone numbers
+// Helpers for formatting phone numbers
 
 const formatPhone = (num) => {
   if (!num) return 'N/A';
@@ -57,6 +59,7 @@ const statusColors = {
   "In-Progress": "#FFD600",
   Resolved: "#43B174",
   Rejected: "#DC3545"
+  Rejected: "#DC3545"
 };
 const priorityColors = {
   Urgent: "#C00F0C",
@@ -69,11 +72,13 @@ const ComplaintDetailsPage = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const { getComplaintById } = useComplaintsApi();
+  const { getComplaintById } = useComplaintsApi();
 
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
@@ -444,6 +449,14 @@ const ComplaintDetailsPage = () => {
                   complaint={complaint}
                   onPriorityUpdate={handlePriorityUpdate}
                 />
+
+                <StatusUpdateModal
+                  isOpen={isStatusUpdateOpen}
+                  onClose={() => setIsStatusUpdateOpen(false)}
+                  complaint={complaint}
+                  onRefresh={() => handleStatusUpdate(complaint)}
+                />
+
 
                 <StatusUpdateModal
                   isOpen={isStatusUpdateOpen}

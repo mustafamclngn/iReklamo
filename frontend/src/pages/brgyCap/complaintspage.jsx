@@ -371,6 +371,16 @@ const BC_ComplaintsPage = () => {
           fetchComplaints();
         }}
       />
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
+      />
     </>
   );
 };

@@ -17,10 +17,12 @@ python-dotenv==1.0.1
 # Security & Cryptography
 cryptography==46.0.3
 # cffi== conflicts resolved by pip
+# cffi== conflicts resolved by pip
 pycparser==2.22
 PyJWT==2.10.1
 
 # PostgreSQL (Database Driver)
+psycopg2-binary==2.9.9
 psycopg2-binary==2.9.9
 
 # Email
