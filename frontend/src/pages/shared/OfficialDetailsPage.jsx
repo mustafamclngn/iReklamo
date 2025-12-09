@@ -7,7 +7,7 @@ import useProfileEditor from "../../hooks/useProfileEditor";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { getRoleBasePath } from "../../utils/roleUtils";
 import DeleteModal from "../../components/modals/DeleteUserModal";
-import AssignActionModal from "../../components/modals/AssignActionModal";
+import AssignOfficialModal from "../../components/modals/AssignOfficialModal";
 import ActiveCasesModal from "../../components/modals/ActiveCasesModal";
 import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
 import useComplaintsApi from "../../api/complaintsAPI";
@@ -70,7 +70,6 @@ const OfficialDetailsPage = () => {
         setActive(activeCases?.complaints?.length || 0);
         setResolved(resolvedCases?.complaints?.length || 0);
       } catch (error) {
-        console.error("Error fetching case data:", error);
         setActive(0);
         setResolved(0);
       }
@@ -78,7 +77,7 @@ const OfficialDetailsPage = () => {
 
     fetchOfficialDetails();
     fetchCases();
-  }, [user_id, refresh, isAssignOpen]);
+  }, [user_id, refresh]);
 
   useEffect(() => {
     if (official) {
@@ -407,15 +406,13 @@ const OfficialDetailsPage = () => {
         deleteData={official}
       />
 
-      <AssignActionModal
-        isOpen={isAssignOpen}
-        onClose={() => {
-          setIsAssignOpen(false);
-          setRefresh((prev) => !prev);
-        }}
-        Action="Assign Official"
-        assignDetails={official}
-      />
+      <AssignOfficialModal 
+        isOpen={isAssignOpen} 
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        officialDetails={official}
+        >
+      </AssignOfficialModal>
 
       <ActiveCasesModal
         isOpen={isViewCasesOpen}

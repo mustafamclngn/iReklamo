@@ -8,7 +8,7 @@ const useOfficialsApi = () => {
     try {
       const encodedBarangay = encodeURIComponent(barangay);
       const response = await axiosPrivate.get(`/api/officials?barangay=${encodedBarangay}`);
-      console.log(response.data)
+      // console.log(response.data)
       return response.data;
     } catch (error) {
       console.error('Error fetching officials by barangay:', error);

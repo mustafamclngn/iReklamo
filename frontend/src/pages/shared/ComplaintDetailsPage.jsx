@@ -4,7 +4,7 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
@@ -310,9 +310,10 @@ const ComplaintDetailsPage = () => {
                             </button>
                             <button
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
-                              onClick={handleAssign}>
+                              onClick={handleAssign}
+                              disabled={complaint.status === "Resolved"}>
                               <i className="bi bi-person-check text-lg"></i>
-                              Assign Official
+                              {complaint.status === "Pending" ? "Assign Official" : "Reassign Official"}
                             </button>
                           </div>
                         )}
@@ -384,13 +385,13 @@ const ComplaintDetailsPage = () => {
                     </div>
                   </div>
                 </div>
-                <AssignActionModal
-                  isOpen={isAssignOpen}
-                  onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-                  Action="Assign Complaint"
-                  assignDetails={complaint}
+                <AssignComplaintModal
+                  isOpen={isAssignOpen} 
+                  onClose={() => setIsAssignOpen(false)}
+                  onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+                  selectedComplaints={[complaint]}
                   >
-                </AssignActionModal>
+                </AssignComplaintModal>
 
                 <RejectComplaintModal
                   isOpen={isRejectOpen}

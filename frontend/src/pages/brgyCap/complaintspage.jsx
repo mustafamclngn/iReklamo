@@ -6,17 +6,26 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const { auth } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [complaints, setComplaints] = useState([]);
+  const user = auth?.user
+  const userId = user?.user_id
+    
+  const [complaints, setComplaints] = useState([]); // All complaints under barangay
+  const [complaintData, setComplaintData] = useState(null)
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -25,14 +34,11 @@ const BC_ComplaintsPage = () => {
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
-  const [complaintData, setComplaintData] = useState(null);
-  const [refresh, setRefresh] = useState(false);
 
   // toast state
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
   const defaultPriority = location.state?.defaultPriority || 'all';
 
@@ -134,11 +140,46 @@ const BC_ComplaintsPage = () => {
     setIsPriorityOpen(true);
   };
 
+  // Selection
+  const [selectAll, setSelectAll] = useState(false);
+  const [selected, setSelected] = useState(new Map()); // selected complaints for assignment
+
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    console.log('Assign complaint to:', complaint);
-    setComplaintData(complaint);
+    if(complaint) {
+      setSelected(prev => {
+        const map = new Map(prev);
+        map.set(complaint.id, complaint);   
+        return map;
+      });
+    }
     setIsAssignOpen(true);
+  };
+
+  useEffect(() => {
+    console.log("Selected changed:", [...selected.values()]);
+  }, [selected]);
+
+
+  const handleSelect = (complaint, isChecked) => {
+    setSelected(prev => {
+      const map = new Map(prev);
+      if (isChecked) map.set(complaint.id, complaint);
+      else map.delete(complaint.id);
+      return map;
+    });
+  };
+
+  const handleSelAll = () => {
+    if (selectAll) {
+      setSelectAll(false);
+      setSelected(new Map()); 
+    } else {
+      const map = new Map();
+      filteredComplaints.forEach(c => map.set(c.id, c));
+      setSelected(map);
+      setSelectAll(true); 
+    }
   };
 
   // Priority Update Handler
@@ -220,6 +261,39 @@ const BC_ComplaintsPage = () => {
                   <option key={priority} value={priority}>{priority}</option>
                 ))}
               </select>
+
+              {/* Select for Assignment */}
+              <button
+                onClick={() => handleAssignOfficial(null)}
+                className={`
+                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200 
+                  bg-green-500 border-green-500 text-white hover:bg-green-800
+
+                  disabled:bg-gray-400 disabled:border-gray-400
+                  disabled:text-gray-500 disabled:cursor-not-allowed
+                  disabled:hover:bg-gray-400    
+                `}
+                title="Assign selected"
+                disabled={selected.size === 0}
+              >
+                Batch Assign
+              </button>
+              
+              <button
+                onClick={handleSelAll}
+                className={`
+                  ml-1 px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
+
+                  ${selectAll
+                    ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
+                    : "bg-gray-400 border-gray-400 text-black hover:bg-blue-300"}
+                `}
+                title="Select All for assignment"
+              >
+                {selectAll ? "Unselect All" : "Select All"}
+              </button>
+
+
             </div>
             {/* Loading State */}
             {loading && <LoadingSpinner message="Loading complaints..." />}
@@ -239,6 +313,8 @@ const BC_ComplaintsPage = () => {
                       onStatusUpdate={handleStatusUpdate}
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
+                      onSelect={handleSelect}
+                      isSelected={selected.has(complaint.id)}
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
@@ -266,13 +342,13 @@ const BC_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal
-        isOpen={isAssignOpen}
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Complaint"
-        assignDetails={complaintData}
+      <AssignComplaintModal 
+        isOpen={isAssignOpen} 
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        selectedComplaints={[...selected.values()]}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
       <SetPriorityModal
         isOpen={isPriorityOpen}
         onClose={() => setIsPriorityOpen(false)}

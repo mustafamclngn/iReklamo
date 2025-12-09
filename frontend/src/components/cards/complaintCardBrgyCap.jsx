@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const statusColors = {
   Pending: "#FFB300",
@@ -13,13 +13,18 @@ const priorityColors = {
   Low: "#43B174",
 };
 
+
+
 const ComplaintCardBrgyCap = ({
   complaint,
   onViewDetails,
   onStatusUpdate,
   onPriorityUpdate,
-  onAssignOfficial
+  onAssignOfficial,
+  onSelect,
+  isSelected
 }) => {
+
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start">
@@ -78,11 +83,25 @@ const ComplaintCardBrgyCap = ({
           {/* Assign Official Icon Button */}
           <button 
             onClick={() => onAssignOfficial(complaint)}
-            className="p-2 bg-[#E3E3E3] text-gray-700 rounded-lg border border-[#767676] hover:bg-gray-200 transition-colors"
+            className={`p-2 rounded-lg border transition-colors 
+                ${complaint.status !== "Pending" 
+                  ? "bg-gray-300 text-gray-400 border-gray-300 cursor-not-allowed"
+                  : "bg-[#E3E3E3] text-gray-700 border-[#767676] hover:bg-gray-200"  
+                }`}            
             title="Assign official to complaint"
+            disabled={complaint.status !== "Pending"}
           >
             <i className="bi bi-person-check text-xl"></i>
           </button>
+
+          {/* Select for Assignment */}
+          <input
+            type="checkbox"
+            id="selectCheckbox"
+            checked={complaint.status !== "Pending" && !!isSelected}
+            onChange={(e) => onSelect(complaint, e.target.checked)}
+            disabled={complaint.status !== "Pending"}
+          />
         </div>
       </div>
     </div>

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CityAdminOfficialCard from '../../components/cards/offcardCityAdmin';
+import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
-
-import { useNavigate } from 'react-router-dom';
 import useOfficialsApi from '../../api/officialsApi';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
 
 const CA_OfficialsPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const { auth } = useAuth();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { getAllOfficials } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
@@ -20,7 +21,7 @@ const CA_OfficialsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const [refresh, setRefresh] =useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] =useState(false);
@@ -41,7 +42,7 @@ const CA_OfficialsPage = () => {
   // fetch officials
   useEffect(() => {
     fetchOfficials();
-  }, [isAssignOpen]);
+  }, [refresh]);
 
   const fetchOfficials = async () => {
     try {
@@ -216,13 +217,13 @@ const CA_OfficialsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal 
+      <AssignOfficialModal 
         isOpen={isAssignOpen} 
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        assignDetails={officialData}
-        Action="Assign Official"
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        officialDetails={officialData}
         >
-      </AssignActionModal>
+      </AssignOfficialModal>
     </>
   );
 }

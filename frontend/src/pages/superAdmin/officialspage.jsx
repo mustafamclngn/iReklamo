@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import SuperAdminOfficialCard from "../../components/cards/offcardSuperAdmin";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import ErrorAlert from "../../components/common/ErrorAlert";
 import Pagination from "../../components/common/Pagination";
 
-import { useNavigate } from "react-router-dom";
 import DeleteModal from "../../components/modals/DeleteUserModal";
 import useOfficialsApi from "../../api/officialsApi";
 import CreateAdmin from "../../components/modals/CreateAdmin";
-import AssignActionModal from "../../components/modals/AssignActionModal";
+import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
 
 const SA_OfficialsPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { getAllOfficials } = useOfficialsApi();
   const [officials, setOfficials] = useState([]);
@@ -62,7 +62,6 @@ const SA_OfficialsPage = () => {
       }
     } catch (err) {
       setError("Error connecting to server. Please try again.");
-      console.error("Error fetching officials:", err);
     } finally {
       setLoading(false);
     }
@@ -266,15 +265,13 @@ const SA_OfficialsPage = () => {
         }}
         deleteData={officialData}
       ></DeleteModal>
-      <AssignActionModal
-        isOpen={isAssignOpen}
-        onClose={() => {
-          setIsAssignOpen(false);
-          setRefresh((prev) => !prev);
-        }}
-        Action="Assign Official"
-        assignDetails={officialData}
-      ></AssignActionModal>
+      <AssignOfficialModal 
+        isOpen={isAssignOpen} 
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        officialDetails={officialData}
+        >
+      </AssignOfficialModal>
     </>
   );
 };

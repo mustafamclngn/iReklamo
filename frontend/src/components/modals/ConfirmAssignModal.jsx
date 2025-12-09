@@ -1,30 +1,38 @@
 import './modal.css'
 import { useState } from 'react'
 
-const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaint, official }) => {
+const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => {
 
   const [isChecked, setIsChecked] = useState(false);
 
   if (!isOpen) return null;
-
-  console.log(complaint)
-  console.log(official)
 
   return (
     <>
       <div className="popup-overlay">
         <div className="confirm-content">
           <button onClick={onClose} className="popup-close">✕</button>
-          <h2 className="title">Confirm Complaint Assignment</h2>
+          <h2 className="title">Confirm Assignment</h2>
           <form className="form">
             
             <div className="form-group">
               <label>
-                You are about to assign the complaint:
+                You are about to assign the complaint/s:
               </label>
               <div className="user-summary">
-                <p><strong>Complaint Code:</strong> {complaint.complaint_code}</p>
-                <p><strong>Complaint Title:</strong> {complaint.title}</p>
+                <div className="complaint-list">
+                  {complaints?.length > 0 ? (
+                    <ol>
+                      {complaints.map((complaint, index) => (
+                        <li key={complaint.id}>
+                          <strong>{index + 1}</strong>. <em>{complaint.complaint_code}</em>: <em>{complaint.title}</em>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="no-complaints">None</p>
+                  )}
+                </div>
               </div>
             </div>
 

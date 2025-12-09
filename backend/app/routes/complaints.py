@@ -165,6 +165,7 @@ def get_all_complaints():
     try:
         # Get query parameters
         barangay_filter = request.args.get('barangay')
+        barangay_id_filter = request.args.get('barangay_id')
         status_filter = request.args.get('status')
         priority_filter = request.args.get('priority')
         assigned_filter = request.args.get('assigned_official_id')
@@ -207,6 +208,10 @@ def get_all_complaints():
             conditions.append("barangays.name = %s")
             params.append(barangay_filter)
 
+        if barangay_id_filter:
+            conditions.append("complaints.barangay_id = %s")
+            params.append(barangay_id_filter)
+
         if status_filter:
             conditions.append("complaints.status = %s")
             params.append(status_filter)
@@ -233,6 +238,10 @@ def get_all_complaints():
             query += " WHERE " + " AND ".join(conditions)
 
         query += " ORDER BY complaints.created_at DESC"
+
+        print(query)
+        print(conditions)
+        print(params)
 
         cursor.execute(query, params)
         results = cursor.fetchall()
