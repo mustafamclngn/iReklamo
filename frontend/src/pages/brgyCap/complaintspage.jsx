@@ -271,11 +271,10 @@ const BC_ComplaintsPage = () => {
       </div>
       <AssignComplaintModal
         isOpen={isAssignOpen}
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Complaint"
-        assignDetails={complaintData}
-        >
-      </AssignComplaintModal>
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        selectedComplaints={[complaintData]}
+      />
       <SetPriorityModal
         isOpen={isPriorityOpen}
         onClose={() => setIsPriorityOpen(false)}
