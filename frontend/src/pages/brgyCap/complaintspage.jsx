@@ -6,7 +6,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
@@ -269,13 +269,13 @@ const BC_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal
+      <AssignComplaintModal
         isOpen={isAssignOpen}
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
       <SetPriorityModal
         isOpen={isPriorityOpen}
         onClose={() => setIsPriorityOpen(false)}

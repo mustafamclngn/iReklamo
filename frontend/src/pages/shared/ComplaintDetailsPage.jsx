@@ -4,7 +4,7 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getRoleBasePath } from '../../utils/roleUtils';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
@@ -94,19 +94,16 @@ const ComplaintDetailsPage = () => {
     setIsRejectOpen(true);
   };
 
-  const handleRejectConfirm = () => {
-    // Update local complaint state to rejected
-    setComplaint(prev => prev ? { ...prev, status: 'Rejected' } : null);
-
-    // Close the rejection modal and show success toast
+  const handleRejectSuccess = () => {
+    // Close all modals and refresh data
     setIsRejectOpen(false);
     setToastMessage('Complaint rejected successfully!');
     setToastVisible(true);
 
-    // Trigger refetch after a delay
+    // Trigger refetch to get updated status and audit trail
     setTimeout(() => {
       setRefresh(prev => !prev);
-    }, 1000);
+    }, 1500);
   };
 
   // Status update handlers
@@ -305,6 +302,7 @@ const ComplaintDetailsPage = () => {
                         {canManageComplaints && (
                           <div className="flex gap-4">
                             <button
+                              type="button"
                               className="px-8 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-lg flex items-center gap-2 font-medium"
                               onClick={handleReject}
                               disabled={complaint.status === 'Rejected' || complaint.status === 'Resolved'}
@@ -313,6 +311,7 @@ const ComplaintDetailsPage = () => {
                               Reject Complaint
                             </button>
                             <button
+                              type="button"
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
                               onClick={handleAssign}>
                               <i className="bi bi-person-check text-lg"></i>
@@ -421,19 +420,26 @@ const ComplaintDetailsPage = () => {
                     </div>
                   </div>
                 </div>
-                <AssignActionModal
+                <AssignComplaintModal
                   isOpen={isAssignOpen}
                   onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-                  Action="Assign Complaint"
-                  assignDetails={complaint}
+                  selectedComplaints={[complaint]}
+                  onConfirm={() => {
+                    setIsAssignOpen(false);
+                    setToastMessage('Complaint assigned successfully!');
+                    setToastVisible(true);
+                    setTimeout(() => {
+                      setRefresh(prev => !prev);
+                    }, 1000);
+                  }}
                   >
-                </AssignActionModal>
+                </AssignComplaintModal>
 
                 <RejectComplaintModal
                   isOpen={isRejectOpen}
                   onClose={() => setIsRejectOpen(false)}
                   complaint={complaint}
-                  onConfirm={handleRejectConfirm}
+                  onConfirm={handleRejectSuccess}
                 />
 
 

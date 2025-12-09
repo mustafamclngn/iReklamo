@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardSuperAdmin from '../../components/cards/complaintCardSuperAdmin';
 import useComplaintsApi from '../../api/complaintsAPI';
+import useUserInfoApi from '../../api/userInfo';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 
 const SA_ComplaintsPage = () => {
@@ -18,8 +19,10 @@ const SA_ComplaintsPage = () => {
   const itemsPerPage = 5;
 
   const [refresh, setRefresh] = useState(false);
+  const [barangays, setBarangays] = useState([]);
 
   const { getAllComplaints } = useComplaintsApi();
+  const { getBarangays } = useUserInfoApi();
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] = useState(false);
@@ -40,12 +43,20 @@ const SA_ComplaintsPage = () => {
   const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
 
-  // Extract unique barangays from complaints data
-  const uniqueBarangays = [...new Set(
-    complaints
-      .map(complaint => complaint.barangay)
-      .filter(Boolean)
-  )].sort();
+  // Fetch barangays on component mount
+  useEffect(() => {
+    const fetchBarangays = async () => {
+      try {
+        const response = await getBarangays();
+        if (response.success) {
+          setBarangays(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching barangays:', err);
+      }
+    };
+    fetchBarangays();
+  }, []);
 
   // Fetch complaints
   useEffect(() => {
@@ -192,8 +203,8 @@ const SA_ComplaintsPage = () => {
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#578fe0] bg-white text-gray-700 cursor-pointer hover:border-gray-400 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3cpath%20d%3D%22M1%201.5L6%206.5L11%201.5%22%20stroke%3D%22%23666666%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3c%2Fsvg%3E')] bg-[length:12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
               >
                 <option value="all">All Barangays</option>
-                {uniqueBarangays.map(barangay => (
-                  <option key={barangay} value={barangay}></option>
+                {barangays.map(barangay => (
+                  <option key={barangay.id} value={barangay.name}>{barangay.name}</option>
                 ))}
               </select>
               {/* Status Filter */}
@@ -264,13 +275,13 @@ const SA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal
+      <AssignComplaintModal
         isOpen={isAssignOpen}
         onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
         Action="Assign Complaint"
         assignDetails={complaintData}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
 
       <StatusUpdateModal
         isOpen={isStatusModalOpen}
