@@ -4,6 +4,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { BarChart } from '@mui/x-charts/BarChart';
+import { Box } from '@mui/material';
+import { PieChart } from '@mui/x-charts/PieChart';
 import { Ellipsis, HandHelping, Megaphone, MessageCircleMore, Pin, TrendingUp, TrendingDown, Star, AlertOctagon, AlertTriangle, CheckCircle, CircleCheck } from 'lucide-react';
 import '/src/assets/css/eventcard.css';
 import useUserInfoApi from '../../api/userInfo';
@@ -126,12 +128,14 @@ export default function ReportsPage() {
 
 
 function CaseTypeBreakdownperBrgy(){
-    const [selectedMonth, setSelectedMonth] = useState('November');
+    const currentDate = new Date();
+    const currentMonth = MONTHS[currentDate.getMonth()];
+    
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [caseTypes, setCaseTypes] = useState([]);
     const [barangayData, setBarangayData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [topMonthlyTypes, setTopMonthlyTypes] = useState([]);
-    const [selectedTopMonth, setSelectedTopMonth] = useState('November');
 
     const mainColors = {
         'Infrastructure & Utilities': '#3b82f6',
@@ -148,6 +152,18 @@ function CaseTypeBreakdownperBrgy(){
                 setLoading(true);
                 const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedMonth, '2025');
                 
+                console.log('Fetched data for', selectedMonth, ':', data);
+                
+                // Check if we have valid data
+                if (!data || !data.case_types || data.case_types.length === 0) {
+                    console.log('No case types found for', selectedMonth);
+                    setCaseTypes([]);
+                    setBarangayData([]);
+                    setTopMonthlyTypes([]);
+                    setLoading(false);
+                    return;
+                }
+
                 // Transform data for the chart
                 const chartSeries = data.case_types.map((caseType, idx) => ({
                     label: caseType,
@@ -157,22 +173,8 @@ function CaseTypeBreakdownperBrgy(){
 
                 setCaseTypes(chartSeries);
                 setBarangayData(data.barangays.map(b => b.barangay_name));
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching case type breakdown:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [selectedMonth]);
-
-    useEffect(() => {
-        const fetchTopMonthlyTypes = async () => {
-            try {
-                const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedTopMonth, '2025');
                 
-                // Calculate totals for each case type across all barangays
+                // Calculate totals for each case type across all barangays for Top 3
                 const typeTotals = data.case_types.map((caseType, idx) => {
                     const total = data.barangays.reduce((sum, b) => sum + (b.case_type_counts[idx] || 0), 0);
                     return { case_type: caseType, count: total };
@@ -184,13 +186,19 @@ function CaseTypeBreakdownperBrgy(){
                     .slice(0, 3);
                 
                 setTopMonthlyTypes(top3);
+                
+                setLoading(false);
             } catch (error) {
-                console.error('Error fetching top monthly case types:', error);
+                console.error('Error fetching case type breakdown:', error);
+                setCaseTypes([]);
+                setBarangayData([]);
+                setTopMonthlyTypes([]);
+                setLoading(false);
             }
         };
-        
-        fetchTopMonthlyTypes();
-    }, [selectedTopMonth]);
+
+        fetchData();
+    }, [selectedMonth]);
 
     const maxTopCount = topMonthlyTypes.length > 0 
         ? Math.max(...topMonthlyTypes.map(item => item.count)) 
@@ -200,7 +208,7 @@ function CaseTypeBreakdownperBrgy(){
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Case Type Breakdown per Barangay</p>
+                    <p className="event-title">Monthly Case Type Breakdown per Barangay (2025)</p>
                     <select 
                         className='border border-gray-300 rounded-lg p-1 text-xs'
                         value={selectedMonth}
@@ -246,7 +254,7 @@ function CaseTypeBreakdownperBrgy(){
                         </div>
 
                         {/* Legend */}
-                        <div className='w-2/3 flex flex-wrap gap-3 text-xs justify-center items-center text-center mx-auto'>
+                        <div className='w-4/5 flex flex-wrap gap-3 text-xs justify-center items-center text-center mx-auto'>
                             {caseTypes.map((ct, idx) => (
                                 <div key={idx} className='flex items-center gap-1 justify-center -mt-2'>
                                     <div 
@@ -266,17 +274,8 @@ function CaseTypeBreakdownperBrgy(){
 
                 <div className='flex flex-row border rounded-lg mt-4'>
                     <div className='w-full'>
-                        <div className='flex flex-row justify-between p-4 gap-5'>
+                        <div className='p-4'>
                             <h1 className="text-sm text-gray-500 font-medium">Top 3 Monthly Case Type</h1>
-                            <select 
-                                className='border border-gray-300 rounded-lg p-1 text-xs h-7'
-                                value={selectedTopMonth}
-                                onChange={(e) => setSelectedTopMonth(e.target.value)}
-                            >
-                                {MONTHS.map((month, idx) => (
-                                    <option key={idx} value={month}>{month}</option>
-                                ))}
-                            </select>
                         </div>
 
                         <div className='px-4 pb-4'>
@@ -313,10 +312,13 @@ function CaseTypeBreakdownperBrgy(){
 
 
 function UrgentBarangays() {
+    const currentDate = new Date();
+    const currentMonth = MONTHS[currentDate.getMonth()];
+    
     const [urgentBarangays, setUrgentBarangays] = useState([]);
     const [moderateBarangays, setModerateBarangays] = useState([]);
     const [lowBarangays, setLowBarangays] = useState([]);
-    const [selectedMonth, setSelectedMonth] = useState('November');
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [priorityData, setPriorityData] = useState([]);
     const [barangayNames, setBarangayNames] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -366,6 +368,17 @@ function UrgentBarangays() {
                 setLoading(true);
                 const data = await reportsAPI.getPriorityCountsPerBarangay(selectedMonth, '2025');
                 
+                console.log('Priority data for', selectedMonth, ':', data);
+                
+                // Check if we have valid data
+                if (!data || !data.data || data.data.length === 0) {
+                    console.log('No priority data found for', selectedMonth);
+                    setPriorityData([]);
+                    setBarangayNames([]);
+                    setLoading(false);
+                    return;
+                }
+                
                 // Transform data for bar chart
                 const chartSeries = [
                     {
@@ -393,6 +406,8 @@ function UrgentBarangays() {
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching priority counts:', error);
+                setPriorityData([]);
+                setBarangayNames([]);
                 setLoading(false);
             }
         };
@@ -406,7 +421,7 @@ function UrgentBarangays() {
                 <div className='flex flex-row gap-3'>
                     <div className='w-2/5'>
                         <div className='flex flex-row items-center items-center justify-between'>
-                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Barangay</h1>
+                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Barangay (2025)</h1>
                             <select 
                                 className='border rounded-lg text-xs h-7 px-1'
                                 value={selectedMonth}
@@ -546,7 +561,10 @@ function UrgentBarangays() {
 
 
 function ResolvedComplaintsperBrgy({ barangays }){
-    const [selectedMonth, setSelectedMonth] = useState('November');
+    const currentDate = new Date();
+    const currentMonth = MONTHS[currentDate.getMonth()];
+    
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [statusTypes, setStatusTypes] = useState([]);
     const [barangayData, setBarangayData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -554,66 +572,49 @@ function ResolvedComplaintsperBrgy({ barangays }){
     const [lowestResolved, setLowestResolved] = useState({ name: '', count: 0 });
     const [selectedBarangay, setSelectedBarangay] = useState('');
     const [avgResolutionTime, setAvgResolutionTime] = useState(0);
-
-    // Static sample resolution times for each barangay (in days)
-    const sampleResolutionTimes = {
-        'Abuno': 5.1,
-        'Acmac-Mariano Badelles Sr.': 6.4,
-        'Bagong Silang': 7.2,
-        'Bonbonon': 6.0,
-        'Bunawan': 5.7,
-        'Buru-un': 5.0,
-        'Dalipuga': 7.6,
-        'Del Carmen': 6.8,
-        'Digkilaan': 7.5,
-        'Ditucalan': 6.6,
-        'Dulag': 5.3,
-        'Hinaplanon': 4.0,
-        'Hindang': 7.1,
-        'Kabacsanan': 6.9,
-        'Kalilangan': 8.1,
-        'Kiwalan': 5.9,
-        'Lanipao': 6.7,
-        'Luinab': 7.4,
-        'Mahayahay': 6.2,
-        'Mainit': 5.8,
-        'Mandulog': 7.0,
-        'Maria Cristina': 4.6,
-        'Pala-o': 8.0,
-        'Panoroganan': 6.3,
-        'Poblacion': 8.2,
-        'Puga-an': 6.5,
-        'Rogongon': 7.9,
-        'San Miguel': 5.5,
-        'San Roque': 6.1,
-        'Santa Elena': 6.0,
-        'Santa Filomena': 7.3,
-        'Santo Rosario': 5.6,
-        'Saray': 6.4,
-        'Suarez': 8.5,
-        'Tambacan': 7.7,
-        'Tibanga': 7.0,
-        'Tipanoy': 5.4,
-        'Tominobo Proper': 8.0,
-        'Upper Hinaplanon': 6.0,
-        'Upper Tominobo': 8.0,
-        'Villa Verde': 4.3
-    };
+    const [resolutionTimeData, setResolutionTimeData] = useState([]);
 
 
     useEffect(() => {
-        if (barangays && barangays.length > 0) {
-            const firstBrgy = barangays[0].name || barangays[0].barangay_name;
-            setSelectedBarangay(firstBrgy);
-            setAvgResolutionTime(sampleResolutionTimes[firstBrgy] || 5);
-        }
-    }, [barangays]);
+        const fetchResolutionTimes = async () => {
+            try {
+                const data = await reportsAPI.getAvgResolutionTimePerBarangay(selectedMonth, '2025');
+                setResolutionTimeData(data);
+                
+                if (barangays && barangays.length > 0) {
+                    const firstBrgy = barangays[0].name || barangays[0].barangay_name;
+                    setSelectedBarangay(firstBrgy);
+                    
+                    // Find resolution time for this barangay
+                    const brgyResTime = data.find(b => b.barangay_name === firstBrgy);
+                    setAvgResolutionTime(brgyResTime?.avg_resolution_time_days || null);
+                }
+            } catch (error) {
+                console.error('Error fetching resolution times:', error);
+            }
+        };
+
+        fetchResolutionTimes();
+    }, [barangays, selectedMonth]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await reportsAPI.getMonthlyStatusPerBarangay(selectedMonth, '2025');
+                const data = await reportsAPI.getMonthlyStatusByBarangay(selectedMonth, '2025');
+                
+                console.log('Status data for', selectedMonth, ':', data);
+                
+                // Check if we have valid data
+                if (!data || !data.statuses || data.statuses.length === 0 || !data.barangays || data.barangays.length === 0) {
+                    console.log('No status data found for', selectedMonth);
+                    setStatusTypes([]);
+                    setBarangayData([]);
+                    setHighestResolved({ name: 'N/A', count: 0 });
+                    setLowestResolved({ name: 'N/A', count: 0 });
+                    setLoading(false);
+                    return;
+                }
                 
                 // Define colors for each status
                 const statusColors = {
@@ -655,6 +656,10 @@ function ResolvedComplaintsperBrgy({ barangays }){
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching status breakdown:', error);
+                setStatusTypes([]);
+                setBarangayData([]);
+                setHighestResolved({ name: 'N/A', count: 0 });
+                setLowestResolved({ name: 'N/A', count: 0 });
                 setLoading(false);
             }
         };
@@ -666,7 +671,7 @@ function ResolvedComplaintsperBrgy({ barangays }){
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Barangay</p>
+                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Barangay (2025)</p>
                     <select 
                         className='border border-gray-300 rounded-lg p-1 text-xs'
                         value={selectedMonth}
@@ -741,7 +746,8 @@ function ResolvedComplaintsperBrgy({ barangays }){
                                     onChange={(e) => {
                                         const selected = e.target.value;
                                         setSelectedBarangay(selected);
-                                        setAvgResolutionTime(sampleResolutionTimes[selected] || 0);
+                                        const brgyResTime = resolutionTimeData.find(b => b.barangay_name === selected);
+                                        setAvgResolutionTime(brgyResTime?.avg_resolution_time_days || null);
                                     }}
                                 >
                                     {!Array.isArray(barangays) || barangays.length === 0 ? (
@@ -756,7 +762,7 @@ function ResolvedComplaintsperBrgy({ barangays }){
                                 </select>
 
                                 <h2 className="w-full border rounded-b-xl text-3xl font-bold text-gray-900 text-center p-2 mb-2">
-                                    {avgResolutionTime} days
+                                    {avgResolutionTime !== null && avgResolutionTime !== undefined ? `${avgResolutionTime} days` : '--'}
                                 </h2>
                             </div>
                         </div>
@@ -815,8 +821,10 @@ function ResolvedComplaintsperBrgy({ barangays }){
 
 
 function LeadingCaseType() {
+    const currentYear = new Date().getFullYear().toString();
+    
     const [caseData, setCaseData] = useState([]);
-    const [selectedYear, setSelectedYear] = useState('2025');
+    const [selectedYear, setSelectedYear] = useState(currentYear);
     const [maxCount, setMaxCount] = useState(100);
 
     useEffect(() => {
@@ -890,9 +898,11 @@ function LeadingCaseType() {
 
 // connected to backend
 function AnnualComplaintCount() {
+    const currentYear = new Date().getFullYear().toString();
+    
     const [annualCount, setAnnualCount] = useState('...');
     const [monthlyData, setMonthlyData] = useState([]);
-    const [selectedYear, setSelectedYear] = useState('2025');
+    const [selectedYear, setSelectedYear] = useState(currentYear);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -997,12 +1007,12 @@ function SatisfactionLevel() {
                     </div>
                     <div className='w-2/3 ml-4'>
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>1</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>5</p>
                             <div className='h-3 w-4/5 bg-yellow-500 rounded-full'></div>
                         </div>
                         
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>2</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>4</p>
                             <div className='h-3 w-3/6 bg-yellow-500 rounded-full'></div>
                         </div>
                         
@@ -1012,12 +1022,12 @@ function SatisfactionLevel() {
                         </div>
                         
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>4</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>2</p>
                             <div className='h-3 w-1/5 bg-yellow-500 rounded-full'></div>
                         </div>
                         
                         <div className='flex flex-row items-center gap-2 mt-[1px]'>
-                            <p className='w-3 leading-none text-sm text-gray-700'>5</p>
+                            <p className='w-3 leading-none text-sm text-gray-700'>1</p>
                             <div className='h-3 w-1/6 bg-yellow-500 rounded-full'></div>
                         </div>
                     </div>

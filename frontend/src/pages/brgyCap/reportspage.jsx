@@ -64,17 +64,17 @@ export default function ReportsPage() {
                 {/* MIDDLE ANALYTICS */}
                 <div className='flex flex-row gap-3 mt-3'>
                     <div className='w-1/2 border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
-                        <CaseTypeBreakdownperBrgy barangays={barangays} />
+                        <CaseTypeBreakdownperBrgy barangays={barangays} barangayId={barangayId} />
                     </div>
                     <div className='w-1/2 border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
-                        <ResolvedComplaintsperBrgy barangays={barangays} />
+                        <ResolvedComplaintsperBrgy barangays={barangays} barangayId={barangayId} />
                     </div>
                 </div>
 
                 {/* BOTTOM ANALYTICS */}
                 <div className='flex flex-row gap-3 mt-3'>
                     <div className='w-full border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
-                        <UrgentBarangays />
+                        <UrgentBarangays barangayId={barangayId} />
                     </div>
                 </div>
             </div>
@@ -130,13 +130,13 @@ export default function ReportsPage() {
 
 
 
-function CaseTypeBreakdownperBrgy(){
+function CaseTypeBreakdownperBrgy({ barangayId }){
     const currentDate = new Date();
     const currentMonth = MONTHS[currentDate.getMonth()];
     
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [caseTypes, setCaseTypes] = useState([]);
-    const [barangayData, setBarangayData] = useState([]);
+    const [officialsData, setOfficialsData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [topMonthlyTypes, setTopMonthlyTypes] = useState([]);
 
@@ -153,21 +153,42 @@ function CaseTypeBreakdownperBrgy(){
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedMonth, '2025');
+                const data = await reportsAPI.getMonthlyCaseTypePerOfficial(selectedMonth, '2025', barangayId);
                 
+                // Check if we have valid data
+                if (!data || !data.officials || data.officials.length === 0) {
+                    setCaseTypes([]);
+                    setOfficialsData([]);
+                    setTopMonthlyTypes([]);
+                    setLoading(false);
+                    return;
+                }
+
+                // Limit to top 10 officials by total complaints to avoid overcrowding
+                const officialsWithTotals = data.officials.map(o => ({
+                    ...o,
+                    total: o.case_type_counts.reduce((sum, count) => sum + count, 0)
+                })).filter(o => o.total > 0)
+                  .sort((a, b) => b.total - a.total)
+                  .slice(0, 10);
+
                 // Transform data for the chart
                 const chartSeries = data.case_types.map((caseType, idx) => ({
                     label: caseType,
-                    data: data.barangays.map(b => b.case_type_counts[idx] || 0),
+                    data: officialsWithTotals.map(o => o.case_type_counts[idx] || 0),
                     color: mainColors[caseType] || '#6b7280' // Gray for others
                 }));
 
                 setCaseTypes(chartSeries);
-                setBarangayData(data.barangays.map(b => b.barangay_name));
+                // Truncate long names for better display
+                setOfficialsData(officialsWithTotals.map(o => {
+                    const name = o.official_name;
+                    return name.length > 15 ? name.substring(0, 12) + '...' : name;
+                }));
                 
-                // Calculate totals for each case type across all barangays for Top 3
+                // Calculate totals for each case type across all officials for Top 3
                 const typeTotals = data.case_types.map((caseType, idx) => {
-                    const total = data.barangays.reduce((sum, b) => sum + (b.case_type_counts[idx] || 0), 0);
+                    const total = data.officials.reduce((sum, o) => sum + (o.case_type_counts[idx] || 0), 0);
                     return { case_type: caseType, count: total };
                 });
                 
@@ -181,12 +202,15 @@ function CaseTypeBreakdownperBrgy(){
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching case type breakdown:', error);
+                setCaseTypes([]);
+                setOfficialsData([]);
+                setTopMonthlyTypes([]);
                 setLoading(false);
             }
         };
 
         fetchData();
-    }, [selectedMonth]);
+    }, [selectedMonth, barangayId]);
 
     const maxTopCount = topMonthlyTypes.length > 0 
         ? Math.max(...topMonthlyTypes.map(item => item.count)) 
@@ -196,7 +220,7 @@ function CaseTypeBreakdownperBrgy(){
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Case Type Breakdown per Barangay</p>
+                    <p className="event-title">Monthly Case Type Breakdown per Official</p>
                     <select 
                         className='border border-gray-300 rounded-lg p-1 text-xs'
                         value={selectedMonth}
@@ -212,7 +236,7 @@ function CaseTypeBreakdownperBrgy(){
                     <div className='flex justify-center items-center h-64'>
                         <p className='text-gray-500'>Loading...</p>
                     </div>
-                ) : caseTypes.length > 0 ? (
+                ) : caseTypes.length > 0 && officialsData.length > 0 ? (
                     <>
                         <div className='mt-4'>
                             <BarChart
@@ -225,7 +249,7 @@ function CaseTypeBreakdownperBrgy(){
                                 }))}
                                 xAxis={[{
                                     scaleType: 'band',
-                                    data: barangayData,
+                                    data: officialsData,
                                     tickLabelStyle: {
                                         fontSize: 11,
                                         angle: -15,
@@ -299,87 +323,87 @@ function CaseTypeBreakdownperBrgy(){
 
 
 
-function UrgentBarangays() {
+function UrgentBarangays({ barangayId }) {
     const currentDate = new Date();
     const currentMonth = MONTHS[currentDate.getMonth()];
     
-    const [urgentBarangays, setUrgentBarangays] = useState([]);
-    const [moderateBarangays, setModerateBarangays] = useState([]);
-    const [lowBarangays, setLowBarangays] = useState([]);
+    const [urgentOfficials, setUrgentOfficials] = useState([]);
+    const [moderateOfficials, setModerateOfficials] = useState([]);
+    const [lowOfficials, setLowOfficials] = useState([]);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [priorityData, setPriorityData] = useState([]);
-    const [barangayNames, setBarangayNames] = useState([]);
+    const [officialsNames, setOfficialsNames] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUrgentBarangays = async () => {
+        const fetchUrgentOfficials = async () => {
             try {
-                const data = await reportsAPI.getTopUrgentBarangays();
-                setUrgentBarangays(data);
+                const data = await reportsAPI.getTopUrgentOfficials(barangayId);
+                setUrgentOfficials(data);
             } catch (error) {
-                console.error('Error fetching urgent barangays:', error);
+                console.error('Error fetching urgent officials:', error);
             }
         };
         
-        fetchUrgentBarangays();
-    }, []);
+        fetchUrgentOfficials();
+    }, [barangayId]);
 
     useEffect(() => {
-        const fetchModerateBarangays = async () => {
+        const fetchModerateOfficials = async () => {
             try {
-                const data = await reportsAPI.getTopModerateBarangays();
-                setModerateBarangays(data);
+                const data = await reportsAPI.getTopModerateOfficials(barangayId);
+                setModerateOfficials(data);
             } catch (error) {
-                console.error('Error fetching moderate barangays:', error);
+                console.error('Error fetching moderate officials:', error);
             }
         };
         
-        fetchModerateBarangays();
-    }, []);
+        fetchModerateOfficials();
+    }, [barangayId]);
 
     useEffect(() => {
-        const fetchLowBarangays = async () => {
+        const fetchLowOfficials = async () => {
             try {
-                const data = await reportsAPI.getTopLowBarangays();
-                setLowBarangays(data);
+                const data = await reportsAPI.getTopLowOfficials(barangayId);
+                setLowOfficials(data);
             } catch (error) {
-                console.error('Error fetching low barangays:', error);
+                console.error('Error fetching low officials:', error);
             }
         };
         
-        fetchLowBarangays();
-    }, []);
+        fetchLowOfficials();
+    }, [barangayId]);
 
     useEffect(() => {
         const fetchPriorityData = async () => {
             try {
                 setLoading(true);
-                const data = await reportsAPI.getPriorityCountsPerBarangay(selectedMonth, '2025');
+                const data = await reportsAPI.getPriorityCountsPerOfficial(selectedMonth, '2025', barangayId);
                 
                 // Transform data for bar chart
                 const chartSeries = [
                     {
                         label: 'Urgent',
-                        data: data.data.map(b => b.priority_counts[0]),
+                        data: data.data.map(o => o.priority_counts[0]),
                         color: '#ef4444',
                         stack: 'total'
                     },
                     {
                         label: 'Moderate',
-                        data: data.data.map(b => b.priority_counts[1]),
+                        data: data.data.map(o => o.priority_counts[1]),
                         color: '#f59e0b',
                         stack: 'total'
                     },
                     {
                         label: 'Low',
-                        data: data.data.map(b => b.priority_counts[2]),
+                        data: data.data.map(o => o.priority_counts[2]),
                         color: '#3b82f6',
                         stack: 'total'
                     }
                 ];
 
                 setPriorityData(chartSeries);
-                setBarangayNames(data.barangays);
+                setOfficialsNames(data.officials);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching priority counts:', error);
@@ -388,7 +412,7 @@ function UrgentBarangays() {
         };
 
         fetchPriorityData();
-    }, [selectedMonth]);
+    }, [selectedMonth, barangayId]);
 
     return (
         <div className="w-auto">
@@ -396,7 +420,7 @@ function UrgentBarangays() {
                 <div className='flex flex-row gap-3'>
                     <div className='w-2/5'>
                         <div className='flex flex-row items-center items-center justify-between'>
-                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Barangay</h1>
+                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Official</h1>
                             <select 
                                 className='border rounded-lg text-xs h-7 px-1'
                                 value={selectedMonth}
@@ -419,7 +443,7 @@ function UrgentBarangays() {
                                     series={priorityData}
                                     xAxis={[{
                                         scaleType: 'band',
-                                        data: barangayNames,
+                                        data: officialsNames,
                                         tickLabelStyle: {
                                             fontSize: 11,
                                             angle: -15,
@@ -459,17 +483,17 @@ function UrgentBarangays() {
                             <div className='flex flex-row gap-3 mb-6 items-center'>
                                 <AlertOctagon className="text-red-600" size={23} strokeWidth={2} />
                                 <div className="text-sm text-gray-500 font-medium leading-tight">
-                                    Barangays that Needs
+                                    Officials that Needs
                                     <h1 className='text-red-500'>Urgent Attention</h1>
                                 </div>
                             </div>
-                            {urgentBarangays.length > 0 ? (
-                                urgentBarangays.map((brgy, idx) => (
+                            {urgentOfficials.length > 0 ? (
+                                urgentOfficials.map((official, idx) => (
                                     <div key={idx} className='mb-2'>
                                         <div className='text-sm'>
-                                            <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
+                                            <span className='font-semibold'>{idx + 1}. {official.official_name}</span>
                                             <h1 className='ml-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full w-fit inline-block'>
-                                                {brgy.urgent_count} urgent
+                                                {official.urgent_count} urgent
                                             </h1>
                                         </div>
                                     </div>
@@ -483,17 +507,17 @@ function UrgentBarangays() {
                             <div className='flex flex-row gap-3 mb-6 items-center '>
                                 <AlertTriangle className="text-yellow-600" size={23} strokeWidth={2} />
                                 <div className="text-sm text-gray-500 font-medium leading-tight">
-                                    Barangays that Needs
+                                    Officials that Needs
                                     <h1 className='text-yellow-500'>Moderate Attention</h1>
                                 </div>
                             </div>
-                            {moderateBarangays.length > 0 ? (
-                                moderateBarangays.map((brgy, idx) => (
+                            {moderateOfficials.length > 0 ? (
+                                moderateOfficials.map((official, idx) => (
                                     <div key={idx} className='mb-2'>
                                         <div className='text-sm'>
-                                            <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
+                                            <span className='font-semibold'>{idx + 1}. {official.official_name}</span>
                                             <h1 className='ml-2 text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full w-fit inline-block'>
-                                                {brgy.moderate_count} moderate
+                                                {official.moderate_count} moderate
                                             </h1>
                                         </div>
                                     </div>
@@ -506,17 +530,17 @@ function UrgentBarangays() {
                             <div className='flex flex-row gap-3 mb-6 items-center'>
                                 <CircleCheck className="text-green-600" size={23} strokeWidth={2} />
                                 <div className="text-sm text-gray-500 font-medium leading-tight">
-                                    Barangays that Needs
+                                    Officials that Needs
                                     <h1 className='text-green-500'>Low Attention</h1>
                                 </div>
                             </div>
-                            {lowBarangays.length > 0 ? (
-                                lowBarangays.map((brgy, idx) => (
+                            {lowOfficials.length > 0 ? (
+                                lowOfficials.map((official, idx) => (
                                     <div key={idx} className='mb-2'>
                                         <div className='text-sm'>
-                                            <span className='font-semibold'>{idx + 1}. {brgy.barangay_name}</span>
+                                            <span className='font-semibold'>{idx + 1}. {official.official_name}</span>
                                             <h1 className='ml-2 text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full w-fit inline-block'>
-                                                {brgy.low_count} low
+                                                {official.low_count} low
                                             </h1>
                                         </div>
                                     </div>
@@ -535,79 +559,71 @@ function UrgentBarangays() {
 
 
 
-function ResolvedComplaintsperBrgy({ barangays }){
+function ResolvedComplaintsperBrgy({ barangays, barangayId }){
     const currentDate = new Date();
     const currentMonth = MONTHS[currentDate.getMonth()];
     
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [statusTypes, setStatusTypes] = useState([]);
-    const [barangayData, setBarangayData] = useState([]);
+    const [officialsData, setOfficialsData] = useState([]);
+    const [officialsNames, setOfficialsNames] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [highestResolved, setHighestResolved] = useState({ name: '', count: 0 });
-    const [lowestResolved, setLowestResolved] = useState({ name: '', count: 0 });
-    const [selectedBarangay, setSelectedBarangay] = useState('');
+    const [highestResolved, setHighestResolved] = useState({ official_name: '', count: 0 });
+    const [lowestResolved, setLowestResolved] = useState({ official_name: '', count: 0 });
+    const [selectedOfficial, setSelectedOfficial] = useState('');
     const [avgResolutionTime, setAvgResolutionTime] = useState(0);
-
-    // Static sample resolution times for each barangay (in days)
-    const sampleResolutionTimes = {
-        'Abuno': 5.1,
-        'Acmac-Mariano Badelles Sr.': 6.4,
-        'Bagong Silang': 7.2,
-        'Bonbonon': 6.0,
-        'Bunawan': 5.7,
-        'Buru-un': 5.0,
-        'Dalipuga': 7.6,
-        'Del Carmen': 6.8,
-        'Digkilaan': 7.5,
-        'Ditucalan': 6.6,
-        'Dulag': 5.3,
-        'Hinaplanon': 4.0,
-        'Hindang': 7.1,
-        'Kabacsanan': 6.9,
-        'Kalilangan': 8.1,
-        'Kiwalan': 5.9,
-        'Lanipao': 6.7,
-        'Luinab': 7.4,
-        'Mahayahay': 6.2,
-        'Mainit': 5.8,
-        'Mandulog': 7.0,
-        'Maria Cristina': 4.6,
-        'Pala-o': 8.0,
-        'Panoroganan': 6.3,
-        'Poblacion': 8.2,
-        'Puga-an': 6.5,
-        'Rogongon': 7.9,
-        'San Miguel': 5.5,
-        'San Roque': 6.1,
-        'Santa Elena': 6.0,
-        'Santa Filomena': 7.3,
-        'Santo Rosario': 5.6,
-        'Saray': 6.4,
-        'Suarez': 8.5,
-        'Tambacan': 7.7,
-        'Tibanga': 7.0,
-        'Tipanoy': 5.4,
-        'Tominobo Proper': 8.0,
-        'Upper Hinaplanon': 6.0,
-        'Upper Tominobo': 8.0,
-        'Villa Verde': 4.3
-    };
+    const [resolutionTimeData, setResolutionTimeData] = useState([]);
 
 
     useEffect(() => {
-        if (barangays && barangays.length > 0) {
-            const firstBrgy = barangays[0].name || barangays[0].barangay_name;
-            setSelectedBarangay(firstBrgy);
-            setAvgResolutionTime(sampleResolutionTimes[firstBrgy] || 5);
+        const fetchResolutionTimes = async () => {
+            try {
+                const data = await reportsAPI.getAvgResolutionTimePerOfficial(barangayId);
+                setResolutionTimeData(data);
+                
+                if (officialsData && officialsData.length > 0) {
+                    const firstOfficial = officialsData[0];
+                    setSelectedOfficial(firstOfficial.official_name);
+                    
+                    // Find resolution time for this official
+                    const officialResTime = data.find(o => o.user_id === firstOfficial.user_id);
+                    setAvgResolutionTime(officialResTime?.avg_resolution_time_days || 0);
+                }
+            } catch (error) {
+                console.error('Error fetching resolution times:', error);
+            }
+        };
+
+        if (barangayId) {
+            fetchResolutionTimes();
         }
-    }, [barangays]);
+    }, [officialsData, barangayId]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await reportsAPI.getMonthlyStatusPerBarangay(selectedMonth, '2025');
+                const data = await reportsAPI.getMonthlyStatusPerBarangay(selectedMonth, '2025', barangayId);
                 
+                // Check if we have valid data
+                if (!data || !data.officials || data.officials.length === 0) {
+                    setStatusTypes([]);
+                    setOfficialsNames([]);
+                    setOfficialsData([]);
+                    setHighestResolved({ official_name: 'N/A', count: 0 });
+                    setLowestResolved({ official_name: 'N/A', count: 0 });
+                    setLoading(false);
+                    return;
+                }
+
+                // Limit to top 10 officials by total complaints to avoid overcrowding
+                const officialsWithTotals = data.officials.map(o => ({
+                    ...o,
+                    total: o.status_counts.reduce((sum, count) => sum + count, 0)
+                })).filter(o => o.total > 0)
+                  .sort((a, b) => b.total - a.total)
+                  .slice(0, 10);
+
                 // Define colors for each status
                 const statusColors = {
                     'Pending': '#f59e0b',
@@ -618,48 +634,58 @@ function ResolvedComplaintsperBrgy({ barangays }){
                 // Transform data for the chart
                 const chartSeries = data.statuses.map((status, idx) => ({
                     label: status,
-                    data: data.barangays.map(b => b.status_counts[idx] || 0),
+                    data: officialsWithTotals.map(o => o.status_counts[idx] || 0),
                     color: statusColors[status] || '#6b7280'
                 }));
 
                 setStatusTypes(chartSeries);
-                setBarangayData(data.barangays.map(b => b.barangay_name));
+                // Truncate long names for better display
+                setOfficialsNames(officialsWithTotals.map(o => {
+                    const name = o.official_name;
+                    return name.length > 15 ? name.substring(0, 12) + '...' : name;
+                }));
+                setOfficialsData(data.officials); // Keep full data for dropdown
 
                 // Find highest and lowest resolved cases (Resolved is at index 2)
                 const resolvedIndex = data.statuses.indexOf('Resolved');
                 if (resolvedIndex !== -1) {
-                    let maxResolved = { name: '', count: 0 };
-                    let minResolved = { name: '', count: Infinity };
+                    let maxResolved = { official_name: '', count: 0 };
+                    let minResolved = { official_name: '', count: Infinity };
 
-                    data.barangays.forEach(b => {
-                        const resolvedCount = b.status_counts[resolvedIndex] || 0;
+                    data.officials.forEach(o => {
+                        const resolvedCount = o.status_counts[resolvedIndex] || 0;
                         if (resolvedCount > maxResolved.count) {
-                            maxResolved = { name: b.barangay_name, count: resolvedCount };
+                            maxResolved = { official_name: o.official_name, count: resolvedCount };
                         }
                         if (resolvedCount < minResolved.count && resolvedCount > 0) {
-                            minResolved = { name: b.barangay_name, count: resolvedCount };
+                            minResolved = { official_name: o.official_name, count: resolvedCount };
                         }
                     });
 
                     setHighestResolved(maxResolved);
-                    setLowestResolved(minResolved.count !== Infinity ? minResolved : { name: 'N/A', count: 0 });
+                    setLowestResolved(minResolved.count !== Infinity ? minResolved : { official_name: 'N/A', count: 0 });
                 }
 
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching status breakdown:', error);
+                setStatusTypes([]);
+                setOfficialsNames([]);
+                setOfficialsData([]);
+                setHighestResolved({ official_name: 'N/A', count: 0 });
+                setLowestResolved({ official_name: 'N/A', count: 0 });
                 setLoading(false);
             }
         };
 
         fetchData();
-    }, [selectedMonth]);
+    }, [selectedMonth, barangayId]);
 
     return (
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Barangay</p>
+                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Official</p>
                     <select 
                         className='border border-gray-300 rounded-lg p-1 text-xs'
                         value={selectedMonth}
@@ -675,7 +701,7 @@ function ResolvedComplaintsperBrgy({ barangays }){
                     <div className='flex justify-center items-center h-64'>
                         <p className='text-gray-500'>Loading...</p>
                     </div>
-                ) : statusTypes.length > 0 ? (
+                ) : statusTypes.length > 0 && officialsNames.length > 0 ? (
                     <>
                         <div className='mt-4'>
                             <BarChart
@@ -688,7 +714,7 @@ function ResolvedComplaintsperBrgy({ barangays }){
                                 }))}
                                 xAxis={[{
                                     scaleType: 'band',
-                                    data: barangayData,
+                                    data: officialsNames,
                                     tickLabelStyle: {
                                         fontSize: 11,
                                         angle: -15,
@@ -725,24 +751,26 @@ function ResolvedComplaintsperBrgy({ barangays }){
                         <div className="flex flex-col gap-5">
                             <div className='items-center flex flex-col justify-center'>
                                 <p className="text-sm text-gray-500 font-medium text-center">
-                                    Avg. Resolution Time per Barangay
+                                    Avg. Resolution Time per Official
                                 </p>
 
                                 <select 
                                     className='w-full border bg-white rounded-t-lg text-xs font-semibold text-blue-500 p-1 px-2 mt-5'
-                                    value={selectedBarangay}
+                                    value={selectedOfficial}
                                     onChange={(e) => {
-                                        const selected = e.target.value;
-                                        setSelectedBarangay(selected);
-                                        setAvgResolutionTime(sampleResolutionTimes[selected] || 0);
+                                        const selectedOfficialName = e.target.value;
+                                        setSelectedOfficial(selectedOfficialName);
+                                        const officialData = officialsData.find(o => o.official_name === selectedOfficialName);
+                                        const officialResTime = resolutionTimeData.find(o => o.user_id === officialData?.user_id);
+                                        setAvgResolutionTime(officialResTime?.avg_resolution_time_days || 0);
                                     }}
                                 >
-                                    {!Array.isArray(barangays) || barangays.length === 0 ? (
-                                        <option value="">Loading barangays...</option>
+                                    {!Array.isArray(officialsData) || officialsData.length === 0 ? (
+                                        <option value="">Loading officials...</option>
                                     ) : (
-                                        barangays.map((brgy, idx) => (
-                                            <option key={idx} value={brgy.name || brgy.barangay_name}>
-                                                {brgy.name || brgy.barangay_name}
+                                        officialsData.map((official, idx) => (
+                                            <option key={idx} value={official.official_name}>
+                                                {official.official_name}
                                             </option>
                                         ))
                                     )}
@@ -765,11 +793,11 @@ function ResolvedComplaintsperBrgy({ barangays }){
                         <div className="mb-4">
                             <p className="text-sm text-gray-600">
                                 <TrendingUp size={14} className='inline-block mr-1' color='green'/>
-                                Barangay with Highest Resolved Cases
+                                Official with Highest Resolved Cases
                             </p>
                             <div className='flex flex-row justify-between items-center border rounded-lg mx-4 mt-1'>
                                 <h2 className="w-2/3 text-lg px-2 font-semibold text-gray-900 overflow-hidden whitespace-nowrap text-ellipsis">
-                                    {highestResolved.name || 'N/A'}
+                                    {highestResolved.official_name || 'N/A'}
                                 </h2>
                                 <h2 className='w-1/3 bg-green-500 text-center rounded-lg text-white text-lg font-semibold'>
                                     {highestResolved.count} cases
@@ -780,11 +808,11 @@ function ResolvedComplaintsperBrgy({ barangays }){
                         <div>
                             <p className="text-sm text-gray-600">
                                 <TrendingDown size={14} className='inline-block mr-1' color='red'/>
-                                Barangay with Lowest Resolved Cases
+                                Official with Lowest Resolved Cases
                             </p>
                             <div className='flex flex-row justify-between items-center border rounded-lg mx-4 mt-1'>
                                 <h2 className="w-2/3 text-lg px-2 font-semibold text-gray-900 overflow-hidden whitespace-nowrap text-ellipsis">
-                                    {lowestResolved.name || 'N/A'}
+                                    {lowestResolved.official_name || 'N/A'}
                                 </h2>
                                 <h2 className='w-1/3 bg-red-500 text-center rounded-lg text-white text-lg font-semibold'>
                                     {lowestResolved.count} cases

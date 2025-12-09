@@ -152,6 +152,18 @@ function CaseTypeBreakdownperBrgy(){
                 setLoading(true);
                 const data = await reportsAPI.getMonthlyCaseTypePerBarangay(selectedMonth, '2025');
                 
+                console.log('Fetched data for', selectedMonth, ':', data);
+                
+                // Check if we have valid data
+                if (!data || !data.case_types || data.case_types.length === 0) {
+                    console.log('No case types found for', selectedMonth);
+                    setCaseTypes([]);
+                    setBarangayData([]);
+                    setTopMonthlyTypes([]);
+                    setLoading(false);
+                    return;
+                }
+
                 // Transform data for the chart
                 const chartSeries = data.case_types.map((caseType, idx) => ({
                     label: caseType,
@@ -178,6 +190,9 @@ function CaseTypeBreakdownperBrgy(){
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching case type breakdown:', error);
+                setCaseTypes([]);
+                setBarangayData([]);
+                setTopMonthlyTypes([]);
                 setLoading(false);
             }
         };
@@ -353,6 +368,17 @@ function UrgentBarangays() {
                 setLoading(true);
                 const data = await reportsAPI.getPriorityCountsPerBarangay(selectedMonth, '2025');
                 
+                console.log('Priority data for', selectedMonth, ':', data);
+                
+                // Check if we have valid data
+                if (!data || !data.data || data.data.length === 0) {
+                    console.log('No priority data found for', selectedMonth);
+                    setPriorityData([]);
+                    setBarangayNames([]);
+                    setLoading(false);
+                    return;
+                }
+                
                 // Transform data for bar chart
                 const chartSeries = [
                     {
@@ -380,6 +406,8 @@ function UrgentBarangays() {
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching priority counts:', error);
+                setPriorityData([]);
+                setBarangayNames([]);
                 setLoading(false);
             }
         };
@@ -393,7 +421,7 @@ function UrgentBarangays() {
                 <div className='flex flex-row gap-3'>
                     <div className='w-2/5'>
                         <div className='flex flex-row items-center items-center justify-between'>
-                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Barangay</h1>
+                            <h1 className="text-sm text-gray-500 font-medium">Complaint Priority Count per Barangay (2025)</h1>
                             <select 
                                 className='border rounded-lg text-xs h-7 px-1'
                                 value={selectedMonth}
@@ -544,66 +572,49 @@ function ResolvedComplaintsperBrgy({ barangays }){
     const [lowestResolved, setLowestResolved] = useState({ name: '', count: 0 });
     const [selectedBarangay, setSelectedBarangay] = useState('');
     const [avgResolutionTime, setAvgResolutionTime] = useState(0);
-
-    // Static sample resolution times for each barangay (in days)
-    const sampleResolutionTimes = {
-        'Abuno': 5.1,
-        'Acmac-Mariano Badelles Sr.': 6.4,
-        'Bagong Silang': 7.2,
-        'Bonbonon': 6.0,
-        'Bunawan': 5.7,
-        'Buru-un': 5.0,
-        'Dalipuga': 7.6,
-        'Del Carmen': 6.8,
-        'Digkilaan': 7.5,
-        'Ditucalan': 6.6,
-        'Dulag': 5.3,
-        'Hinaplanon': 4.0,
-        'Hindang': 7.1,
-        'Kabacsanan': 6.9,
-        'Kalilangan': 8.1,
-        'Kiwalan': 5.9,
-        'Lanipao': 6.7,
-        'Luinab': 7.4,
-        'Mahayahay': 6.2,
-        'Mainit': 5.8,
-        'Mandulog': 7.0,
-        'Maria Cristina': 4.6,
-        'Pala-o': 8.0,
-        'Panoroganan': 6.3,
-        'Poblacion': 8.2,
-        'Puga-an': 6.5,
-        'Rogongon': 7.9,
-        'San Miguel': 5.5,
-        'San Roque': 6.1,
-        'Santa Elena': 6.0,
-        'Santa Filomena': 7.3,
-        'Santo Rosario': 5.6,
-        'Saray': 6.4,
-        'Suarez': 8.5,
-        'Tambacan': 7.7,
-        'Tibanga': 7.0,
-        'Tipanoy': 5.4,
-        'Tominobo Proper': 8.0,
-        'Upper Hinaplanon': 6.0,
-        'Upper Tominobo': 8.0,
-        'Villa Verde': 4.3
-    };
+    const [resolutionTimeData, setResolutionTimeData] = useState([]);
 
 
     useEffect(() => {
-        if (barangays && barangays.length > 0) {
-            const firstBrgy = barangays[0].name || barangays[0].barangay_name;
-            setSelectedBarangay(firstBrgy);
-            setAvgResolutionTime(sampleResolutionTimes[firstBrgy] || 5);
-        }
-    }, [barangays]);
+        const fetchResolutionTimes = async () => {
+            try {
+                const data = await reportsAPI.getAvgResolutionTimePerBarangay(selectedMonth, '2025');
+                setResolutionTimeData(data);
+                
+                if (barangays && barangays.length > 0) {
+                    const firstBrgy = barangays[0].name || barangays[0].barangay_name;
+                    setSelectedBarangay(firstBrgy);
+                    
+                    // Find resolution time for this barangay
+                    const brgyResTime = data.find(b => b.barangay_name === firstBrgy);
+                    setAvgResolutionTime(brgyResTime?.avg_resolution_time_days || null);
+                }
+            } catch (error) {
+                console.error('Error fetching resolution times:', error);
+            }
+        };
+
+        fetchResolutionTimes();
+    }, [barangays, selectedMonth]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await reportsAPI.getMonthlyStatusPerBarangay(selectedMonth, '2025');
+                const data = await reportsAPI.getMonthlyStatusByBarangay(selectedMonth, '2025');
+                
+                console.log('Status data for', selectedMonth, ':', data);
+                
+                // Check if we have valid data
+                if (!data || !data.statuses || data.statuses.length === 0 || !data.barangays || data.barangays.length === 0) {
+                    console.log('No status data found for', selectedMonth);
+                    setStatusTypes([]);
+                    setBarangayData([]);
+                    setHighestResolved({ name: 'N/A', count: 0 });
+                    setLowestResolved({ name: 'N/A', count: 0 });
+                    setLoading(false);
+                    return;
+                }
                 
                 // Define colors for each status
                 const statusColors = {
@@ -645,6 +656,10 @@ function ResolvedComplaintsperBrgy({ barangays }){
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching status breakdown:', error);
+                setStatusTypes([]);
+                setBarangayData([]);
+                setHighestResolved({ name: 'N/A', count: 0 });
+                setLowestResolved({ name: 'N/A', count: 0 });
                 setLoading(false);
             }
         };
@@ -656,7 +671,7 @@ function ResolvedComplaintsperBrgy({ barangays }){
         <div className="event-card">
             <div className="event-content">
                 <div className='flex flex-row justify-between items-center mb-2'>
-                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Barangay</p>
+                    <p className="event-title">Monthly Pending, In-Progress, and Resolved Cases per Barangay (2025)</p>
                     <select 
                         className='border border-gray-300 rounded-lg p-1 text-xs'
                         value={selectedMonth}
@@ -731,7 +746,8 @@ function ResolvedComplaintsperBrgy({ barangays }){
                                     onChange={(e) => {
                                         const selected = e.target.value;
                                         setSelectedBarangay(selected);
-                                        setAvgResolutionTime(sampleResolutionTimes[selected] || 0);
+                                        const brgyResTime = resolutionTimeData.find(b => b.barangay_name === selected);
+                                        setAvgResolutionTime(brgyResTime?.avg_resolution_time_days || null);
                                     }}
                                 >
                                     {!Array.isArray(barangays) || barangays.length === 0 ? (
@@ -746,7 +762,7 @@ function ResolvedComplaintsperBrgy({ barangays }){
                                 </select>
 
                                 <h2 className="w-full border rounded-b-xl text-3xl font-bold text-gray-900 text-center p-2 mb-2">
-                                    {avgResolutionTime} days
+                                    {avgResolutionTime !== null && avgResolutionTime !== undefined ? `${avgResolutionTime} days` : '--'}
                                 </h2>
                             </div>
                         </div>
