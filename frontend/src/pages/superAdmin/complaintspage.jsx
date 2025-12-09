@@ -7,6 +7,8 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 const SA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -27,9 +29,14 @@ const SA_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [complaintData, setComplaintData] = useState(null);
+
+  // toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const defaultStatus = location.state?.defaultStatus || 'all';
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
@@ -133,8 +140,8 @@ const SA_ComplaintsPage = () => {
 
   // Update Priority
   const handlePriorityUpdate = (complaint) => {
-    console.log('Update priority for:', complaint);
-    // Open priority modal
+    setComplaintData(complaint);
+    setIsPriorityOpen(true);
   };
   
     // Selection
@@ -194,6 +201,19 @@ const SA_ComplaintsPage = () => {
     setCurrentPage(1);
   }, [searchTerm, filters]);
 
+  // Priority Update Handler
+  const handlePriorityChange = (newPriority) => {
+    setComplaints(prevComplaints =>
+      prevComplaints.map(complaint =>
+        complaint.id === complaintData?.id
+          ? { ...complaint, priority: newPriority }
+          : complaint
+      )
+    );
+    setToastMessage('Priority updated successfully!');
+    setToastVisible(true);
+  };
+
   return (
     <>
       <div className="bg-gray-50 min-h-screen py-8">
@@ -231,7 +251,7 @@ const SA_ComplaintsPage = () => {
               >
                 <option value="all">All Barangays</option>
                 {uniqueBarangays.map(barangay => (
-                  <option key={barangay} value={barangay}></option>
+                  <option key={barangay} value={barangay}>{barangay}</option>
                 ))}
               </select>
               {/* Status Filter */}
@@ -337,13 +357,20 @@ const SA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal
+      <AssignComplaintModal
         isOpen={isAssignOpen}
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Complaint"
-        assignDetails={complaintData}
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        selectedComplaints={[...selected.values()]}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
+
+      <SetPriorityModal
+        isOpen={isPriorityOpen}
+        onClose={() => setIsPriorityOpen(false)}
+        complaint={complaintData}
+        onPriorityUpdate={handlePriorityChange}
+      />
 
       <StatusUpdateModal
         isOpen={isStatusModalOpen}
@@ -353,6 +380,12 @@ const SA_ComplaintsPage = () => {
           setRefresh(prev => !prev);
           fetchComplaints();
         }}
+      />
+
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
       />
     </>
   );

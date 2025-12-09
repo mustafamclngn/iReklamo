@@ -6,16 +6,16 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
-import AssignActionModal from '../../components/modals/AssignActionModal';
+import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
+import SetPriorityModal from '../../components/modals/SetPriorityModal';
+import Toast from '../../components/common/Toast';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const { auth } = useAuth();
-  const user = auth?.user
-  const userId = user?.user_id
     
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
   const [complaintData, setComplaintData] = useState(null)
@@ -32,10 +32,9 @@ const BC_ComplaintsPage = () => {
 
   // modal states
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [complaintData, setComplaintData] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const [refresh, setRefresh] = useState(false);
 
   // toast state
   const [toastVisible, setToastVisible] = useState(false);
@@ -344,13 +343,13 @@ const BC_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignActionModal
+      <AssignComplaintModal
         isOpen={isAssignOpen}
-        onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        Action="Assign Complaint"
-        assignDetails={complaintData}
+        onClose={() => setIsAssignOpen(false)}
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        selectedComplaints={[...selected.values()]}
         >
-      </AssignActionModal>
+      </AssignComplaintModal>
       <SetPriorityModal
         isOpen={isPriorityOpen}
         onClose={() => setIsPriorityOpen(false)}

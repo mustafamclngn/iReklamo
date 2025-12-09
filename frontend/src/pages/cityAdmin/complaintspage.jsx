@@ -32,7 +32,6 @@ const CA_ComplaintsPage = () => {
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const [complaintData, setComplaintData] = useState(null);
 
   // toast state
   const [toastVisible, setToastVisible] = useState(false);
