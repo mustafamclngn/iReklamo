@@ -102,6 +102,8 @@ const AccountPage = () => {
     navigate('/home');
   }
 
+  useLockBodyScroll(isConfirmOpen);  
+
   if (loading) {
     return <LoadingSpinner message="Loading account details..." />;
   }
@@ -116,9 +118,6 @@ const AccountPage = () => {
       </div>
     );
   }
-
-  const anyModalOpen = isConfirmOpen;
-  useLockBodyScroll(anyModalOpen);  
 
   return (
     <div className="bg-gray-50 min-h-screen">
