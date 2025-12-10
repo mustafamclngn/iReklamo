@@ -1,11 +1,7 @@
 import './modal.css'
 import { useState } from 'react'
 
-
 const ConfirmCreateAdmin = ({ isOpen, onClose, onConfirm, user }) => {
-
-
-
   const [isChecked, setIsChecked] = useState(false);
 
   if (!isOpen) return null;
@@ -15,12 +11,12 @@ const ConfirmCreateAdmin = ({ isOpen, onClose, onConfirm, user }) => {
       <div className="popup-overlay">
         <div className="confirm-content">
           <button onClick={onClose} className="popup-close">✕</button>
-          <h2 className="title">Confirm Account Creation</h2>
+          <h2 className="title">Confirm Creation</h2>
+          <p className="subtitle">Please review the account details below.</p>
+          
           <form className="form">
             <div className="form-group">
-              <label>
-                You are about to create a new admin account for:
-              </label>
+              <label>New Admin Account Summary:</label>
               <div className="user-summary">
                 <p><strong>Username:</strong> {user.user}</p>
                 <p><strong>Email:</strong> {user.email}</p>
@@ -46,18 +42,18 @@ const ConfirmCreateAdmin = ({ isOpen, onClose, onConfirm, user }) => {
             <div className="popup-footer">
               <button
                 type="button"
-                className="okay-button"
-                onClick={onConfirm}
-                disabled={!isChecked}
-              >
-                Confirm
-              </button>
-              <button
-                type="button"
                 className="revoke-button"
                 onClick={onClose}
               >
                 Cancel
+              </button>
+              <button
+                type="button"
+                className="okay-button"
+                onClick={onConfirm}
+                disabled={!isChecked}
+              >
+                Confirm Creation
               </button>
             </div>
           </form>

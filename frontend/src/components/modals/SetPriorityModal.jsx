@@ -21,7 +21,6 @@ const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
       if (response.success) {
         onPriorityUpdate?.(selectedPriority)
         onClose()
-        // Optionally show success message (not required per acceptance criteria)
       } else {
         setErrorMsg('Failed to update priority, please try again')
         setIsErrorOpen(true)
@@ -42,7 +41,9 @@ const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
       <div className="popup-overlay">
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
-          <h2 className="title">Set Complaint Priority</h2>
+          <h2 className="title">Set Priority</h2>
+          <p className="subtitle">Adjust the priority level for this complaint.</p>
+          
           <form onSubmit={handleSubmit} className="form">
             <div className="form-group">
               <label>Priority Level</label>
@@ -56,16 +57,17 @@ const SetPriorityModal = ({ isOpen, onClose, complaint, onPriorityUpdate }) => {
                 <option value="Urgent">Urgent</option>
               </select>
             </div>
+            
             <div className="popup-footer">
+              <button type="button" onClick={onClose} className="revoke-button" disabled={isSubmitting}>
+                Cancel
+              </button>
               <button
                 type="submit"
                 className="okay-button"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Updating...' : 'Update Priority'}
-              </button>
-              <button type="button" onClick={onClose} className="revoke-button" disabled={isSubmitting}>
-                Cancel
               </button>
             </div>
           </form>

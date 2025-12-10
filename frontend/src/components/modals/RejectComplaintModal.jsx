@@ -12,17 +12,11 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
       setValidationError('Please provide a reason for rejection');
       return;
     }
-
     setValidationError('');
-    setIsConfirmOpen(true); // Open confirmation modal
-  };
-
-  const handleConfirmClose = () => {
-    setIsConfirmOpen(false);
+    setIsConfirmOpen(true);
   };
 
   const handleConfirmSuccess = () => {
-    // Close both modals and trigger parent callback
     setIsConfirmOpen(false);
     onClose();
     onConfirm();
@@ -36,10 +30,7 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
 
   const handleReasonChange = (e) => {
     setRejectionReason(e.target.value);
-    // Clear validation error when user starts typing
-    if (validationError) {
-      setValidationError('');
-    }
+    if (validationError) setValidationError('');
   };
 
   if (!isOpen || !complaint) return null;
@@ -49,77 +40,65 @@ const RejectComplaintModal = ({ isOpen, onClose, complaint, onConfirm }) => {
       <div className="popup-content">
         <button onClick={handleClose} className="popup-close">✕</button>
         <h2 className="title">Reject Complaint</h2>
+        <p className="subtitle">Provide a reason for rejecting this complaint.</p>
 
         <div className="form">
-          {/* Complaint Summary */}
           <div className="form-group">
             <label>Complaint Summary</label>
-            <div className="complaint-summary">
-              <div className="summary-row">
-                <strong>Code:</strong> {complaint.complaint_code}
-              </div>
-              <div className="summary-row">
-                <strong>Title:</strong> {complaint.title}
-              </div>
-              <div className="summary-row">
-                <strong>Barangay:</strong> {complaint.barangay || 'N/A'}
-              </div>
-              <div className="summary-row">
-                <strong>Status:</strong> {complaint.status}
-              </div>
+            <div className="user-summary">
+              <p><strong>Code:</strong> {complaint.complaint_code}</p>
+              <p><strong>Title:</strong> {complaint.title}</p>
+              <p><strong>Barangay:</strong> {complaint.barangay || 'N/A'}</p>
+              <p><strong>Status:</strong> {complaint.status}</p>
             </div>
           </div>
 
-          {/* Rejection Reason */}
           <div className="form-group">
-            <label htmlFor="rejectionReason">Reason for Rejection <span className="required">*</span></label>
+            <label htmlFor="rejectionReason">Reason for Rejection</label>
             <textarea
               id="rejectionReason"
               value={rejectionReason}
               onChange={handleReasonChange}
               placeholder="Please explain why this complaint must be rejected..."
               rows="4"
-              className={`reason-textarea ${validationError ? 'error' : ''}`}
+              style={{
+                width: '100%',
+                padding: '0.625rem',
+                border: `1px solid ${validationError ? '#ef4444' : '#d1d5db'}`,
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontFamily: 'inherit',
+                resize: 'none'
+              }}
               required
             />
             {validationError && (
-              <div style={{
-                color: '#dc2626',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginTop: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <i className="bi bi-exclamation-circle"></i>
-                {validationError}
-              </div>
+              <p className="instructions" style={{color: '#ef4444'}}>
+                <i className="bi bi-exclamation-circle"></i> {validationError}
+              </p>
             )}
           </div>
 
-          {/* Warning */}
-          <div className="warning-box">
-            <strong>⚠️ Important:</strong> This action will reject the complaint and mark it as invalid.
-            Rejected complaints cannot be reassigned or further processed.
+          <div className="user-summary" style={{backgroundColor: '#fffbeb', borderColor: '#fcd34d'}}>
+            <p style={{color: '#92400e', fontSize: '0.8rem'}}>
+              <strong>⚠️ Important:</strong> Rejected complaints cannot be reassigned or further processed.
+            </p>
           </div>
 
-          {/* Footer */}
           <div className="popup-footer">
-            <button type="button" className="revoke-button" onClick={handleNextStep}>
-              Next: Confirm Rejection
-            </button>
-            <button type="button" className="okay-button" onClick={handleClose}>
+            <button type="button" className="revoke-button" onClick={handleClose}>
               Cancel
+            </button>
+            <button type="button" className="okay-button" onClick={handleNextStep} style={{backgroundColor: '#ef4444'}}>
+              Next: Confirm Rejection
             </button>
           </div>
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       <ConfirmRejectModal
         isOpen={isConfirmOpen}
-        onClose={handleConfirmClose}
+        onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleConfirmSuccess}
         complaint={complaint}
         rejectionReason={rejectionReason}

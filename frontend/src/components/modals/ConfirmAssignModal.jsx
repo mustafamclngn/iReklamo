@@ -1,11 +1,7 @@
 import './modal.css'
-
 import { useState } from 'react'
 
 const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => {
-
-
-
   const [isChecked, setIsChecked] = useState(false);
 
   if (!isOpen) return null;
@@ -16,16 +12,16 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => 
         <div className="confirm-content">
           <button onClick={onClose} className="popup-close">✕</button>
           <h2 className="title">Confirm Assignment</h2>
+          <p className="subtitle">Review assignment details before proceeding.</p>
+
           <form className="form">
             
             <div className="form-group">
-              <label>
-                You are about to assign the complaint/s:
-              </label>
+              <label>Selected Complaints:</label>
               <div className="user-summary">
                 <div className="complaint-list">
                   {complaints?.length > 0 ? (
-                    <ol>
+                    <ol style={{paddingLeft: '1.2rem', margin: 0}}>
                       {complaints.map((complaint, index) => (
                         <li key={complaint.id}>
                           <strong>{index + 1}</strong>. <em>{complaint.complaint_code}</em>: <em>{complaint.title}</em>
@@ -40,12 +36,10 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => 
             </div>
 
             <div className="form-group">
-              <label>
-                You are about to assign official:
-              </label>
+              <label>Assignee:</label>
               <div className="user-summary">
-                <p><strong>Official Position:</strong> {official.position}</p>
-                <p><strong>Official Name:</strong> {official.first_name} {official.last_name}</p>
+                <p><strong>Name:</strong> {official.first_name} {official.last_name}</p>
+                <p><strong>Position:</strong> {official.position}</p>
               </div>
             </div>
 
@@ -65,18 +59,18 @@ const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => 
             <div className="popup-footer">
               <button
                 type="button"
-                className="okay-button"
-                onClick={onConfirm}
-                disabled={!isChecked}
-              >
-                Confirm
-              </button>
-              <button
-                type="button"
                 className="revoke-button"
                 onClick={onClose}
               >
                 Cancel
+              </button>
+              <button
+                type="button"
+                className="okay-button"
+                onClick={onConfirm}
+                disabled={!isChecked}
+              >
+                Confirm Assignment
               </button>
             </div>
           </form>

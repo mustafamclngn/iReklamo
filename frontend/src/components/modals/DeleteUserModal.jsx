@@ -3,17 +3,11 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
 import ConfirmDelete from './ConfirmDelete'
 
-
 const DeleteModal = ({ isOpen, onClose, deleteData }) => {
-
-
-
   const [assignedComplaints, setAssignedComplaints] = useState([])
   const user_id = deleteData?.user_id
-
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [revokeType, setRevokeType] = useState('')
-
   const { getActiveCases } = useComplaintsApi();
 
   const handleConfirmRevoke = (type) => {
@@ -22,21 +16,16 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
   };
 
   useEffect(() => {
-
     if (!isOpen || !user_id) return
-
     const fetchComplaints = async () => {
       try {
-        console.log("Searching for complaints for user:", user_id)
         const response = await getActiveCases(user_id)
         setAssignedComplaints(response?.complaints || [])
-        console.log("Active Cases: ", assignedComplaints)
       } catch (error) {
         console.error("Error fetching assigned complaints:", error)
         setAssignedComplaints([])
       }
     }
-
     fetchComplaints()
   }, [isOpen, user_id])
 
@@ -52,14 +41,14 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
 
   if (!isOpen || !deleteData) return null
 
-  console.log(deleteData);
-
   return (
     <>
       <div className="popup-overlay">
         <div className="popup-content">
           <button onClick={onClose} className="popup-close">✕</button>
           <h2 className="title">User Details</h2>
+          <p className="subtitle">Manage account access and permissions.</p>
+
           <form className="form">
             <div className="form-group">
               <label>Username</label>
@@ -77,11 +66,12 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
               <label>Role</label>
               <input value={getRoleLabel(deleteData.role_id) || ""} readOnly />
             </div>
+            
             <div className="form-group">
               <label>Ongoing Assignments</label>
-              <div className="complaint-list">
+              <div className="user-summary">
                 {assignedComplaints.length > 0 ? (
-                  <ol>
+                  <ol style={{paddingLeft: '1.2rem', margin: 0}}>
                     {assignedComplaints.map((complaint, index) => (
                       <li key={complaint.id}>
                         <strong>{index + 1}</strong>. <em>{complaint.title}</em>
@@ -93,25 +83,29 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
                 )}
               </div>
             </div>
+
             <div className="popup-footer">
-              <div className="tooltip">
-                <button type="button" className="revoke-button" onClick={() => handleConfirmRevoke("Permissions")}>
-                  Revoke Permissions
-                </button>
-                <span className="tooltip-text">
-                  Removes this user’s access to their role permissions.
-                </span>
-              </div>
-              <div className="tooltip">
-                <button type="button" className="revoke-button" onClick={() => handleConfirmRevoke("Account")}>
-                  Revoke Account
-                </button>
-                <span className="tooltip-text">
-                  Permanently disables the user’s account and removes login access.
-                </span>
-              </div>
               <button type="button" className="okay-button" onClick={onClose}>
                 Cancel
+              </button>
+              
+              <button 
+                type="button" 
+                className="revoke-button" 
+                onClick={() => handleConfirmRevoke("Permissions")}
+                title="Removes this user’s access to their role permissions."
+              >
+                Revoke Permissions
+              </button>
+              
+              <button 
+                type="button" 
+                className="revoke-button" 
+                style={{backgroundColor: '#ef4444', color: 'white'}}
+                onClick={() => handleConfirmRevoke("Account")}
+                title="Permanently disables the user’s account."
+              >
+                Revoke Account
               </button>
             </div>
           </form>

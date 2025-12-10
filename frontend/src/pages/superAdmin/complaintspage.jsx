@@ -292,7 +292,7 @@ const SA_ComplaintsPage = () => {
                 title="Assign selected"
                 disabled={selected.size === 0}
               >
-                Batch Assign
+                Batch
               </button>
               
               <button
