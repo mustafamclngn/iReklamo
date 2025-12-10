@@ -141,6 +141,9 @@ const OfficialDetailsPage = () => {
 
   const profileCompletion = getProfileCompletion();
 
+  const anyModalOpen = isAssignOpen || isDeleteOpen || isViewCasesOpen;
+  useLockBodyScroll(anyModalOpen);
+
   if (loading) {
     return <LoadingSpinner message="Loading official details..." />;
   }
@@ -184,9 +187,6 @@ const OfficialDetailsPage = () => {
     const basePath = getRoleBasePath(auth);
     navigate(`${basePath}/officials`, { replace: true });
   };
-
-  const anyModalOpen = isAssignOpen || isDeleteOpen || isViewCasesOpen;
-  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

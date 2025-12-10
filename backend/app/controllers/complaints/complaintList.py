@@ -121,8 +121,10 @@ def activeCases_official(assignee):
                         "status": "In-Progress"
                     })\
                     .execute().retDict()
-        
-        print(result)
+        if result is None:
+            result = []
+        elif isinstance(result, dict):
+            result = [result]
 
         return jsonify({
             'success': True,
@@ -147,7 +149,10 @@ def resolvedCases_official(assignee):
                     })\
                     .execute().retDict()
         
-        print(result)
+        if result is None:
+            result = []
+        elif isinstance(result, dict):
+            result = [result]
 
         return jsonify({
             'success': True,
