@@ -4,8 +4,11 @@ import { useState } from 'react';
 
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeType, user }) => {
+
+  useLockBodyScroll(isOpen);
 
   const { revokePermissions, revokeAccount } = useUsersApi();
 

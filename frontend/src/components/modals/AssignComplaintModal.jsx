@@ -7,9 +7,13 @@ import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 import ConfirmAssign from './ConfirmAssignModal';
 import useAuth from '../../hooks/useAuth';
+import SelectedComplaintsList from './SelectedComplaints';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 // This modal is for assigning complaints to an official
 const AssignComplaintModal = ({ isOpen, onClose, onConfirm, selectedComplaints }) => {
+
+  useLockBodyScroll(isOpen);
 
   // selectedComplaintsIds is an array of the selected complaints for assignment. NOTE: These are objects, not ids
 
@@ -125,23 +129,14 @@ const AssignComplaintModal = ({ isOpen, onClose, onConfirm, selectedComplaints }
           <p className='subtitle'>{(role === 1 || role === 2) ? "Admin" : assignBrgy?.name}</p>
           <form onSubmit={handleSubmit} className="form">
 
-            <label>Selected Complaints: </label>
-              <div className="complaint-list">
-                {selectedComplaints.length > 0 ? (
-                  <ol>
-                    {selectedComplaints.map((complaint, index) => (
-                      <li key={complaint.id}>
-                        <strong>{index + 1}</strong>. <em>{complaint.complaint_code}</em>: <em>{complaint.title}</em>
-                      </li>
-                    ))}
-                  </ol>
-                ) : (
-                  <p className="no-complaints">None</p>
-                )}
-              </div>
+            <SelectedComplaintsList 
+              selectedComplaints={selectedComplaints}
+              onRemove={null}
+              button={false}
+            />
             
             <div className="form-group">
-              <label>Official</label>
+              <label>Assign to Official: </label>
               <select
                 name="official"
                 value={selectedOfficial?.user_id}

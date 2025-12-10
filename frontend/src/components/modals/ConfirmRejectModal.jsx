@@ -3,6 +3,7 @@ import useComplaintsApi from '../../api/complaintsAPI.js';
 import { useState } from 'react';
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const ConfirmRejectModal = ({
   isOpen,
@@ -11,6 +12,9 @@ const ConfirmRejectModal = ({
   complaint,
   rejectionReason
 }) => {
+
+  useLockBodyScroll(isOpen);
+
   const { rejectComplaint } = useComplaintsApi();
 
   // Error and Success messages

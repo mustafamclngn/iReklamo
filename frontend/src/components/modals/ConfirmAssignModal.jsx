@@ -1,7 +1,10 @@
 import './modal.css'
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 import { useState } from 'react'
 
 const ConfirmAssign = ({ isOpen, onClose, onConfirm, complaints, official }) => {
+
+  useLockBodyScroll(isOpen);
 
   const [isChecked, setIsChecked] = useState(false);
 

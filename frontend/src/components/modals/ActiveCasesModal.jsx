@@ -1,8 +1,12 @@
 import './modal.css'
 import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
+
+  useLockBodyScroll(isOpen);
+
   const [assignedComplaints, setAssignedComplaints] = useState([])
   const user_id = officialData?.user_id
 

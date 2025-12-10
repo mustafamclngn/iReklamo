@@ -312,8 +312,9 @@ const ComplaintDetailsPage = () => {
                             </button>
                             <button
                               type="button"
-                              className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
-                              onClick={handleAssign}>
+                              className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium disabled:bg-gray-400  disabled:hover:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed disabled:opacity-70"
+                              onClick={handleAssign}
+                              disabled={complaint.status === "Resolved"}>
                               <i className="bi bi-person-check text-lg"></i>
                               {complaint.assignedOfficial ? "Reassign Official" : "Assign Official"}
                             </button>
