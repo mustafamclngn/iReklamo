@@ -1,4 +1,3 @@
-
 // ==================
 // IMPORTS
 // ==========
@@ -224,87 +223,101 @@ const LogInPage = () => {
 // ==========
   return (
     <>
-        <div className="auth-container">
+    <div className="auth-page-background">
+        <div className="auth-wrapper">
+            {/* Lgawas sa container */}
+            <div className="auth-logo-wrapper">
+                <IliganLogo scale={1.65} mode="login"/>
+            </div>
 
-            <IliganLogo scale={1.65} mode="login"/>
-            <p className="sessionmessage">Sign in to start your session</p>
+            {/* container*/}
+            <div className="auth-container">
+                <p className="sessionmessage">Sign in to start your session</p>
 
-            {/* ========== */}
-            {/* FORM */}
-            {/* === */}
-            <form className="auth-form" onSubmit={handleSubmit}>
-        
-            {/* ========== */}
-                {/* Username or Email */}
-                {/* input field */}
-                <div className="input-wrapper">
-                    <input
-                        type="text"
-                        id="identity"
-                        ref={userRef}
-                        autoComplete="off"
-                        onChange={(e) => setIdentity(e.target.value)}
-                        required
-                        placeholder="Username/Email"
-                        className="auth-input"
-                    />
-                    <i className="bi bi-envelope-fill input-icon" style={{ color: 'gray'}}></i>
-                </div>
                 {/* ========== */}
-                {/* Password */}
-                {/* input field */}
-                <div className="input-row">
+                {/* FORM */}
+                {/* === */}
+                <form className="auth-form" onSubmit={handleSubmit}>
+            
+                    {/* ========== */}
+                    {/* Username or Email */}
+                    {/* input field */}
                     <div className="input-wrapper">
                         <input
-                            type={showPwd ? "text" : "password"}
-                            id="password"
+                            type="text"
+                            id="identity"
+                            ref={userRef}
                             autoComplete="off"
-                            onChange={(e) => setPwd(e.target.value)}
+                            onChange={(e) => setIdentity(e.target.value)}
+                            value={identity}
                             required
-                            placeholder="Password"
+                            placeholder="Email"
                             className="auth-input"
                         />
-                        <i className="bi bi-lock-fill input-icon" style={{ color: 'gray'}}></i>
+                        <i className="bi bi-envelope-fill input-icon"></i>
                     </div>
-                    <i
-                        className={`bi ${showPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
-                        onClick={() => setShowPwd((prev) => !prev)}
-                    />
-                </div>
-                {/* ========== */}
-                {/* Persist */}
-                <div className="remember_me">
-                    <input
-                        type="checkbox"
-                        className="remember_me_box"
-                        id="rememberMe"
-                        checked={persistChecked}
-                        onChange={(e) => setPersistChecked(e.target.checked)}
-                    />
-                    <label htmlFor="rememberMe" className="remember_me_label">Remember me</label>
+                    
+                    {/* ========== */}
+                    {/* Password */}
+                    {/* input field */}
+                    <div className="input-row">
+                        <div className="input-wrapper" style={{marginBottom: 0}}>
+                            <input
+                                type={showPwd ? "text" : "password"}
+                                id="password"
+                                autoComplete="off"
+                                onChange={(e) => setPwd(e.target.value)}
+                                value={pwd}
+                                required
+                                placeholder="Password"
+                                className="auth-input"
+                            />
+                        </div>
+                        <i
+                            className={`bi ${showPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
+                            onClick={() => setShowPwd((prev) => !prev)}
+                        />
+                    </div>
+                    
+                    {/* ========== */}
+                    {/* Persist */}
+                    <div className="remember_me">
+                        <input
+                            type="checkbox"
+                            className="remember_me_box"
+                            id="rememberMe"
+                            checked={persistChecked}
+                            onChange={(e) => setPersistChecked(e.target.checked)}
+                        />
+                        <label htmlFor="rememberMe" className="remember_me_label">Remember Me</label>
+                    </div>
+                    
                     {/* Button */}
                     <button
                         className="auth-button"
                         disabled={!pwd || !identity}>
                         {loading ? 
                             (<LoadingSpinner message="" scale={0.45}/>)
-                                    : (<p>Login</p>)}
-                            
+                                    : (<span>Login</span>)}
                     </button>
-                </div>
-                {/* ========== */}     
-                
-                {/* ========== */}
-                {/* Forgot Password */}
-                {(forgotCooldown <= 0) ? 
-                            (<button className="forget_password" onClick={handleForgot} disabled={!identity || forgotCooldown > 0}>
-                                Forgot Password?
-                            </button>)
-                                        :
-                            <p className="forgot_pressed">Request to reset password has already been sent to your email.</p>}
-                {/* ========== */}           
-            </form>
+                    
+                    {/* ========== */}
+                    {/* Forgot Password */}
+                    {(forgotCooldown <= 0) ? 
+                        (<button 
+                            type="button"
+                            className="forget_password" 
+                            onClick={handleForgot} 
+                            disabled={!identity || forgotCooldown > 0}>
+                            Forgot Password?
+                        </button>)
+                            :
+                        <p className="forgot_pressed">Request to reset password has already been sent to your email.</p>}
+                    {/* ========== */}           
+                </form>
+            </div>
         </div>
+    </div>
 
         <SuccessModal
             isOpen={isSuccessOpen}

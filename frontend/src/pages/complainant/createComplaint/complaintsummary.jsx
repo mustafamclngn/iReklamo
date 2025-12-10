@@ -153,7 +153,7 @@ export default function CU_ComplaintSummaryPage() {
                     <div className="border-2 border-gray-200 mx-auto max-w-[1500px] w-[80%] px-16 py-10 rounded-lg mb-5 shadow-md">
                         <div className="flex flex-row gap-1 border-b-2 border-gray-200 pb-3 mb-8">
                             <h1 className="font-bold text-blue-400 text-3xl">Step 3:</h1>
-                            <h1 className="font-medium text-black text-3xl">Complaint Summary</h1>
+                            <h1 className="font-bold text-black text-3xl">Complaint Summary</h1>
                         </div>
                         {/* COMPLAINANT INFO */}
                         <div className='w-full mb-8'>
