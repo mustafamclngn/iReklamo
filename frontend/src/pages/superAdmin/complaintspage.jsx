@@ -1,32 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ComplaintCardSuperAdmin from '../../components/cards/complaintCardSuperAdmin';
-import useComplaintsApi from '../../api/complaintsAPI'; 
+import useComplaintsApi from '../../api/complaintsAPI';
+import useUserInfoApi from '../../api/userInfo';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
+import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 
 const SA_ComplaintsPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-
-  const [complaints, setComplaints] = useState([]); // All complaints under barangay
-
+  const [searchTerm, setSearchTerm] = useState('');
+  const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refresh, setRefresh] = useState(false);
-
-  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const [refresh, setRefresh] = useState(false);
+  const [barangays, setBarangays] = useState([]);
+
   const { getAllComplaints } = useComplaintsApi();
+  const { getBarangays } = useUserInfoApi();
 
   // modal states
-  const [isAssignOpen, setIsAssignOpen] =useState(false);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [complaintData, setComplaintData] = useState(null);
+  const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
 
   // Super Admin gets ALL filters: Barangay, Status, AND Priority
@@ -39,13 +42,21 @@ const SA_ComplaintsPage = () => {
   // Define filter options
   const uniqueStatuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected'];
   const uniquePriorities = ['Urgent', 'Moderate', 'Low'];
-  
-  // Extract unique barangays from complaints data
-  const uniqueBarangays = [...new Set(
-    complaints
-      .map(complaint => complaint.barangay)
-      .filter(Boolean)
-  )].sort();
+
+  // Fetch barangays on component mount
+  useEffect(() => {
+    const fetchBarangays = async () => {
+      try {
+        const response = await getBarangays();
+        if (response.success) {
+          setBarangays(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching barangays:', err);
+      }
+    };
+    fetchBarangays();
+  }, []);
 
   // Fetch complaints
   useEffect(() => {
@@ -58,22 +69,6 @@ const SA_ComplaintsPage = () => {
     // Clear search when filters change to avoid confusion with new results
     setSearchTerm('');
   }, [filters]);
-
-  // Check for refresh trigger from navigation state
-  useEffect(() => {
-    if (location.state?.refresh) {
-      setRefresh(prev => !prev);
-      // Clear the navigation state
-      window.history.replaceState({}, document.title, location.pathname);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    return () => {
-      // Clear location state on unmount
-      window.history.replaceState({}, document.title)
-    };
-  }, []);
 
   const fetchComplaints = async (currentFilters = {}) => {
     try {
@@ -140,8 +135,8 @@ const SA_ComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    console.log('Update status for:', complaint);
-    // Open status modal
+    setSelectedComplaint(complaint);
+    setIsStatusModalOpen(true);
   };
 
   // Update Priority
@@ -149,47 +144,12 @@ const SA_ComplaintsPage = () => {
     console.log('Update priority for:', complaint);
     // Open priority modal
   };
-  
-    // Selection
-      const [selectAll, setSelectAll] = useState(false);
-      const [selected, setSelected] = useState(new Map()); // selected complaints for assignment
 
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    if(complaint) {
-      setSelected(prev => {
-        const map = new Map(prev);
-        map.set(complaint.id, complaint);   
-        return map;
-      });
-    }
+    console.log('Assign complaint to:', complaint);
+    setComplaintData(complaint);
     setIsAssignOpen(true);
-  };
-  
-  useEffect(() => {
-    console.log("Selected changed:", [...selected.values()]);
-  }, [selected]);
-
-
-  const handleSelect = (complaint, isChecked) => {
-    setSelected(prev => {
-      const map = new Map(prev);
-      if (isChecked) map.set(complaint.id, complaint);
-      else map.delete(complaint.id);
-      return map;
-    });
-  };
-
-  const handleSelAll = () => {
-    if (selectAll) {
-      setSelectAll(false);
-      setSelected(new Map()); 
-    } else {
-      const map = new Map();
-      filteredComplaints.forEach(c => map.set(c.id, c));
-      setSelected(map);
-      setSelectAll(true); 
-    }
   };
 
   // Pagination logic
@@ -243,8 +203,8 @@ const SA_ComplaintsPage = () => {
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#578fe0] bg-white text-gray-700 cursor-pointer hover:border-gray-400 transition-colors appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3cpath%20d%3D%22M1%201.5L6%206.5L11%201.5%22%20stroke%3D%22%23666666%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3c%2Fsvg%3E')] bg-[length:12px] bg-[position:right_1rem_center] bg-no-repeat pr-10"
               >
                 <option value="all">All Barangays</option>
-                {uniqueBarangays.map(barangay => (
-                  <option key={barangay} value={barangay}>{barangay}</option>
+                {barangays.map(barangay => (
+                  <option key={barangay.id} value={barangay.name}>{barangay.name}</option>
                 ))}
               </select>
               {/* Status Filter */}
@@ -269,39 +229,6 @@ const SA_ComplaintsPage = () => {
                   <option key={priority} value={priority}>{priority}</option>
                 ))}
               </select>
-
-              {/* Select for Assignment */}
-              <button
-                onClick={() => handleAssignOfficial(null)}
-                className={`
-                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200 
-                  bg-green-500 border-green-500 text-white hover:bg-green-800
-
-                  disabled:bg-gray-400 disabled:border-gray-400
-                  disabled:text-gray-500 disabled:cursor-not-allowed
-                  disabled:hover:bg-gray-400    
-                `}
-                title="Assign selected"
-                disabled={selected.size === 0}
-              >
-                Batch Assign
-              </button>
-              
-              <button
-                onClick={handleSelAll}
-                className={`
-                  ml-1 px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
-
-                  ${selectAll
-                    ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
-                    : "bg-gray-400 border-gray-400 text-black hover:bg-blue-300"}
-                `}
-                title="Select All for assignment"
-              >
-                {selectAll ? "Unselect All" : "Select All"}
-              </button>
-
-
             </div>
             {/* Loading State */}
             {loading && <LoadingSpinner message="Loading complaints..." />}
@@ -321,8 +248,6 @@ const SA_ComplaintsPage = () => {
                       onStatusUpdate={handleStatusUpdate}
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
-                      onSelect={handleSelect}
-                      isSelected={selected.has(complaint.id)}
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
@@ -350,13 +275,22 @@ const SA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignComplaintModal 
-        isOpen={isAssignOpen} 
+      <AssignComplaintModal
+        isOpen={isAssignOpen}
         onClose={() => setIsAssignOpen(false)}
-        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
-        selectedComplaints={[...selected.values()]}
-        >
-      </AssignComplaintModal>
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
+        selectedComplaints={[complaintData]}
+      />
+
+      <StatusUpdateModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        complaint={selectedComplaint}
+        onRefresh={() => {
+          setRefresh(prev => !prev);
+          fetchComplaints();
+        }}
+      />
     </>
   );
 };

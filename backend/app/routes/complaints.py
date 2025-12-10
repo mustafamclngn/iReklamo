@@ -165,7 +165,6 @@ def get_all_complaints():
     try:
         # Get query parameters
         barangay_filter = request.args.get('barangay')
-        barangay_id_filter = request.args.get('barangay_id')
         status_filter = request.args.get('status')
         priority_filter = request.args.get('priority')
         assigned_filter = request.args.get('assigned_official_id')
@@ -208,10 +207,6 @@ def get_all_complaints():
             conditions.append("barangays.name = %s")
             params.append(barangay_filter)
 
-        if barangay_id_filter:
-            conditions.append("complaints.barangay_id = %s")
-            params.append(barangay_id_filter)
-
         if status_filter:
             conditions.append("complaints.status = %s")
             params.append(status_filter)
@@ -238,10 +233,6 @@ def get_all_complaints():
             query += " WHERE " + " AND ".join(conditions)
 
         query += " ORDER BY complaints.created_at DESC"
-
-        print(query)
-        print(conditions)
-        print(params)
 
         cursor.execute(query, params)
         results = cursor.fetchall()
@@ -502,7 +493,25 @@ def get_complaint(complaint_id):
                 COALESCE(
                     NULLIF(TRIM(CONCAT(users.first_name, ' ', users.last_name)), ''),
                     'Unassigned'
-                ) as "assignedOfficial"
+                ) as "assignedOfficial",
+                -- STATUS HISTORY: JSON array of status changes
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'status', csh.new_status,
+                                'changed_at', csh.changed_at,
+                                'remarks', csh.remarks,
+                                'actor_name', CONCAT(hist_actor.first_name, ' ', hist_actor.last_name)
+                            )
+                            ORDER BY csh.changed_at DESC
+                        )
+                        FROM complaint_status_history csh
+                        LEFT JOIN users hist_actor ON csh.actor_id = hist_actor.user_id
+                        WHERE csh.complaint_id = complaints.id
+                    ),
+                    '[]'::json
+                ) as status_history
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN complainants ON complaints.complainant_id = complainants.id
@@ -809,8 +818,12 @@ def get_user_complaints(assignee):
     return list_by_assignee(assignee)
 
 @complaints_bp.route('assign/<int:complaint_id>/<int:assigned_official_id>')
+@verify_jwt
 def perform_assignment(complaint_id, assigned_official_id):
-    return assign_complaint(complaint_id, assigned_official_id)
+    # Get user info for audit logging
+    user_info = getattr(request, 'user', None)
+    user_id = user_info.get('user_id') if user_info else None
+    return assign_complaint(complaint_id, assigned_official_id, user_id)
 
 @complaints_bp.route('cases/active/<int:assigned_official_id>')
 def get_active_cases(assigned_official_id):
@@ -819,6 +832,209 @@ def get_active_cases(assigned_official_id):
 @complaints_bp.route('cases/resolved/<int:assigned_official_id>')
 def get_resolved_cases(assigned_official_id):
     return resolvedCases_official(assigned_official_id)
+
+
+@complaints_bp.route('/<int:complaint_id>/update-status', methods=['POST'])
+@verify_jwt
+def update_complaint_status(complaint_id):
+    """
+    Update complaint status with mandatory remarks and history logging
+    """
+    try:
+        # Get user data from JWT middleware
+        user_info = getattr(request, 'user', None)
+        if not user_info:
+            return jsonify({"error": "Authentication required"}), 401
+
+        user_id = user_info.get('user_id')
+        user_role = user_info.get('role')
+
+        # Extract role from array if it's an array (e.g., [3])
+        if isinstance(user_role, list) and user_role:
+            user_role = user_role[0]
+
+        if not user_id or not user_role:
+            return jsonify({"error": "Invalid user credentials"}), 401
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'Request body required'}), 400
+
+        new_status = data.get('status')
+        remarks = data.get('remarks')
+
+        # Validate required fields
+        if not new_status or not remarks:
+            return jsonify({
+                'success': False,
+                'message': 'Status and remarks are required'
+            }), 400
+
+
+
+        # Validate status values
+        valid_statuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected']
+        if new_status not in valid_statuses:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid status value'
+            }), 400
+
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Check if complaint exists and get current data
+        cursor.execute("""
+            SELECT status, assigned_official_id, barangay_id
+            FROM complaints WHERE id = %s
+        """, (complaint_id,))
+
+        complaint = cursor.fetchone()
+        if not complaint:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Complaint not found'}), 404
+
+        can_update = False
+
+        if user_role in [1, 2]:
+            can_update = True
+
+        elif user_role == 3:
+            cursor.execute("SELECT barangay_id FROM users WHERE user_id = %s", (user_id,))
+            captain_result = cursor.fetchone()
+            captain_barangay_id = captain_result['barangay_id'] if captain_result else None
+            can_update = (captain_barangay_id is not None and complaint['barangay_id'] == captain_barangay_id)
+
+        elif user_role == 4:
+            can_update = (complaint['assigned_official_id'] == user_id)
+
+        if not can_update:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Unauthorized to update this complaint'}), 403
+
+        # Prevent reverting from closed statuses (Resolved/Rejected) for lower roles
+        current_status = complaint['status']
+        is_closed = current_status in ['Resolved', 'Rejected']
+
+        if is_closed and current_status != new_status and user_role not in [1, 2, 3]:
+            # Only higher roles can reopen closed complaints
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Cannot reopen closed complaints'
+            }), 403
+
+        # Update complaint status
+        cursor.execute("""
+            UPDATE complaints
+            SET status = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (new_status, complaint_id))
+
+        # Log to history table - Note: you may need to create this table first
+        # Assuming complaint_status_history table exists with columns:
+        # complaint_id, old_status, new_status, remarks, actor_id, changed_at
+        try:
+            cursor.execute("""
+                INSERT INTO complaint_status_history
+                (complaint_id, old_status, new_status, remarks, actor_id, changed_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+            """, (complaint_id, current_status, new_status, remarks, user_id))
+        except Exception as history_error:
+            print(f"Warning: Could not log status history - {history_error}")
+            # Continue with update even if history logging fails
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': f'Status updated to {new_status}',
+            'data': {'status': new_status}
+        }), 200
+
+    except Exception as e:
+        print(f"Error updating complaint status: {e}")
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
+
+@complaints_bp.route('/<int:complaint_id>/set-priority', methods=['POST'])
+@verify_jwt
+def update_priority(complaint_id):
+    """
+    Update complaint priority with audit logging
+    """
+    try:
+        # Get user data from JWT middleware
+        user_info = getattr(request, 'user', None)
+        if not user_info:
+            return jsonify({"error": "Authentication required"}), 401
+
+        user_id = user_info.get('user_id')
+
+        data = request.get_json()
+        if not data or 'priority' not in data:
+            return jsonify({'success': False, 'message': 'Priority is required'}), 400
+
+        new_priority = data['priority']
+        valid_priorities = ['Low', 'Moderate', 'Urgent']
+
+        if new_priority not in valid_priorities:
+            return jsonify({'success': False, 'message': 'Invalid priority value'}), 400
+
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        try:
+            # Get current priority and status for audit logging
+            cursor.execute("SELECT priority, status FROM complaints WHERE id = %s", (complaint_id,))
+            current_record = cursor.fetchone()
+
+            if not current_record:
+                cursor.close()
+                conn.close()
+                return jsonify({'success': False, 'message': 'Complaint not found'}), 404
+
+            current_priority = current_record['priority']
+            current_status = current_record['status']
+
+            # Update priority
+            cursor.execute("""
+                UPDATE complaints
+                SET priority = %s, updated_at = NOW()
+                WHERE id = %s
+            """, (new_priority, complaint_id))
+
+            # Log priority change to status history
+            # Keep status the same, log as administrative action
+            remarks = f"Priority changed from {current_priority or 'None'} to {new_priority}"
+            cursor.execute("""
+                INSERT INTO complaint_status_history
+                (complaint_id, old_status, new_status, remarks, actor_id, changed_at)
+                VALUES (%s, %s, %s, %s, %s, NOW())
+            """, (complaint_id, current_status or 'Pending', current_status or 'Pending', remarks, user_id))
+
+            conn.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'Priority updated to {new_priority}'
+            }), 200
+
+        except Exception as inner_error:
+            conn.rollback()
+            print(f"Error updating priority: {inner_error}")
+            return jsonify({'success': False, 'message': 'Failed to update priority'}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
+    except Exception as e:
+        print(f"Error in update priority route: {e}")
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
 
 @complaints_bp.route('/<int:complaint_id>/reject', methods=['POST'])
 @verify_jwt

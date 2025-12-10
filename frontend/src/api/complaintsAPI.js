@@ -66,12 +66,12 @@ const useComplaintsApi = () => {
 
   const getAllComplaints = async (filters = {}) => {
       try {
-        const params = new URLSearchParams(filters).toString();
+        const params = new URLSearchParams(filters);
         const response = await axiosPrivate.get(`/api/complaints/?${params}`);
         console.log(response)
         return response.data;
       } catch (error) {
-        console.error('Error fetching complaints', error);
+        console.error('Error assigning complaint to officer', error);
         throw error;
       }
   };
@@ -108,6 +108,14 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
+  const updateStatus = async (complaintId, status, remarks) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/update-status`, {
+      status,
+      remarks
+    });
+    return response.data;
+  };
+
   const getBarangays = async () => {
     const response = await axiosPrivate.get('/api/complaints/barangays');
     return response.data;
@@ -141,6 +149,13 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
+  const setPriority = async (complaintId, priority) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/set-priority`, {
+      priority
+    });
+    return response.data;
+  };
+
 return {
     complaintsByBarangayId,
     StatusComplaintsByBarangayId,
@@ -149,6 +164,7 @@ return {
     getAllComplaints,
     getComplaintById,
     updateComplaint,
+    updateStatus,
     getBarangays,
     getBarangayComplaints,
     getAssignedComplaints,
@@ -156,7 +172,8 @@ return {
     getBarangayOfficialComplaints,
     getActiveCases,
     getResolvedCases,
-    rejectComplaint
+    rejectComplaint,
+    setPriority
   };
 
 };
