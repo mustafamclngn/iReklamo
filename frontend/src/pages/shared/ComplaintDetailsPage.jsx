@@ -144,7 +144,7 @@ const ComplaintDetailsPage = () => {
     }, 1000);
   };
 
-  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh, isAssignOpen]);
+  useEffect(() => { fetchComplaintDetails(); }, [complaint_id, refresh]);
   const fetchComplaintDetails = async () => {
     setLoading(true);
     if (!complaint_id || isNaN(Number(complaint_id))) {
@@ -157,6 +157,9 @@ const ComplaintDetailsPage = () => {
     else navigate(`${getRoleBasePath(auth)}/complaints`, { replace: true });
     setLoading(false);
   };
+
+  const anyModalOpen = isAssignOpen || isPriorityOpen || isRejectOpen || isStatusUpdateOpen;
+  useLockBodyScroll(anyModalOpen);
 
   if (loading) return <LoadingSpinner message="Loading complaint details..." />;
 
@@ -182,9 +185,6 @@ const ComplaintDetailsPage = () => {
   // Email and contact are NEVER censored - needed for communication
   const displayEmail = rawEmail || 'N/A';
   const displayPhone = formatPhone(rawPhone) || 'N/A';
-
-  const anyModalOpen = isAssignOpen || isPriorityOpen || isRejectOpen || isStatusUpdateOpen;
-  useLockBodyScroll(anyModalOpen);
 
   return (
     <>
@@ -426,7 +426,7 @@ const ComplaintDetailsPage = () => {
                 </div>
                 <AssignComplaintModal
                   isOpen={isAssignOpen}
-                  onClose={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+                  onClose={() => setIsAssignOpen(false)}
                   selectedComplaints={[complaint]}
                   onConfirm={() => {
                     setIsAssignOpen(false);

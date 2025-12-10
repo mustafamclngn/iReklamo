@@ -43,7 +43,7 @@ const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
           <form className="form">
             <div className="form-group">
               <div className="complaint-list">
-                {assignedComplaints.length > 0 ? (
+                {(assignedComplaints && assignedComplaints.length > 0) ? (
                   <ol>
                     {assignedComplaints.map((complaint, index) => (
                       <li key={complaint.id}>

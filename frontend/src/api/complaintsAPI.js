@@ -79,7 +79,7 @@ const useComplaintsApi = () => {
   const getActiveCases = async (assigned_official_id) => {
       try {
         const response = await axiosPrivate.get(`/api/complaints/cases/active/${assigned_official_id}`);
-        console.log(response)
+        console.log("Active Cases: ", response.data)
         return response.data;
       } catch (error) {
         console.error('Error fetching complaint', error);
