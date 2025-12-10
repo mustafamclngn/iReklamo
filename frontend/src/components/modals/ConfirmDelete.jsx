@@ -1,26 +1,17 @@
 import './modal.css'
 import useUsersApi from "../../api/usersApi.js";
 import { useState } from 'react';
-
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 
-
 const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeType, user }) => {
-
-
 
   const { revokePermissions, revokeAccount } = useUsersApi();
 
-  // =============
-  // Error and Success messages 
   const [isErrorOpen, setIsErrorOpen] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-
-  // ==============
-  // Checkbox confirmation
   const [isConfirmed, setIsConfirmed] = useState(false);
   
   if (!isOpen) return null;
@@ -41,12 +32,11 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
       setErrMsg(error?.response?.data?.error || "An unexpected error occurred.");
       setIsErrorOpen(true);
     }
-
   };
 
   const handleConfirm = () => {
-  onClose();
-  onConfirm(revokeType);  
+    onClose();
+    onConfirm(revokeType);  
   };
 
   return (
@@ -54,16 +44,22 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
       <div className="popup-overlay">
         <div className="confirm-content">
           <button onClick={onClose} className="popup-close">✕</button>
-          <h2 className="title">Confirm</h2>
+          <h2 className="title">Confirm Revocation</h2>
+          <p className="subtitle">This action will affect {user.first_name} {user.last_name}'s access.</p>
+
           <form className="form">
             <div className="form-group">
-              <label>Are you sure you want to revoke {user.first_name} {user.last_name}'s {revokeType}?</label>
+              <label>Action</label>
+              <div className="user-summary">
+                 Revoke <strong>{revokeType}</strong> for {user.first_name} {user.last_name}
+              </div>
             </div>
+
             <div className="form-group">
               <label>Affected Assignments</label>
-              <div className="complaint-list">
+              <div className="user-summary">
                 {assignedComplaints.length > 0 ? (
-                  <ol>
+                  <ol style={{paddingLeft: '1.2rem', margin: 0}}>
                     {assignedComplaints.map((complaint, index) => (
                       <li key={complaint.id}>
                         <strong>{index + 1}</strong>. <em>{complaint.title}</em>
@@ -77,25 +73,30 @@ const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeT
             </div>
 
             <div className="form-group checkbox-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={isConfirmed}
-                  onChange={() => setIsConfirmed((prev) => !prev)}
-                />
-                <span>
-                  I hereby confirm, by the management responsibilities bestowed upon me, 
-                  to revoke the <strong>{revokeType}</strong> of this user.
-                </span>
+              <input
+                type="checkbox"
+                id="revokeCheck"
+                checked={isConfirmed}
+                onChange={() => setIsConfirmed((prev) => !prev)}
+              />
+              <label htmlFor="revokeCheck">
+                I hereby confirm, by the management responsibilities bestowed upon me, 
+                to revoke the <strong>{revokeType}</strong> of this user.
               </label>
             </div>
 
             <div className="popup-footer">
-                <button type="button" className="revoke-button" onClick={handleRevoke} disabled={!isConfirmed}>
-                  Revoke {revokeType}
-                </button>
-              <button type="button" className="okay-button" onClick={onClose}>
+              <button type="button" className="revoke-button" onClick={onClose}>
                 Cancel
+              </button>
+              <button 
+                type="button" 
+                className="okay-button" 
+                onClick={handleRevoke} 
+                disabled={!isConfirmed}
+                style={{backgroundColor: '#ef4444'}}
+              >
+                Revoke {revokeType}
               </button>
             </div>
           </form>
