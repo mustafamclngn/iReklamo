@@ -1,7 +1,10 @@
 import './modal.css'
 import { useState } from 'react'
 
+
 const ConfirmCreateAdmin = ({ isOpen, onClose, onConfirm, user }) => {
+
+
 
   const [isChecked, setIsChecked] = useState(false);
 

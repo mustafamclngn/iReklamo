@@ -1,6 +1,9 @@
 import './modal.css'
 
+
 const ErrorModal = ({ isOpen, onClose, message }) => {
+
+
 
   if (!isOpen) return null;
 

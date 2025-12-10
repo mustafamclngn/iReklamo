@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
+
 const ConfirmEditModal = ({ isOpen, onClose, onConfirm, isLoading }) => {
+
+
 
   {/* scrollable or unscroll doc kung open ang modal */}
   useEffect(() => {

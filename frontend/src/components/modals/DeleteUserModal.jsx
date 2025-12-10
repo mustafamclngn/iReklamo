@@ -3,7 +3,11 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
 import ConfirmDelete from './ConfirmDelete'
 
+
 const DeleteModal = ({ isOpen, onClose, deleteData }) => {
+
+
+
   const [assignedComplaints, setAssignedComplaints] = useState([])
   const user_id = deleteData?.user_id
 

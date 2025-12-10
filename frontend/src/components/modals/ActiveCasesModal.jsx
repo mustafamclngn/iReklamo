@@ -3,6 +3,9 @@ import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
 
 const ActiveCasesModal = ({ isOpen, onClose, officialData }) => {
+
+
+
   const [assignedComplaints, setAssignedComplaints] = useState([])
   const user_id = officialData?.user_id
 

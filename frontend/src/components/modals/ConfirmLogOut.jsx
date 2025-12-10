@@ -1,6 +1,9 @@
 import './modal.css'
 
+
 const LogOutModal = ({ isOpen, onClose, onConfirm }) => {
+
+
 
   if (!isOpen) return null;
 

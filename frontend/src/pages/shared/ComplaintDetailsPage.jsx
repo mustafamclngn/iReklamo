@@ -9,7 +9,7 @@ import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
-
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -183,6 +183,9 @@ const ComplaintDetailsPage = () => {
   const displayEmail = rawEmail || 'N/A';
   const displayPhone = formatPhone(rawPhone) || 'N/A';
 
+  const anyModalOpen = isAssignOpen || isPriorityOpen || isRejectOpen || isStatusUpdateOpen;
+  useLockBodyScroll(anyModalOpen);
+
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
@@ -312,10 +315,11 @@ const ComplaintDetailsPage = () => {
                             </button>
                             <button
                               type="button"
-                              className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
-                              onClick={handleAssign}>
+                              className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium disabled:bg-gray-400  disabled:hover:bg-gray-400 disabled:text-gray-200 disabled:cursor-not-allowed disabled:opacity-70"
+                              onClick={handleAssign}
+                              disabled={complaint.status === "Resolved"}>
                               <i className="bi bi-person-check text-lg"></i>
-                              Assign Official
+                              {complaint.assignedOfficial ? "Reassign Official" : "Assign Official"}
                             </button>
                           </div>
                         )}

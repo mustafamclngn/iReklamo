@@ -5,7 +5,10 @@ import { useState } from 'react';
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 
+
 const ConfirmDelete = ({ isOpen, onClose, onConfirm, assignedComplaints, revokeType, user }) => {
+
+
 
   const { revokePermissions, revokeAccount } = useUsersApi();
 

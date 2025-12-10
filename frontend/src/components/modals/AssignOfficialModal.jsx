@@ -6,9 +6,13 @@ import useAuth from '../../hooks/useAuth';
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 import ConfirmAssign from './ConfirmAssignModal';
+import SelectedComplaintsList from './SelectedComplaints';
+
 
 //  for assigning official to complaints
 const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) => {
+
+
 
   // ===========
   // User states
@@ -113,7 +117,7 @@ const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) =>
 
   }, [complaints, selectedComplaints, refresh]);
 
-  if (!isOpen || !officialDetails) return null;
+  if (!isOpen) return null;
 
   // ==========
   // Submit 
@@ -156,31 +160,14 @@ const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) =>
           <p className='subtitle'>{(role === 1 || role === 2) ? "Admin" : assignBrgy?.name}</p>
           <form onSubmit={handleSubmit} className="form">
             
-            <label>Selected Complaints: </label>
-              <div className="complaint-list">
-                {selectedComplaints?.size > 0 ? (
-                  <ol>
-                    {[...selectedComplaints.entries()].map(([id, complaint], index) => (
-                      <li key={id}>
-                        <div className='row'>
-                          <strong>{index + 1}</strong>. <em>{complaint.complaint_code}</em>: <em>{complaint.title}</em>
-                          <button
-                            type='button'
-                            className='remove_complaint'
-                            onClick={() => {handleSelect(complaint, false); setRefresh(prev => !prev)}}>
-                            <i className="bi bi-dash-circle"></i>
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                ) : (
-                  <p className="no-complaints">None</p>
-                )}
-              </div>
+            <SelectedComplaintsList 
+              selectedComplaints={selectedComplaints}
+              onRemove={(complaint) => {handleSelect(complaint, false); setRefresh(prev => !prev)}}
+              button={true}
+              />
               
               <div className="form-group">
-                <label>Complaint</label>
+                <label>Add Complaint: </label>
                 <div className='row'>
                   <select
                     name="complaint"

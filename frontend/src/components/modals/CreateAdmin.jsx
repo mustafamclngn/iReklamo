@@ -10,10 +10,13 @@ import ConfirmCreateAdmin from './ConfirmCreateAdmin';
 
 import useUserInfoApi from '../../api/userInfo';
 
+
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const CreateAdmin = ({ isOpen, onClose }) => {
+
+
 
   if (!isOpen) return null
 

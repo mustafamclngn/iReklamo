@@ -38,7 +38,7 @@
 }
 
 .popup-close {
-  position: absolute;
+  position: fixed;
   top: 15px;
   right: 15px;
   background: none;
@@ -264,7 +264,7 @@
   text-align: center;
   border-radius: 6px;
   padding: 8px;
-  position: absolute;
+  position: fixed;
   z-index: 10;
   bottom: 125%; 
   left: 50%;
@@ -276,7 +276,7 @@
 
 .tooltip-text::after {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 100%; 
   left: 50%;
   margin-left: -5px;
@@ -288,6 +288,48 @@
 .tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+.complaints-list {
+  padding-left: 1rem;
+  margin-top: 0.3rem;
+}
+
+.complaint-item {
+  margin-bottom: 0.35rem;
+}
+
+.complaint-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complaint-text {
+  max-width: 85%;
+  word-wrap: break-word;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  opacity: 0.7;
+}
+
+.selected_complaints_list_label {
+  font-weight: 500;
+  color: #4cbdff;
+  margin-bottom: 900 !important;
+}
+
+.no-complaints { 
+  color: #6f93a0
 }
 
 /* Toast animations */

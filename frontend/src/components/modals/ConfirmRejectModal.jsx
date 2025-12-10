@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 
+
 const ConfirmRejectModal = ({
   isOpen,
   onClose,
@@ -11,6 +12,9 @@ const ConfirmRejectModal = ({
   complaint,
   rejectionReason
 }) => {
+
+
+
   const { rejectComplaint } = useComplaintsApi();
 
   // Error and Success messages

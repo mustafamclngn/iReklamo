@@ -6,35 +6,35 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
-import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [complaints, setComplaints] = useState([]);
+  const location = useLocation();
+    
+  const [complaints, setComplaints] = useState([]); // All complaints under barangay
+    const [complaintData, setComplaintData] = useState(null)
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
-  const [refresh, setRefresh] = useState(false);
 
   const { getAllComplaints } = useComplaintsApi();
 
   // modal states
-  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isAssignOpen, setIsAssignOpen] =useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const [complaintData, setComplaintData] = useState(null);
 
   // toast state
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  const location = useLocation();
   const defaultStatus = location.state?.defaultStatus || 'all';
 
   // UPDATED: 3 filters - Barangay, Status, Priority
@@ -141,8 +141,8 @@ const CA_ComplaintsPage = () => {
 
   // Update Status
   const handleStatusUpdate = (complaint) => {
-    setSelectedComplaint(complaint);
-    setIsStatusModalOpen(true);
+    console.log('Update status for:', complaint);
+    // Open status modal
   };
 
   // Update Priority
@@ -151,13 +151,54 @@ const CA_ComplaintsPage = () => {
     setIsPriorityOpen(true);
   };
 
+  // Selection
+    const [selectAll, setSelectAll] = useState(false);
+    const [selected, setSelected] = useState(new Map()); // selected complaints for assignment
+
   // Assign Official
   const handleAssignOfficial = (complaint) => {
-    console.log('Assign complaint to:', complaint);
-    setComplaintData(complaint);
+    if(complaint) {
+      setSelected(prev => {
+        const map = new Map(prev);
+        map.set(complaint.id, complaint);   
+        return map;
+      });
+    }
     setIsAssignOpen(true);
   };
+  
+  useEffect(() => {
+    console.log("Selected changed:", [...selected.values()]);
+  }, [selected]);
 
+
+  const handleSelect = (complaint, isChecked) => {
+    setSelected(prev => {
+      const map = new Map(prev);
+      if (isChecked) map.set(complaint.id, complaint);
+      else map.delete(complaint.id);
+      return map;
+    });
+  };
+
+  const handleSelAll = () => {
+    if (selectAll) {
+      setSelectAll(false);
+      setSelected(new Map()); 
+    } else {
+      const map = new Map();
+      filteredComplaints
+      .filter(c => c.status?.toLowerCase() === "pending")
+      .forEach(c => map.set(c.id, c));
+      setSelected(map);
+      setSelectAll(true); 
+    }
+  };
+
+  const hasPending = filteredComplaints.some(
+    (c) => c.status?.toLowerCase() === "pending"
+  );
+  
   // Priority Update Handler
   const handlePriorityChange = (newPriority) => {
     setComplaints(prevComplaints =>
@@ -185,6 +226,9 @@ const CA_ComplaintsPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filters]);
+
+  const anyModalOpen = isAssignOpen || isPriorityOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>
@@ -248,6 +292,40 @@ const CA_ComplaintsPage = () => {
                   <option key={priority} value={priority}>{priority}</option>
                 ))}
               </select>
+
+              {/* Select for Assignment */}
+              <button
+                onClick={() => handleAssignOfficial(null)}
+                className={`
+                  ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200 
+                  bg-green-500 border-green-500 text-white hover:bg-green-800
+
+                  disabled:bg-gray-300 disabled:border-gray-300
+                  disabled:text-gray-500 disabled:cursor-not-allowed
+                `}
+                title="Assign selected"
+                disabled={selected.size === 0}
+              >
+                Batch Assign
+              </button>
+              
+              <button
+                onClick={handleSelAll}
+                className={`
+                  ml-1 px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
+                  ${(!hasPending)
+                    ? "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed"
+                    : selectAll
+                    ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
+                    : "bg-gray-400 border-gray-400 text-black hover:bg-blue-300"}
+                `}
+                title="Select All for assignment"
+                disabled={!hasPending}
+              >
+                {selectAll ? "Unselect All" : "Select All"}
+              </button>
+
+
             </div>
             {/* Loading State */}
             {loading && <LoadingSpinner message="Loading complaints..." />}
@@ -267,6 +345,8 @@ const CA_ComplaintsPage = () => {
                       onStatusUpdate={handleStatusUpdate}
                       onPriorityUpdate={handlePriorityUpdate}
                       onAssignOfficial={handleAssignOfficial}
+                      onSelect={handleSelect}
+                      isSelected={selected.has(complaint.id)}
                     />
                   ))}
                   {filteredComplaints.length === 0 && (
@@ -294,28 +374,19 @@ const CA_ComplaintsPage = () => {
           </div>
         </div>
       </div>
-      <AssignComplaintModal
-        isOpen={isAssignOpen}
+      <AssignComplaintModal 
+        isOpen={isAssignOpen} 
         onClose={() => setIsAssignOpen(false)}
-        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev);}}
-        selectedComplaints={[complaintData]}
-      />
+        onConfirm={() => {setIsAssignOpen(false); setRefresh(prev => !prev)}}
+        selectedComplaints={[...selected.values()]}
+        >
+      </AssignComplaintModal>
       <SetPriorityModal
         isOpen={isPriorityOpen}
         onClose={() => setIsPriorityOpen(false)}
         complaint={complaintData}
         onPriorityUpdate={handlePriorityChange}
       />
-      <StatusUpdateModal
-        isOpen={isStatusModalOpen}
-        onClose={() => setIsStatusModalOpen(false)}
-        complaint={selectedComplaint}
-        onRefresh={() => {
-          setRefresh(prev => !prev);
-          fetchComplaints();
-        }}
-      />
-
       <Toast
         message={toastMessage}
         isVisible={toastVisible}

@@ -16,6 +16,7 @@ import {
   PersonalInfoSection,
   AddressInfoSection,
 } from "../../components/common/ProfileFormSections";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll.jsx";
 
 const AccountPage = () => {
   const { auth } = useAuth();
@@ -100,6 +101,8 @@ const AccountPage = () => {
     await logout();
     navigate('/home');
   }
+
+  useLockBodyScroll(isConfirmOpen);  
 
   if (loading) {
     return <LoadingSpinner message="Loading account details..." />;
