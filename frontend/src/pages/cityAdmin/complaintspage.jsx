@@ -186,12 +186,18 @@ const CA_ComplaintsPage = () => {
       setSelected(new Map()); 
     } else {
       const map = new Map();
-      filteredComplaints.forEach(c => map.set(c.id, c));
+      filteredComplaints
+      .filter(c => c.status?.toLowerCase() === "pending")
+      .forEach(c => map.set(c.id, c));
       setSelected(map);
       setSelectAll(true); 
     }
   };
 
+  const hasPending = filteredComplaints.some(
+    (c) => c.status?.toLowerCase() === "pending"
+  );
+  
   // Priority Update Handler
   const handlePriorityChange = (newPriority) => {
     setComplaints(prevComplaints =>
@@ -290,9 +296,8 @@ const CA_ComplaintsPage = () => {
                   ml-auto px-7 py-2.5 rounded-lg border w-40 transition-all duration-200 
                   bg-green-500 border-green-500 text-white hover:bg-green-800
 
-                  disabled:bg-gray-400 disabled:border-gray-400
+                  disabled:bg-gray-300 disabled:border-gray-300
                   disabled:text-gray-500 disabled:cursor-not-allowed
-                  disabled:hover:bg-gray-400    
                 `}
                 title="Assign selected"
                 disabled={selected.size === 0}
@@ -304,12 +309,14 @@ const CA_ComplaintsPage = () => {
                 onClick={handleSelAll}
                 className={`
                   ml-1 px-7 py-2.5 rounded-lg border w-40 transition-all duration-200
-
-                  ${selectAll
+                  ${(!hasPending)
+                    ? "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed"
+                    : selectAll
                     ? "bg-blue-500 border-blue-500 text-white hover:bg-gray-400"
                     : "bg-gray-400 border-gray-400 text-black hover:bg-blue-300"}
                 `}
                 title="Select All for assignment"
+                disabled={!hasPending}
               >
                 {selectAll ? "Unselect All" : "Select All"}
               </button>

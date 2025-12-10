@@ -98,7 +98,7 @@ const ComplaintCardBrgyCap = ({
           <input
             type="checkbox"
             id="selectCheckbox"
-            checked={complaint.status !== "Pending" && !!isSelected}
+            checked={complaint.status === "Pending" && !!isSelected}
             onChange={(e) => onSelect(complaint, e.target.checked)}
             disabled={complaint.status !== "Pending"}
           />
