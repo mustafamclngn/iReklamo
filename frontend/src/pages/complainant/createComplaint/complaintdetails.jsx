@@ -62,7 +62,7 @@ const CU_FileComplaintPage = () => {
                     <div className="border-2 border-gray-200 mx-auto max-w-[1500px] w-[80%] px-16 py-10 rounded-lg mb-5 shadow-md">
                         <div className="flex flex-row gap-1 border-b-2 border-gray-200 pb-3 mb-8">
                             <h1 className="font-bold text-blue-400 text-3xl">Step 2:</h1>
-                            <h1 className="font-medium text-black text-3xl">Complaint Details</h1>
+                            <h1 className="font-bold text-black text-3xl">Complaint Details</h1>
                         </div>
             
                         {/* form */}
@@ -71,13 +71,13 @@ const CU_FileComplaintPage = () => {
                                 <label className="text-base font-medium mb-2">Complaint Title: *</label>
                                 <input
                                     type="text"
-                                    placeholder="Brief description of your complaint"
+                                    placeholder="Mubo nga detalye sa imong reklamo"
                                     value={formData.complaint_title}
                                     onChange={(e) => {
                                         updateFormData({ complaint_title: e.target.value });
                                         if (errors.complaint_title) setErrors(prev => ({ ...prev, complaint_title: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.complaint_title ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.complaint_title ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 />
                                 {errors.complaint_title && <p className="text-red-500 text-sm mt-1">{errors.complaint_title}</p>}
 
@@ -104,39 +104,39 @@ const CU_FileComplaintPage = () => {
 
                                 <label className="text-base font-medium mb-2 mt-6">Description: *</label>
                                 <textarea
-                                    placeholder="Please provide a detailed description of the issue, including all the relevant and necessary information in the complaint"
+                                    placeholder="Palihog ihatag ang detalyadong paghulagway sa isyu, apil ang tanang importante ug gikinahanglan nga impormasyon sa reklamo"
                                     value={formData.description}
                                     onChange={(e) => {
                                         updateFormData({ description: e.target.value });
                                         if (errors.description) setErrors(prev => ({ ...prev, description: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base min-h-32 focus:outline-none transition ${errors.description ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base min-h-32 focus:outline-none transition placeholder:italic ${errors.description ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 />
                                 {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
 
                                 <label className="text-base font-medium mb-2 mt-6">Full Address: *</label>
                                 <input
                                     type="text"
-                                    placeholder="Provide the complete address where the incident took place"
+                                    placeholder="Ihatag ang kompleto nga address kung asa nahitabo ang insidente"
                                     value={formData.full_address}
                                     onChange={(e) => {
                                         updateFormData({ full_address: e.target.value });
                                         if (errors.full_address) setErrors(prev => ({ ...prev, full_address: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.full_address ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.full_address ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 />
                                 {errors.full_address && <p className="text-red-500 text-sm mt-1">{errors.full_address}</p>}
 
                                 <label className="text-base font-medium mb-2 mt-6">Specific Location:</label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. in front of Barangay Hall, near the park, etc."
+                                    placeholder="e.g. sa tunga sa duha ka tindahan, atbang sa parke, sulod sa eskwelahan"
                                     value={formData.specific_location}
                                     onChange={(e) => {
                                         updateFormData({ specific_location: e.target.value });
                                         if (errors.specific_location) setErrors(prev => ({ ...prev, specific_location: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.specific_location ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.specific_location ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                 />
                                 {errors.specific_location && <p className="text-red-500 text-sm mt-1">{errors.specific_location}</p>}
                             </div>
