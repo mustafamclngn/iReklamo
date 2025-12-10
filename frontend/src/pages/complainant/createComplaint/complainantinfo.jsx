@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../contexts/formcontext.jsx';
 import { ArrowRight, CircleCheck } from "lucide-react";
+import { validateEmail, validatePhone } from '../../../utils/validators.js';
 import '../../../assets/css/checkbox.css';
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -33,12 +34,20 @@ const CU_FileComplaintPage = () => {
         
         // These are always required
         if (!formData.barangay) missing.barangay = 'Required';
+        
+        // Email validation
         if (!formData.email) {
             missing.email = 'Required' 
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        } else if (!validateEmail(formData.email)) {
             missing.email = "Invalid email format";
         }
-        if (!formData.contact_number) missing.contact_number = 'Required';
+        
+        // Contact number validation
+        if (!formData.contact_number) {
+            missing.contact_number = 'Required';
+        } else if (!validatePhone(formData.contact_number)) {
+            missing.contact_number = 'Invalid phone number.';
+        }
 
         if (Object.keys(missing).length > 0) {
             setErrors(missing);
@@ -176,9 +185,12 @@ const CU_FileComplaintPage = () => {
                                         placeholder="Ibutang imong contact number"
                                         value={formData.contact_number}
                                         onChange={(e) => {
-                                            updateFormData({ contact_number: e.target.value });
+                                            // numbers only bawal letters sa input
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            updateFormData({ contact_number: value });
                                             if (errors.contact_number) setErrors(prev => ({ ...prev, contact_number: ''}));
                                         }}
+                                        maxLength={11}
                                         className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.contact_number ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
                                     />
                                     {errors.contact_number && <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>}
@@ -298,7 +310,7 @@ const CU_FileComplaintPage = () => {
                             <button
                                 type='button'
                                 onClick={handleNext}
-                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-2 px-6 mb-3 mr-2 text-base"
+                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-2 px-6 mb-3 text-base"
                             >
                                 Next
                                 <ArrowRight size={20} />
