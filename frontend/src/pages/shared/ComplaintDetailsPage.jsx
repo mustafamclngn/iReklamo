@@ -315,7 +315,7 @@ const ComplaintDetailsPage = () => {
                               className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-lg flex items-center gap-2 font-medium"
                               onClick={handleAssign}>
                               <i className="bi bi-person-check text-lg"></i>
-                              Assign Official
+                              {complaint.assignedOfficial ? "Reassign Official" : "Assign Official"}
                             </button>
                           </div>
                         )}
