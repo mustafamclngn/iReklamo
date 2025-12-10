@@ -13,6 +13,7 @@ const CU_FileComplaintPage = () => {
 
     const [barangays, setBarangays] = useState([]);
     const [errors, setErrors] = React.useState({});
+    const [showErrors, setShowErrors] = React.useState(false);
 
     const handleNext = (e) => {
         // for error handling
@@ -51,11 +52,18 @@ const CU_FileComplaintPage = () => {
 
         if (Object.keys(missing).length > 0) {
             setErrors(missing);
+            setShowErrors(true);
+            
+            setTimeout(() => {
+                setShowErrors(false);
+            }, 3000);
+            
             return;
         }
 
         // clear errors and proceed
         setErrors({});
+        setShowErrors(false);
         navigate('/file-complaint/complaintdetails');
     };
     
@@ -125,13 +133,13 @@ const CU_FileComplaintPage = () => {
                                             updateFormData({ first_name: e.target.value });
                                             if (errors.first_name) setErrors(prev => ({ ...prev, first_name: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${
-                                            errors.first_name 
-                                                ? 'border border-red-500' 
+                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.first_name
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                 : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                         }`}
                                     />
-                                    {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
+                                    {showErrors && errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
                                 </div>
 
                                 {/* brgy */}
@@ -143,7 +151,11 @@ const CU_FileComplaintPage = () => {
                                             updateFormData({ barangay: e.target.value });
                                             if (errors.barangay) setErrors(prev => ({ ...prev, barangay: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition ${errors.barangay ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition-all duration-300 ${
+                                            showErrors && errors.barangay
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                                : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                        }`}
                                     >
                                         <option value="">Select Barangay</option>
                                         {barangays.map((b) => (
@@ -152,7 +164,7 @@ const CU_FileComplaintPage = () => {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.barangay && <p className="text-red-500 text-sm mt-1">{errors.barangay}</p>}
+                                    {showErrors && errors.barangay && <p className="text-red-500 text-sm mt-1">{errors.barangay}</p>}
                                 </div>
 
                                 {/* last name */}
@@ -168,13 +180,13 @@ const CU_FileComplaintPage = () => {
                                             updateFormData({ last_name: e.target.value });
                                             if (errors.last_name) setErrors(prev => ({ ...prev, last_name: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition placeholder:italic ${
-                                            errors.last_name 
-                                                ? 'border border-red-500' 
+                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.last_name
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                 : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                         }`}
                                     />
-                                    {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>}
+                                    {showErrors && errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>}
                                 </div>
 
                                 {/* contact number */}
@@ -191,9 +203,13 @@ const CU_FileComplaintPage = () => {
                                             if (errors.contact_number) setErrors(prev => ({ ...prev, contact_number: ''}));
                                         }}
                                         maxLength={11}
-                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.contact_number ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.contact_number
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                                : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                        }`}
                                     />
-                                    {errors.contact_number && <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>}
+                                    {showErrors && errors.contact_number && <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>}
                                 </div>
 
                                 {/* sex and age*/}
@@ -208,9 +224,9 @@ const CU_FileComplaintPage = () => {
                                                 updateFormData({ sex: e.target.value });
                                                 if (errors.sex) setErrors(prev => ({ ...prev, sex: ''}));
                                             }}
-                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${
-                                                errors.sex 
-                                                    ? 'border border-red-500' 
+                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 ${
+                                                showErrors && errors.sex
+                                                    ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                     : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                             }`}
                                         >
@@ -218,7 +234,7 @@ const CU_FileComplaintPage = () => {
                                             <option>Female</option>
                                             <option>Male</option>
                                         </select>
-                                        {errors.sex && <p className="text-red-500 text-sm mt-1">{errors.sex}</p>}
+                                        {showErrors && errors.sex && <p className="text-red-500 text-sm mt-1">{errors.sex}</p>}
                                     </div>
                                     <div className="flex flex-col flex-1">
                                         <label className="text-base font-medium mb-2">
@@ -233,13 +249,13 @@ const CU_FileComplaintPage = () => {
                                                 if (errors.age) setErrors(prev => ({ ...prev, age: ''}));
                                             }}
                                             placeholder='Ibutang imong edad'
-                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${
-                                                errors.age 
-                                                    ? 'border border-red-500' 
+                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                                showErrors && errors.age
+                                                    ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                     : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                             }`}
                                         />
-                                        {errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
+                                        {showErrors && errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
                                     </div>
                                 </div>
 
@@ -254,9 +270,13 @@ const CU_FileComplaintPage = () => {
                                             updateFormData({ email: e.target.value });
                                             if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition placeholder:italic ${errors.email ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.email
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                                : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                        }`}
                                     />
-                                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                                    {showErrors && errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                                 </div>
                                 
                                 {/* anonymous option */}

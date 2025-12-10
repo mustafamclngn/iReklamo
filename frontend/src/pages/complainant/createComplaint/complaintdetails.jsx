@@ -8,6 +8,7 @@ const CU_FileComplaintPage = () => {
     const { formData, updateFormData } = useFormData();
 
     const [errors, setErrors] = React.useState({});
+    const [showErrors, setShowErrors] = React.useState(false);
 
     const handleNext = (e) => {
         if (e && e.preventDefault) e.preventDefault();
@@ -19,10 +20,17 @@ const CU_FileComplaintPage = () => {
 
         if (Object.keys(missing).length > 0) {
             setErrors(missing);
+            setShowErrors(true);
+            
+            setTimeout(() => {
+                setShowErrors(false);
+            }, 3000);
+            
             return;
         }
 
         setErrors({});
+        setShowErrors(false);
         navigate('/file-complaint/summary')
     }
 
@@ -77,9 +85,13 @@ const CU_FileComplaintPage = () => {
                                         updateFormData({ complaint_title: e.target.value });
                                         if (errors.complaint_title) setErrors(prev => ({ ...prev, complaint_title: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.complaint_title ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                        showErrors && errors.complaint_title
+                                            ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                            : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                    }`}
                                 />
-                                {errors.complaint_title && <p className="text-red-500 text-sm mt-1">{errors.complaint_title}</p>}
+                                {showErrors && errors.complaint_title && <p className="text-red-500 text-sm mt-1">{errors.complaint_title}</p>}
 
                                 <label className="text-base font-medium mb-2 mt-6">Case Type: *</label>
                                 <select
@@ -88,7 +100,11 @@ const CU_FileComplaintPage = () => {
                                         updateFormData({ case_type: e.target.value });
                                         if (errors.case_type) setErrors(prev => ({ ...prev, case_type: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.case_type ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 ${
+                                        showErrors && errors.case_type
+                                            ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                            : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                    }`}
                                 >
                                     <option value="">Select Case Type</option>
                                     <option value="Infrastructure & Utilities">Infrastructure & Utilities</option>
@@ -100,7 +116,7 @@ const CU_FileComplaintPage = () => {
                                     <option value="Other">Other</option>
 
                                 </select>
-                                {errors.case_type && <p className="text-red-500 text-sm mt-1">{errors.case_type}</p>}
+                                {showErrors && errors.case_type && <p className="text-red-500 text-sm mt-1">{errors.case_type}</p>}
 
                                 <label className="text-base font-medium mb-2 mt-6">Description: *</label>
                                 <textarea
@@ -110,9 +126,13 @@ const CU_FileComplaintPage = () => {
                                         updateFormData({ description: e.target.value });
                                         if (errors.description) setErrors(prev => ({ ...prev, description: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base min-h-32 focus:outline-none transition placeholder:italic ${errors.description ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base min-h-32 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                        showErrors && errors.description
+                                            ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                            : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                    }`}
                                 />
-                                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                                {showErrors && errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
 
                                 <label className="text-base font-medium mb-2 mt-6">Full Address: *</label>
                                 <input
@@ -123,9 +143,13 @@ const CU_FileComplaintPage = () => {
                                         updateFormData({ full_address: e.target.value });
                                         if (errors.full_address) setErrors(prev => ({ ...prev, full_address: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.full_address ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                        showErrors && errors.full_address
+                                            ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                            : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                    }`}
                                 />
-                                {errors.full_address && <p className="text-red-500 text-sm mt-1">{errors.full_address}</p>}
+                                {showErrors && errors.full_address && <p className="text-red-500 text-sm mt-1">{errors.full_address}</p>}
 
                                 <label className="text-base font-medium mb-2 mt-6">Specific Location:</label>
                                 <input
@@ -136,9 +160,13 @@ const CU_FileComplaintPage = () => {
                                         updateFormData({ specific_location: e.target.value });
                                         if (errors.specific_location) setErrors(prev => ({ ...prev, specific_location: '' }));
                                     }}
-                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition placeholder:italic ${errors.specific_location ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                    className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                        showErrors && errors.specific_location
+                                            ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                            : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                    }`}
                                 />
-                                {errors.specific_location && <p className="text-red-500 text-sm mt-1">{errors.specific_location}</p>}
+                                {showErrors && errors.specific_location && <p className="text-red-500 text-sm mt-1">{errors.specific_location}</p>}
                             </div>
                         </div>
 

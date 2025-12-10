@@ -63,6 +63,7 @@ function App() {
   // usertypes: 'user' // null , 'super_admin', 'city_admin', 'brgy_cap', 'brgy_off'
 
   return (
+  <div style={{ fontFamily: 'Montserrat, sans-serif' }}>
     <FormProvider>
       <Routes>
         {/* Home route (Default) */}
@@ -211,6 +212,7 @@ function App() {
         <Route path="*" element={<RedirectFallback />} />
       </Routes>
     </FormProvider>
+  </div>
   );
 }
 
