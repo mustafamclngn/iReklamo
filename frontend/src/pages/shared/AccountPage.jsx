@@ -16,6 +16,7 @@ import {
   PersonalInfoSection,
   AddressInfoSection,
 } from "../../components/common/ProfileFormSections";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll.jsx";
 
 const AccountPage = () => {
   const { auth } = useAuth();
@@ -115,6 +116,9 @@ const AccountPage = () => {
       </div>
     );
   }
+
+  const anyModalOpen = isConfirmOpen;
+  useLockBodyScroll(anyModalOpen);  
 
   return (
     <div className="bg-gray-50 min-h-screen">

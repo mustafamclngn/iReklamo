@@ -9,7 +9,7 @@ import RejectComplaintModal from '../../components/modals/RejectComplaintModal';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
-
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -182,6 +182,9 @@ const ComplaintDetailsPage = () => {
   // Email and contact are NEVER censored - needed for communication
   const displayEmail = rawEmail || 'N/A';
   const displayPhone = formatPhone(rawPhone) || 'N/A';
+
+  const anyModalOpen = isAssignOpen || isPriorityOpen || isRejectOpen || isStatusUpdateOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

@@ -8,12 +8,12 @@ import ErrorModal from './ErrorModal';
 import ConfirmAssign from './ConfirmAssignModal';
 import useAuth from '../../hooks/useAuth';
 import SelectedComplaintsList from './SelectedComplaints';
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 // This modal is for assigning complaints to an official
 const AssignComplaintModal = ({ isOpen, onClose, onConfirm, selectedComplaints }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   // selectedComplaintsIds is an array of the selected complaints for assignment. NOTE: These are objects, not ids
 
@@ -86,7 +86,7 @@ const AssignComplaintModal = ({ isOpen, onClose, onConfirm, selectedComplaints }
     fetchOfficials();
   }, [assignBrgy, user]);
 
-  if (!isOpen || !selectedComplaints) return null;
+  if (!isOpen) return null;
 
   // ==========
   // Submit 

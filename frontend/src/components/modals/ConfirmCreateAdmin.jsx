@@ -1,10 +1,10 @@
 import './modal.css'
 import { useState } from 'react'
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 const ConfirmCreateAdmin = ({ isOpen, onClose, onConfirm, user }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   const [isChecked, setIsChecked] = useState(false);
 

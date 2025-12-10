@@ -9,6 +9,7 @@ import DeleteModal from "../../components/modals/DeleteUserModal";
 import useOfficialsApi from "../../api/officialsApi";
 import CreateAdmin from "../../components/modals/CreateAdmin";
 import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const SA_OfficialsPage = () => {
   const navigate = useNavigate();

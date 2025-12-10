@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { X } from "lucide-react";
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 const ConfirmEditModal = ({ isOpen, onClose, onConfirm, isLoading }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   {/* scrollable or unscroll doc kung open ang modal */}
   useEffect(() => {

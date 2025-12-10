@@ -2,11 +2,11 @@ import './modal.css'
 import useComplaintsApi from '../../api/complaintsAPI';
 import { useEffect, useState } from 'react'
 import ConfirmDelete from './ConfirmDelete'
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 const DeleteModal = ({ isOpen, onClose, deleteData }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   const [assignedComplaints, setAssignedComplaints] = useState([])
   const user_id = deleteData?.user_id

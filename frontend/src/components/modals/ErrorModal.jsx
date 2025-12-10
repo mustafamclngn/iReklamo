@@ -1,9 +1,9 @@
 import './modal.css'
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 const ErrorModal = ({ isOpen, onClose, message }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   if (!isOpen) return null;
 

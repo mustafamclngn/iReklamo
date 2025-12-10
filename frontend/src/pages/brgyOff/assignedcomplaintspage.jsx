@@ -7,6 +7,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useAuth from '../../hooks/useAuth';
 import StatusUpdateModal from '../../components/modals/StatusUpdateModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const BO_AssignedComplaintsPage = () => {
   const navigate = useNavigate();
@@ -134,6 +135,10 @@ const BO_AssignedComplaintsPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filters]);
+  
+    
+  const anyModalOpen = isStatusModalOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">

@@ -9,6 +9,7 @@ import useAuth from '../../hooks/useAuth';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const BC_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -215,6 +216,9 @@ const BC_ComplaintsPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filters]);
+  
+  const anyModalOpen = isAssignOpen || isPriorityOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

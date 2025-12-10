@@ -11,6 +11,7 @@ import useUsersApi from "../../api/usersApi.js";
 import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
 import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,24}$/;
 
@@ -81,6 +82,9 @@ const ResetPassword = () => {
             setLoading(false);
         }
     };
+
+    const anyModalOpen = isSuccessOpen || isErrorOpen;
+    useLockBodyScroll(anyModalOpen);
 
   return (
     <>

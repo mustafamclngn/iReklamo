@@ -1,9 +1,9 @@
 import './modal.css'
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 const LogOutModal = ({ isOpen, onClose, onConfirm }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   if (!isOpen) return null;
 

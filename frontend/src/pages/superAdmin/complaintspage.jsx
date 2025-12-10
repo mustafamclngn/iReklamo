@@ -6,11 +6,11 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const SA_ComplaintsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
 
   const [complaints, setComplaints] = useState([]); // All complaints under barangay
 
@@ -212,6 +212,9 @@ const SA_ComplaintsPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filters]);
+
+  const anyModalOpen = isAssignOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

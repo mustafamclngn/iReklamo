@@ -8,6 +8,7 @@ import Pagination from '../../components/common/Pagination';
 import AssignComplaintModal from '../../components/modals/AssignComplaintModal';
 import SetPriorityModal from '../../components/modals/SetPriorityModal';
 import Toast from '../../components/common/Toast';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const CA_ComplaintsPage = () => {
   const navigate = useNavigate();
@@ -225,6 +226,9 @@ const CA_ComplaintsPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filters]);
+
+  const anyModalOpen = isAssignOpen || isPriorityOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

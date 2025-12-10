@@ -15,6 +15,7 @@ import ErrorModal from '../../components/modals/ErrorModal';
 import "./auth.css";
 import useUsersApi from '../../api/usersApi.js'
 import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 // ==========
 // IMPORTS
@@ -213,6 +214,9 @@ const LogInPage = () => {
         }
         
     }
+      
+    const anyModalOpen = isSuccessOpen || isErrorOpen;
+    useLockBodyScroll(anyModalOpen);
 
 // ==========
 // SETUP

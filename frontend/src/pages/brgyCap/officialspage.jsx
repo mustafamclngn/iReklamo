@@ -7,6 +7,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import useOfficialsApi from '../../api/officialsApi';
 import AssignOfficialModal from '../../components/modals/AssignOfficialModal';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const BC_OfficialsPage = () => {
   const { auth } = useAuth();
@@ -127,6 +128,9 @@ const BC_OfficialsPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, positionFilter, assignmentFilter]);
+  
+  const anyModalOpen = isAssignOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

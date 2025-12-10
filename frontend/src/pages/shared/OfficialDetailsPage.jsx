@@ -18,6 +18,7 @@ import {
   PersonalInfoSection,
   AddressInfoSection,
 } from "../../components/common/ProfileFormSections";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll.jsx";
 
 const OfficialDetailsPage = () => {
   const { user_id } = useParams();
@@ -183,6 +184,9 @@ const OfficialDetailsPage = () => {
     const basePath = getRoleBasePath(auth);
     navigate(`${basePath}/officials`, { replace: true });
   };
+
+  const anyModalOpen = isAssignOpen || isDeleteOpen || isViewCasesOpen;
+  useLockBodyScroll(anyModalOpen);
 
   return (
     <>

@@ -7,12 +7,12 @@ import SuccessModal from './SuccessModal';
 import ErrorModal from './ErrorModal';
 import ConfirmAssign from './ConfirmAssignModal';
 import SelectedComplaintsList from './SelectedComplaints';
-import useLockBodyScroll from '../../hooks/useLockBodyScroll';
+
 
 //  for assigning official to complaints
 const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) => {
 
-  useLockBodyScroll(isOpen);
+
 
   // ===========
   // User states
@@ -117,7 +117,7 @@ const AssignOfficialModal = ({ isOpen, onClose, onConfirm, officialDetails }) =>
 
   }, [complaints, selectedComplaints, refresh]);
 
-  if (!isOpen || !officialDetails) return null;
+  if (!isOpen) return null;
 
   // ==========
   // Submit 
