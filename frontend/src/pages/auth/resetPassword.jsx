@@ -61,12 +61,12 @@ const ResetPassword = () => {
         setLoading(true);
 
         try{
-        const response = await resetPassword(token, pwd)
-        console.log(response)
-        if (response?.data?.success) {
-            setSuccessMessage(response?.data?.message)
-            setIsSuccessOpen(true)
-        }
+            const response = await resetPassword(token, pwd)
+            console.log(response)
+            if (response?.data?.success) {
+                setSuccessMessage(response?.data?.message)
+                setIsSuccessOpen(true)
+            }
         } catch (err) {
             if (!err?.response) {
                 console.log(err)
@@ -88,106 +88,92 @@ const ResetPassword = () => {
 
   return (
     <>
-        <div className="auth-container">
-        
-            <IliganLogo scale={1.65} mode="login"/>
-            <p className="sessionmessage">Enter your new password</p>
-            <form className="auth-form" onSubmit={handleSubmit}>
-            {/* ========== */}
-            {/* New Password */}
-            {/* input field */}
-            <div className="input-row">
-                <div className="input-wrapper">
-                    <input
-                        type={showPwd ? "text" : "password"}
-                        id="pwd"
-                        autoComplete="off"
-                        onChange={(e) => setPwd(e.target.value)}
-                        required
-                        aria-invalid={validPwd ? "false" : "true"}
-                        aria-describedby="pwdnote"
-                        onFocus={() => setPwdFocus(true)}
-                        onBlur={() => setPwdFocus(false)}
-                        placeholder="New Password"
-                        className="auth-input"
-                    />
-                    <i className="bi bi-lock-fill input-icon" style={{ color: 'gray'}}>
-                        {/* validation icons */}
-                        <span className={validPwd ? "valid" : "hide"}>
-                            <FontAwesomeIcon icon={faCheck} />
-                        </span>
-                        <span className={validPwd || !pwd ? "hide" : "invalid"}>
-                            <FontAwesomeIcon icon={faTimes} />
-                        </span>
-                    </i>
+        <div className="auth-page-background">
+            <div className="auth-wrapper">
+                <div className="auth-logo-wrapper">
+                    <IliganLogo scale={1.65} mode="login"/>
                 </div>
-                <i
-                    className={`bi ${showPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
-                    onClick={() => setShowPwd((prev) => !prev)}
-                />
-            </div>
-            {/* instructions note */}
-            <p
-                id="pwdnote"
-                className={pwdFocus && pwd && !validPwd ? "instructions" : "offscreen"}>
-                <FontAwesomeIcon icon={faInfoCircle} />
-                    Password must be 8 to 24 characters,
-                    contain uppercase and lowercase letters, 
-                    and includes atleast one number. 
-            </p>
-            {/* ========== */}
-            {/* Confirm New Password */}
-            {/* input field */}
-            <div className="input-row">
-                <div className="input-wrapper">
-                    <input
-                        type={showMatchPwd ? "text" : "password"}
-                        id="matchPwd"
-                        autoComplete="off"
-                        onChange={(e) => setMatchPwd(e.target.value)}
-                        required
-                        aria-invalid={validPwd ? "false" : "true"}
-                        aria-describedby="pwdnote"
-                        onFocus={() => setMatchFocus(true)}
-                        onBlur={() => setMatchFocus(false)}
-                        placeholder="Confirm Password"
-                        className="auth-input"
-                    />
-                    <i className="bi bi-lock-fill input-icon" style={{ color: 'gray'}}>
-                        {/* validation icons */}
-                        <span className={validMatch ? "valid" : "hide"}>
-                            <FontAwesomeIcon icon={faCheck} />
-                        </span>
-                        <span className={validMatch || !matchPwd ? "hide" : "invalid"}>
-                            <FontAwesomeIcon icon={faTimes} />
-                        </span>
-                    </i>
+
+                {/* container*/}
+                <div className="auth-container">
+                    <p className="sessionmessage">Enter your new password</p>
+                    <form className="auth-form" onSubmit={handleSubmit}>
+                    {/* ========== */}
+                    {/* New Password */}
+                    {/* input field */}
+                    <div className="input-row">
+                        <div className="input-wrapper" style={{marginBottom: 0}}>
+                            <input
+                                type={showPwd ? "text" : "password"}
+                                id="pwd"
+                                autoComplete="off"
+                                onChange={(e) => setPwd(e.target.value)}
+                                required
+                                aria-invalid={validPwd ? "false" : "true"}
+                                aria-describedby="pwdnote"
+                                onFocus={() => setPwdFocus(true)}
+                                onBlur={() => setPwdFocus(false)}
+                                placeholder="New Password"
+                                className="auth-input"
+                            />
+                        </div>
+                        <i
+                            className={`bi ${showPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
+                            onClick={() => setShowPwd((prev) => !prev)}
+                        />
+                    </div>
+                    {/* instructions note */}
+                    <p
+                        id="pwdnote"
+                        className={pwdFocus && pwd && !validPwd ? "instructions" : "offscreen"}>
+                        <FontAwesomeIcon icon={faInfoCircle} />
+                            Password must be 8 to 24 characters,
+                            contain uppercase and lowercase letters, 
+                            and includes atleast one number. 
+                    </p>
+                    {/* ========== */}
+                    {/* Confirm New Password */}
+                    {/* input field */}
+                    <div className="input-row">
+                        <div className="input-wrapper" style={{marginBottom: 0}}>
+                            <input
+                                type={showMatchPwd ? "text" : "password"}
+                                id="matchPwd"
+                                autoComplete="off"
+                                onChange={(e) => setMatchPwd(e.target.value)}
+                                required
+                                aria-invalid={validPwd ? "false" : "true"}
+                                aria-describedby="pwdnote"
+                                onFocus={() => setMatchFocus(true)}
+                                onBlur={() => setMatchFocus(false)}
+                                placeholder="Confirm Password"
+                                className="auth-input"
+                            />
+                        </div>
+                        <i
+                            className={`bi ${showMatchPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
+                            onClick={() => setShowMatchPwd((prev) => !prev)}
+                        />
+                    </div>
+                    {/* instructions note */}
+                    <p
+                        id="matchpwdnote"
+                        className={matchFocus && matchPwd && !validMatch ? "instructions" : "offscreen"}>
+                        <FontAwesomeIcon icon={faInfoCircle} />
+                            Password fields must match.
+                    </p>
+                    {/* Button */}
+                    <button
+                        className="auth-button"
+                        disabled={!pwd || !matchPwd || !validMatch || !validPwd}>
+                        {loading ? 
+                            (<LoadingSpinner message="" scale={0.45}/>)
+                                : (<span>Confirm</span>)}
+                    </button>
+                    {/* ========== */}
+                    </form>
                 </div>
-                <i
-                    className={`bi ${showMatchPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
-                    onClick={() => setShowMatchPwd((prev) => !prev)}
-                />
             </div>
-            {/* instructions note */}
-            <p
-                id="matchpwdnote"
-                className={matchFocus && matchPwd && !validMatch ? "instructions" : "offscreen"}>
-                <FontAwesomeIcon icon={faInfoCircle} />
-                    Password fields must match.
-            </p>
-            {/* Button */}
-            <button
-                className="auth-button"
-                disabled={!pwd || !matchPwd || !validMatch || !validPwd}>
-                    Confirm
-            </button>
-            {/* ========== */}
-            {/* Loading Update */}
-            {loading && (
-                <LoadingSpinner message="Updating password..." scale={0.95}/>
-            )}
-            {/* ========== */} 
-            </form>
         </div>
 
         <SuccessModal
@@ -203,7 +189,7 @@ const ResetPassword = () => {
             message={errMsg}
         />
     </>
-);
+  );
 };
 
 export default ResetPassword;

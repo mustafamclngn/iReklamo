@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../../../contexts/formcontext.jsx';
 import { ArrowRight, CircleCheck } from "lucide-react";
+import { validateEmail, validatePhone } from '../../../utils/validators.js';
 import '../../../assets/css/checkbox.css';
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -12,6 +13,7 @@ const CU_FileComplaintPage = () => {
 
     const [barangays, setBarangays] = useState([]);
     const [errors, setErrors] = React.useState({});
+    const [showErrors, setShowErrors] = React.useState(false);
 
     const handleNext = (e) => {
         // for error handling
@@ -33,20 +35,35 @@ const CU_FileComplaintPage = () => {
         
         // These are always required
         if (!formData.barangay) missing.barangay = 'Required';
+        
+        // Email validation
         if (!formData.email) {
             missing.email = 'Required' 
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        } else if (!validateEmail(formData.email)) {
             missing.email = "Invalid email format";
         }
-        if (!formData.contact_number) missing.contact_number = 'Required';
+        
+        // Contact number validation
+        if (!formData.contact_number) {
+            missing.contact_number = 'Required';
+        } else if (!validatePhone(formData.contact_number)) {
+            missing.contact_number = 'Invalid phone number.';
+        }
 
         if (Object.keys(missing).length > 0) {
             setErrors(missing);
+            setShowErrors(true);
+            
+            setTimeout(() => {
+                setShowErrors(false);
+            }, 3000);
+            
             return;
         }
 
         // clear errors and proceed
         setErrors({});
+        setShowErrors(false);
         navigate('/file-complaint/complaintdetails');
     };
     
@@ -97,7 +114,7 @@ const CU_FileComplaintPage = () => {
                     <div className="border-2 border-gray-200 mx-auto max-w-[1500px] w-[80%] px-16 py-10 rounded-lg mb-5 shadow-md">
                         <div className="flex flex-row gap-1 border-b-2 border-gray-200 pb-3 mb-8">
                             <h1 className="font-bold text-blue-400 text-3xl">Step 1:</h1>
-                            <h1 className="font-medium text-black text-3xl">Complainant Info</h1>
+                            <h1 className="font-bold text-black text-3xl">Complainant Info</h1>
                         </div>
             
                         {/* form */}
@@ -110,19 +127,19 @@ const CU_FileComplaintPage = () => {
                                     </label>
                                     <input
                                         type="text"
-                                        placeholder="Enter your first name"
+                                        placeholder="Ibutang imong pangalan"
                                         value={formData.first_name}
                                         onChange={(e) => {
                                             updateFormData({ first_name: e.target.value });
                                             if (errors.first_name) setErrors(prev => ({ ...prev, first_name: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${
-                                            errors.first_name 
-                                                ? 'border border-red-500' 
+                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.first_name
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                 : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                         }`}
                                     />
-                                    {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
+                                    {showErrors && errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
                                 </div>
 
                                 {/* brgy */}
@@ -134,7 +151,11 @@ const CU_FileComplaintPage = () => {
                                             updateFormData({ barangay: e.target.value });
                                             if (errors.barangay) setErrors(prev => ({ ...prev, barangay: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition ${errors.barangay ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition-all duration-300 ${
+                                            showErrors && errors.barangay
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                                : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                        }`}
                                     >
                                         <option value="">Select Barangay</option>
                                         {barangays.map((b) => (
@@ -143,7 +164,7 @@ const CU_FileComplaintPage = () => {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.barangay && <p className="text-red-500 text-sm mt-1">{errors.barangay}</p>}
+                                    {showErrors && errors.barangay && <p className="text-red-500 text-sm mt-1">{errors.barangay}</p>}
                                 </div>
 
                                 {/* last name */}
@@ -153,19 +174,19 @@ const CU_FileComplaintPage = () => {
                                     </label>
                                     <input
                                         type="text"
-                                        placeholder="Enter your last name"
+                                        placeholder="Ibutang imong apelyido"
                                         value={formData.last_name}
                                         onChange={(e) => {
                                             updateFormData({ last_name: e.target.value });
                                             if (errors.last_name) setErrors(prev => ({ ...prev, last_name: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition ${
-                                            errors.last_name 
-                                                ? 'border border-red-500' 
+                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.last_name
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                 : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                         }`}
                                     />
-                                    {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>}
+                                    {showErrors && errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>}
                                 </div>
 
                                 {/* contact number */}
@@ -173,15 +194,22 @@ const CU_FileComplaintPage = () => {
                                     <label className="text-base font-medium mb-2">Contact Number: *</label>
                                     <input
                                         type="text"
-                                        placeholder="Enter your contact number"
+                                        placeholder="Ibutang imong contact number"
                                         value={formData.contact_number}
                                         onChange={(e) => {
-                                            updateFormData({ contact_number: e.target.value });
+                                            // numbers only bawal letters sa input
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            updateFormData({ contact_number: value });
                                             if (errors.contact_number) setErrors(prev => ({ ...prev, contact_number: ''}));
                                         }}
-                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${errors.contact_number ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        maxLength={11}
+                                        className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.contact_number
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                                : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                        }`}
                                     />
-                                    {errors.contact_number && <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>}
+                                    {showErrors && errors.contact_number && <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>}
                                 </div>
 
                                 {/* sex and age*/}
@@ -196,9 +224,9 @@ const CU_FileComplaintPage = () => {
                                                 updateFormData({ sex: e.target.value });
                                                 if (errors.sex) setErrors(prev => ({ ...prev, sex: ''}));
                                             }}
-                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${
-                                                errors.sex 
-                                                    ? 'border border-red-500' 
+                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 ${
+                                                showErrors && errors.sex
+                                                    ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                     : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                             }`}
                                         >
@@ -206,7 +234,7 @@ const CU_FileComplaintPage = () => {
                                             <option>Female</option>
                                             <option>Male</option>
                                         </select>
-                                        {errors.sex && <p className="text-red-500 text-sm mt-1">{errors.sex}</p>}
+                                        {showErrors && errors.sex && <p className="text-red-500 text-sm mt-1">{errors.sex}</p>}
                                     </div>
                                     <div className="flex flex-col flex-1">
                                         <label className="text-base font-medium mb-2">
@@ -220,14 +248,14 @@ const CU_FileComplaintPage = () => {
                                                 updateFormData({ age: e.target.value });
                                                 if (errors.age) setErrors(prev => ({ ...prev, age: ''}));
                                             }}
-                                            placeholder='Enter your age'
-                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition ${
-                                                errors.age 
-                                                    ? 'border border-red-500' 
+                                            placeholder='Ibutang imong edad'
+                                            className={`px-3 py-2 rounded-md text-base h-10 focus:outline-none transition-all duration-300 placeholder:italic ${
+                                                showErrors && errors.age
+                                                    ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' 
                                                     : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
                                             }`}
                                         />
-                                        {errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
+                                        {showErrors && errors.age && <p className="text-red-500 text-sm mt-1">{errors.age}</p>}
                                     </div>
                                 </div>
 
@@ -236,15 +264,19 @@ const CU_FileComplaintPage = () => {
                                     <label className="text-base font-medium mb-2">Email Address: *</label>
                                     <input
                                         type="email"
-                                        placeholder="Enter your email address"
+                                        placeholder="Ibutang imong email address"
                                         value={formData.email}
                                         onChange={(e) => {
                                             updateFormData({ email: e.target.value });
                                             if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
                                         }}
-                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition ${errors.email ? 'border border-red-500' : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'}`}
+                                        className={`px-3 py-2 rounded-md h-10 text-base focus:outline-none transition-all duration-300 placeholder:italic ${
+                                            showErrors && errors.email
+                                                ? 'border-2 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                                : 'border border-gray-300 focus:ring-1 focus:ring-blue-400'
+                                        }`}
                                     />
-                                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                                    {showErrors && errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                                 </div>
                                 
                                 {/* anonymous option */}
@@ -298,7 +330,7 @@ const CU_FileComplaintPage = () => {
                             <button
                                 type='button'
                                 onClick={handleNext}
-                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-2 px-6 mb-3 mr-2 text-base"
+                                className="flex flex-row justify-center place-items-center gap-1 w-50 bg-blue-400 rounded-lg font-bold py-2 px-6 mb-3 text-base"
                             >
                                 Next
                                 <ArrowRight size={20} />
