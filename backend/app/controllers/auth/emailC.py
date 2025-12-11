@@ -19,7 +19,7 @@ def email_details(username, email, random_pwd):
             "official_details_email.html",
             username=username,
             password=random_pwd,
-            action_url="http://localhost:5173/auth/login",
+            action_url="http://localhost:5000/auth/login",
             header_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjW6pVUr11OhfYa_pKjC2GEzO3wK4az40l5g&s",
             year=datetime.datetime.now().year
         )
