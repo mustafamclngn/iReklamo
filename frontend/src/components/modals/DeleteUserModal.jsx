@@ -92,21 +92,22 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
               <button 
                 type="button" 
                 className="revoke-button" 
+                style={{backgroundColor: '#ef4444', color: 'white'}}
                 onClick={() => handleConfirmRevoke("Permissions")}
                 title="Removes this user’s access to their role permissions."
               >
                 Revoke Permissions
               </button>
               
-              <button 
+              {/* <button 
                 type="button" 
                 className="revoke-button" 
                 style={{backgroundColor: '#ef4444', color: 'white'}}
                 onClick={() => handleConfirmRevoke("Account")}
                 title="Permanently disables the user’s account."
               >
-                Revoke Account
-              </button>
+                Revoke Account  
+              </button> */}
             </div>
           </form>
         </div>

@@ -16,8 +16,11 @@ def create_app(config_name=None):
     """Application factory function"""
 
     # Create Flask app instance
-    app = Flask(__name__)
-
+    app = Flask(
+        __name__,
+        static_folder=os.path.join(os.path.dirname(__file__), "static"),
+        static_url_path="/static"
+    )
     
     # Load configuration
     if config_name is None:
@@ -46,7 +49,14 @@ def create_app(config_name=None):
     # Serve static files (profile pictures)
     STORAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'storage')
 
-    
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
+    def serve_spa(path):
+        if path != "" and os.path.exists(app.static_folder + "/" + path):
+            return send_from_directory(app.static_folder, path)
+
+        return send_from_directory(app.static_folder, "index.html")
+
     @app.route('/storage/profile_pictures/<filename>')  # CHANGED: Added underscore
     def serve_profile_picture(filename):
         """Serve profile picture files"""
