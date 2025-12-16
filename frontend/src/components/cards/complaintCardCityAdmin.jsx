@@ -25,19 +25,18 @@ const ComplaintCardCityAdmin = ({
   return (
     <div className="border border-gray-200 rounded-sm p-6 shadow-md hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start">
-        {/* LEFT SIDE - PRIORITY + INFO */}
+        {/* LEFT SIDE - CHECKBOX + INFO */}
         <div className="flex gap-1 flex-1">
           <div className="w-16 h-32 flex items-center justify-start flex-shrink-0">
-            <button
-              onClick={() => onPriorityUpdate(complaint)}
-              className="flex items-center justify-center bg-transparent border-0 p-0 cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ width: "20px", height: "20px" }}
-              title={`Priority: ${complaint.priority}`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M18.4212 10.0002C18.4212 14.651 14.651 18.4212 10.0002 18.4212C5.34933 18.4212 1.5791 14.651 1.5791 10.0002C1.5791 5.34933 5.34934 1.5791 10.0002 1.5791C14.651 1.5791 18.4212 5.34934 18.4212 10.0002Z" fill={priorityColors[complaint.priority]}/>
-              </svg>
-            </button>
+            {/* Select for Assignment */}
+            <input
+              type="checkbox"
+              id="selectCheckbox"
+              checked={complaint.status === "Pending" && !!isSelected}
+              onChange={(e) => onSelect(complaint, e.target.checked)}
+              disabled={complaint.status !== "Pending"}
+              className="w-5 h-5 cursor-pointer"
+            />
           </div>
 
           {/* Complaint Info */}
@@ -57,6 +56,17 @@ const ComplaintCardCityAdmin = ({
 
         {/* RIGHT SIDE - ACTIONS */}
         <div className="flex gap-2">
+          {/* Priority Badge */}
+          <button
+            onClick={() => onPriorityUpdate(complaint)}
+            className="flex items-center justify-center bg-transparent border-0 p-2 cursor-pointer hover:opacity-80 transition-opacity"
+            title={`Priority: ${complaint.priority}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M18.4212 10.0002C18.4212 14.651 14.651 18.4212 10.0002 18.4212C5.34933 18.4212 1.5791 14.651 1.5791 10.0002C1.5791 5.34933 5.34934 1.5791 10.0002 1.5791C14.651 1.5791 18.4212 5.34934 18.4212 10.0002Z" fill={priorityColors[complaint.priority]}/>
+            </svg>
+          </button>
+
           {/* Status Badge */}
           <button
             onClick={() => onStatusUpdate(complaint)}
@@ -90,15 +100,6 @@ const ComplaintCardCityAdmin = ({
           >
             <i className="bi bi-person-check text-xl"></i>
           </button>
-          
-          {/* Select for Assignment */}
-          <input
-            type="checkbox"
-            id="selectCheckbox"
-            checked={complaint.status === "Pending" && !!isSelected}
-            onChange={(e) => onSelect(complaint, e.target.checked)}
-            disabled={complaint.status !== "Pending"}
-          />
         </div>
       </div>
     </div>
