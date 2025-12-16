@@ -96,18 +96,21 @@ def login_user():
     # fetch: hashed password
     stored_hash = user_data.get("user_password")
 
+    # ===============
+    # fetch: role, token_version, id
+    role = [user_data.get("role_id")]  
+    user_id = user_data.get("user_id")
+    token_version = user_data.get("token_version", 0)
+
+    if role[0] == 5:
+        return jsonify({"error": "Account has been revoked."}), 403
+
     print("User data:", user_data)
     print("Stored hash:", stored_hash)
     print("pwd:", pwd)
 
     if not check_password_hash(stored_hash, pwd):
         return jsonify({"error": "Incorrect password"}), 401
-    
-    # ===============
-    # fetch: role, token_version, id
-    role = [user_data.get("role_id")]  
-    user_id = user_data.get("user_id")
-    token_version = user_data.get("token_version", 0)
 
     # ===============
     # create: access token
@@ -155,7 +158,7 @@ def login_user():
             "email": user_data["email"],
             "first_name": user_data["first_name"],
             "last_name": user_data["last_name"],
-            "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
+            "position": user_data.get("position"),  
             "contact_number": user_data.get("contact_number"),
             "barangay_id": user_data.get("barangay_id")
         },
@@ -218,7 +221,7 @@ def refresh_token():
                 "email": user_data["email"],
                 "first_name": user_data["first_name"],
                 "last_name": user_data["last_name"],
-                "position": user_data.get("position"),  # FIXED: changed from "user_position" to "position"
+                "position": user_data.get("position"),  
                 "barangay_id": user_data.get("barangay_id")
             }
         }), 200

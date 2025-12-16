@@ -319,7 +319,7 @@ const ComplaintDetailsPage = () => {
                               onClick={handleAssign}
                               disabled={complaint.status === "Resolved"}>
                               <i className="bi bi-person-check text-lg"></i>
-                              {complaint.assignedOfficial ? "Reassign Official" : "Assign Official"}
+                              {(complaint.assignedOfficial !== "Unassigned") ? "Reassign Official" : "Assign Official"}
                             </button>
                           </div>
                         )}

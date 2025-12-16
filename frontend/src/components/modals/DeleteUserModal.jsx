@@ -96,7 +96,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
                 onClick={() => handleConfirmRevoke("Permissions")}
                 title="Removes this user’s access to their role permissions."
               >
-                Revoke Permissions
+                Revoke
               </button>
               
               {/* <button 
@@ -106,7 +106,7 @@ const DeleteModal = ({ isOpen, onClose, deleteData }) => {
                 onClick={() => handleConfirmRevoke("Account")}
                 title="Permanently disables the user’s account."
               >
-                Revoke Account  
+                Revoke  
               </button> */}
             </div>
           </form>

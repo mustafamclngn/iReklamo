@@ -64,7 +64,7 @@ class Select():
                 self.columns.append(col.split(".")[-1])
         return self
     
-    def search(self, tag = None, key = None, table = None, search_mult = {}, search_mult_connect = " AND "):
+    def search(self, tag = None, key = None, table = None, search_mult = {}, search_mult_connect = " AND ", search_mode = "LIKE"):
         self.searchquery = ""
         self.params = []
         integer_searches = ["user_id", "assigned_official_id", "barangay_id", "role_id", "id"]
@@ -80,22 +80,31 @@ class Select():
                     conditions.append(f"{search_tag} = %s")
                     self.params.append(int(val))
                 else:
-                    conditions.append(f"{search_tag} LIKE %s")
-                    self.params.append(f"%{val}%")
+                    conditions.append(f"{search_tag} {search_mode} %s")
+                    if search_mode == "=":
+                        self.params.append(val)
+                    else:
+                        self.params.append(f"%{val}%")
             self.searchquery = "WHERE " + search_mult_connect.join(conditions)
 
         elif tag and key:
             search_tag = self.aliascolumn.get(tag, f"{table}.{tag}")
-            self.searchquery = f"WHERE {search_tag} LIKE %s "
+            self.searchquery = f"WHERE {search_tag} {search_mode} %s "
             if tag in integer_searches:
                 self.searchquery = f"WHERE {search_tag} = %s"
                 self.params.append(int(key))
             else:
-                self.params.append(f"%{key}%")
+                if search_mode == "=":
+                    self.params.append(key)
+                else:
+                    self.params.append(f"%{val}%")
 
         elif key:            
-            searchAll = [f"{col} LIKE %s" for col in self.columns]
-            self.params.extend([f"%{key}%"] * len(self.columns))
+            searchAll = [f"{col} {search_mode} %s" for col in self.columns]
+            if search_mode == "=":
+                self.params.extend([key] * len(self.columns))
+            else:
+                self.params.extend([f"%{key}%"] * len(self.columns))
             self.searchquery = "WHERE " + " OR ".join(searchAll)
         
         return self

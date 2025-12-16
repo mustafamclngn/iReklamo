@@ -50,10 +50,12 @@ class User():
             .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
             .join("LEFT JOIN", "roles", "users.role_id = roles.id")
             .join("LEFT JOIN", "user_info", "users.user_id = user_info.user_id")
-            .search(tag="user_name", key=user_name)
+            .search(tag="user_name", key=user_name, search_mode = "=")
             .execute()
             .retDict()
         )
+
+        print(self.user)
         return self.user
 
     def getEmail(self, user_email: str):
@@ -70,10 +72,11 @@ class User():
             .join("LEFT JOIN", "barangays", "users.barangay_id = barangays.id")
             .join("LEFT JOIN", "roles", "users.role_id = roles.id")
             .join("LEFT JOIN", "user_info", "users.user_id = user_info.user_id")
-            .search(tag="email", key=user_email)
+            .search(tag="email", key=user_email, search_mode = "=")
             .execute()
             .retDict()
         )
+        print(self.user)
         return self.user
 
     # ====================
