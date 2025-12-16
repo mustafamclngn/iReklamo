@@ -74,8 +74,10 @@ def user_forgot_pwd():
     
     data = request.get_json()
     identity = data.get("identity")
+    print(identity)
 
     user = view_user_nameemail(identity)
+    print(user)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -85,7 +87,7 @@ def user_forgot_pwd():
         user_name = user.get("user_name")
         user_email = user.get("email")
 
-        reset_link = f"http://localhost:5000/auth/reset-password?token={reset_token}"
+        reset_link = f"http://localhost:5000/auth/change-password?token={reset_token}"
 
         email_newpwd(user_name, user_email, reset_link)
 
