@@ -156,6 +156,14 @@ const useComplaintsApi = () => {
     return response.data;
   };
 
+  // NEW: Add log without changing status
+  const addComplaintLog = async (complaintId, remarks) => {
+    const response = await axiosPrivate.post(`/api/complaints/${complaintId}/add-log`, {
+      remarks
+    });
+    return response.data;
+  };
+
 return {
     complaintsByBarangayId,
     StatusComplaintsByBarangayId,
@@ -173,7 +181,8 @@ return {
     getActiveCases,
     getResolvedCases,
     rejectComplaint,
-    setPriority
+    setPriority,
+    addComplaintLog  // NEW
   };
 
 };

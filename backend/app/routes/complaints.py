@@ -365,7 +365,23 @@ def track_complaint(complaint_code):
                     WHEN users.first_name IS NOT NULL AND users.last_name IS NOT NULL
                     THEN CONCAT(users.first_name, ' ', users.last_name)
                     ELSE NULL
-                END as assigned_official
+                END as assigned_official,
+                -- STATUS HISTORY: JSON array of status changes
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'status', csh.new_status,
+                                'changed_at', csh.changed_at,
+                                'remarks', csh.remarks
+                            )
+                            ORDER BY csh.changed_at DESC
+                        )
+                        FROM complaint_status_history csh
+                        WHERE csh.complaint_id = complaints.id
+                    ),
+                    '[]'::json
+                ) as status_history
             FROM complaints
             LEFT JOIN barangays ON complaints.barangay_id = barangays.id
             LEFT JOIN complainants ON complaints.complainant_id = complainants.id
@@ -934,9 +950,7 @@ def update_complaint_status(complaint_id):
             WHERE id = %s
         """, (new_status, complaint_id))
 
-        # Log to history table - Note: you may need to create this table first
-        # Assuming complaint_status_history table exists with columns:
-        # complaint_id, old_status, new_status, remarks, actor_id, changed_at
+        # Log to history table
         try:
             cursor.execute("""
                 INSERT INTO complaint_status_history
@@ -960,6 +974,83 @@ def update_complaint_status(complaint_id):
     except Exception as e:
         print(f"Error updating complaint status: {e}")
         return jsonify({'success': False, 'message': 'Internal server error'}), 500
+
+
+# NEW ENDPOINT: Add log without changing status
+@complaints_bp.route('/<int:complaint_id>/add-log', methods=['POST'])
+@verify_jwt
+def add_complaint_log(complaint_id):
+    try:
+        # Get user data from JWT middleware
+        user_info = getattr(request, 'user', None)
+        if not user_info:
+            return jsonify({"error": "Authentication required"}), 401
+
+        user_id = user_info.get('user_id')
+
+        data = request.get_json()
+        if not data or 'remarks' not in data:
+            return jsonify({
+                'success': False,
+                'message': 'Remarks are required'
+            }), 400
+
+        remarks = data.get('remarks', '').strip()
+        if not remarks:
+            return jsonify({
+                'success': False,
+                'message': 'Remarks cannot be empty'
+            }), 400
+
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Get current complaint status
+        cursor.execute("""
+            SELECT status FROM complaints WHERE id = %s
+        """, (complaint_id,))
+
+        complaint = cursor.fetchone()
+        if not complaint:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Complaint not found'
+            }), 404
+
+        current_status = complaint['status']
+
+        # Insert log entry with same old_status and new_status (no status change)
+        cursor.execute("""
+            INSERT INTO complaint_status_history
+            (complaint_id, old_status, new_status, remarks, actor_id, changed_at)
+            VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (complaint_id, current_status, current_status, remarks, user_id))
+
+        # Update the complaint's updated_at timestamp
+        cursor.execute("""
+            UPDATE complaints
+            SET updated_at = NOW()
+            WHERE id = %s
+        """, (complaint_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'Log added successfully'
+        }), 200
+
+    except Exception as e:
+        print(f"Error adding complaint log: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Internal server error'
+        }), 500
+
 
 @complaints_bp.route('/<int:complaint_id>/set-priority', methods=['POST'])
 @verify_jwt
