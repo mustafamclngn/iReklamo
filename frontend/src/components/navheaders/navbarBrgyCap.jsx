@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import IliganLogo from "./iliganLogo";
 
 // BarangayCapNavBar Component
-const BarangayCapNavBar = () => {
+const BarangayCapNavBar = ({ onLogOut }) => {
   const links = ["Dashboard", "Complaints", "Officials", "Reports", "Account"];
 
   return (
@@ -28,6 +28,14 @@ const BarangayCapNavBar = () => {
               </NavLink>
             </li>
           ))}
+          <li>
+            <button
+              onClick={onLogOut}
+              className="text-base uppercase tracking-wide text-red-600 hover:text-red-800 transition"
+            >
+              Log Out
+            </button>
+          </li>
         </ul>
       </div>
     </nav>
