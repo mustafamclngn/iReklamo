@@ -5,6 +5,13 @@ import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import ErrorAlert from "../../../components/common/ErrorAlert";
 import HeroBanner from "../../../components/navheaders/heroBanner";
 
+const statusColors = {
+  Pending: "#FFB300",
+  "In-Progress": "#FFD600",
+  Resolved: "#43B174",
+  Rejected: "#DC3545",
+};
+
 const CU_TrackComplaintDetailsPage = () => {
   const { complaintCode } = useParams();
   const navigate = useNavigate();
@@ -12,7 +19,7 @@ const CU_TrackComplaintDetailsPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const {trackComplaint} = useComplaintsApi();
+  const { trackComplaint } = useComplaintsApi();
 
   useEffect(() => {
     const fetchComplaint = async () => {
@@ -61,6 +68,9 @@ const CU_TrackComplaintDetailsPage = () => {
     return <ErrorAlert message={error} />;
   }
 
+  const currentStatus = complaint?.status || "Pending";
+  const isRejected = currentStatus === "Rejected";
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Hero Banner */}
@@ -82,7 +92,9 @@ const CU_TrackComplaintDetailsPage = () => {
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-              <i className="bi bi-file-earmark-text-fill"></i>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i className="bi bi-file-earmark-text-fill text-blue-600 text-2xl"></i>
+              </div>
               Complaint Details
             </h2>
           </div>
@@ -138,9 +150,12 @@ const CU_TrackComplaintDetailsPage = () => {
               <label className="block text-md text-gray-600 mb-2">
                 Status:
               </label>
-              <p className="text-gray-900 font-medium text-lg">
-                {complaint?.status || "Not yet assigned"}
-              </p>
+              <span
+                className="inline-block px-4 py-1.5 rounded-full font-semibold text-white text-sm"
+                style={{ backgroundColor: statusColors[currentStatus] }}
+              >
+                {currentStatus}
+              </span>
             </div>
 
             <div className="col-span-2">
@@ -158,7 +173,9 @@ const CU_TrackComplaintDetailsPage = () => {
         <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-              <i className="bi bi-geo-alt-fill text-red-600"></i>
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <i className="bi bi-geo-alt-fill text-red-600 text-2xl"></i>
+              </div>
               Complaint Address
             </h2>
           </div>
@@ -196,108 +213,192 @@ const CU_TrackComplaintDetailsPage = () => {
           </div>
         </div>
 
-        {/* complaint status */}
-        <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
+        {/* gicombine status history og line */}
+        <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-              <i className="bi bi-file-earmark-text"></i>
-              Complaint Status
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i className="bi bi-clock-history text-green-600 text-2xl"></i>
+              </div>
+              Status Tracking
             </h2>
           </div>
           <hr className="border-t border-gray-200 mt-4 mb-6" />
-          <div className="relative pt-4 px-8">
+
+          {/* progress bar*/}
+          <div className="relative pt-4 px-8 pb-12 mb-8 bg-gray-50 rounded-xl">
             <div className="flex justify-between items-start mb-2 relative">
               <div
-                className="absolute top-6 left-0 right-0 h-1 bg-gray-200"
+                className="absolute top-6 left-0 right-0 h-2 bg-gray-200 rounded-full"
                 style={{ zIndex: 0 }}
               ></div>
 
               {/* progress line */}
               <div
-                className="absolute top-6 left-0 h-1 bg-green-500 transition-all duration-500"
+                className="absolute top-6 left-0 h-2 transition-all duration-500 rounded-full"
                 style={{
-                  width:
-                    complaint?.status === "Pending"
-                      ? "18%"
-                      : complaint?.status === "In-Progress"
-                      ? "50%"
-                      : complaint?.status === "Resolved"
-                      ? "100%"
-                      : "0%",
+                  width: isRejected
+                    ? "0%"
+                    : currentStatus === "Pending"
+                    ? "18%"
+                    : currentStatus === "In-Progress"
+                    ? "50%"
+                    : currentStatus === "Resolved"
+                    ? "100%"
+                    : "0%",
+                  backgroundColor: isRejected ? "#DC3545" : "#43B174",
                   zIndex: 1,
                 }}
               ></div>
 
               {/* if submitted */}
-              <div className="text-center flex-1 relative" style={{ zIndex: 2 }}>
+              <div
+                className="text-center flex-1 relative"
+                style={{ zIndex: 2 }}
+              >
                 <div
-                  className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold ${
-                    complaint?.status === "Pending" ||
-                    complaint?.status === "In-Progress" ||
-                    complaint?.status === "Resolved"
-                      ? "bg-green-500 text-white"
+                  className={`w-14 h-14 mx-auto rounded-full flex items-center justify-center font-bold shadow-lg ${
+                    !isRejected
+                      ? "bg-green-500 text-white ring-4 ring-green-100"
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  ✓
+                  <i className="bi bi-check-lg text-2xl"></i>
                 </div>
-                <p className="text-sm font-bold text-gray-800 mt-3">Submitted</p>
+                <p className="text-base font-bold text-gray-800 mt-3">
+                  Submitted
+                </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {formatDate(complaint?.created_at)}
                 </p>
               </div>
 
-              {/* if in progress */}
-              <div className="text-center flex-1 relative" style={{ zIndex: 2 }}>
+              {/* if in progress*/}
+              <div
+                className="text-center flex-1 relative"
+                style={{ zIndex: 2 }}
+              >
                 <div
-                  className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold ${
-                    complaint?.status === "In-Progress" ||
-                    complaint?.status === "Resolved"
-                      ? "bg-green-500 text-white"
+                  className={`w-14 h-14 mx-auto rounded-full flex items-center justify-center font-bold shadow-lg ${
+                    !isRejected &&
+                    (currentStatus === "In-Progress" ||
+                      currentStatus === "Resolved")
+                      ? "bg-green-500 text-white ring-4 ring-green-100"
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {complaint?.status === "In-Progress" ||
-                  complaint?.status === "Resolved"
-                    ? "✓"
-                    : ""}
+                  {!isRejected &&
+                  (currentStatus === "In-Progress" ||
+                    currentStatus === "Resolved") ? (
+                    <i className="bi bi-check-lg text-2xl"></i>
+                  ) : (
+                    <span className="text-sm">2</span>
+                  )}
                 </div>
-                <p className="text-sm font-bold text-gray-800 mt-3">
+                <p className="text-base font-bold text-gray-800 mt-3">
                   In-Progress
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {complaint?.status === "In-Progress" ||
-                  complaint?.status === "Resolved"
+                  {!isRejected &&
+                  (currentStatus === "In-Progress" ||
+                    currentStatus === "Resolved")
                     ? formatDate(complaint?.updated_at || complaint?.created_at)
                     : "Pending"}
                 </p>
               </div>
 
               {/* if resolved */}
-              <div className="text-center flex-1 relative" style={{ zIndex: 2 }}>
+              <div
+                className="text-center flex-1 relative"
+                style={{ zIndex: 2 }}
+              >
                 <div
-                  className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold ${
-                    complaint?.status === "Resolved"
-                      ? "bg-green-500 text-white"
+                  className={`w-14 h-14 mx-auto rounded-full flex items-center justify-center font-bold shadow-lg ${
+                    currentStatus === "Resolved"
+                      ? "bg-green-500 text-white ring-4 ring-green-100"
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {complaint?.status === "Resolved" ? "✓" : ""}
+                  {currentStatus === "Resolved" ? (
+                    <i className="bi bi-check-lg text-2xl"></i>
+                  ) : (
+                    <span className="text-sm">3</span>
+                  )}
                 </div>
-                <p className="text-sm font-bold text-gray-800 mt-3">Resolved</p>
+                <p className="text-base font-bold text-gray-800 mt-3">
+                  Resolved
+                </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {complaint?.status === "Resolved"
-                    ? formatDate(complaint?.resolved_at || complaint?.updated_at)
+                  {currentStatus === "Resolved"
+                    ? formatDate(
+                        complaint?.resolved_at || complaint?.updated_at
+                      )
                     : "Pending"}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* status history */}
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Status History
+            </h3>
+            {complaint?.status_history &&
+            complaint.status_history.length > 0 ? (
+              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                {complaint.status_history.map((entry, index) => (
+                  <div key={index} className="relative pl-8 pb-4 last:pb-0">
+                    {index !== complaint.status_history.length - 1 && (
+                      <div className="absolute left-3 top-8 bottom-0 w-0.5 bg-gray-200"></div>
+                    )}
+                    <div className="absolute left-0 top-1">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center"
+                        style={{
+                          backgroundColor:
+                            statusColors[entry.status] || "#AEAEAE",
+                        }}
+                      >
+                        <i className="bi bi-circle-fill text-white text-xs"></i>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className="px-3 py-0.5 rounded-full font-semibold text-white text-xs"
+                          style={{
+                            backgroundColor:
+                              statusColors[entry.status] || "#AEAEAE",
+                          }}
+                        >
+                          {entry.status}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {entry.changed_at
+                            ? formatDate(entry.changed_at)
+                            : "N/A"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {entry.remarks || "No remarks provided"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <i className="bi bi-info-circle text-3xl mb-2 block"></i>
+                <p className="text-sm">No status updates recorded yet.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Rejection Reason Section */}
-        {complaint?.status === 'Rejected' && (
-          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
+        {isRejected && (
+          <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mb-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
                 <i className="bi bi-x-circle-fill text-red-600"></i>
@@ -307,26 +408,32 @@ const CU_TrackComplaintDetailsPage = () => {
             <hr className="border-t border-gray-200 mt-4 mb-6" />
 
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                        <div className="grid grid-cols-1 gap-y-4">
-                              <div>
-                                <label className="block text-md text-gray-600 mb-2">Reason for Rejection:</label>
-                                <p className="text-gray-900 font-medium text-base leading-relaxed">
-                                  {complaint.rejection_reason || 'No reason provided'}
-                                </p>
-                              </div>
-                              {complaint.rejected_at && (
-                                <div>
-                                  <label className="block text-md text-gray-600 mb-2">Rejected On:</label>
-                                  <p className="text-gray-900 font-medium text-base">{formatDate(complaint.rejected_at)}</p>
-                                </div>
-                              )}
-                            </div>
+              <div className="grid grid-cols-1 gap-y-4">
+                <div>
+                  <label className="block text-md text-gray-600 mb-2">
+                    Reason for Rejection:
+                  </label>
+                  <p className="text-gray-900 font-medium text-base leading-relaxed">
+                    {complaint.rejection_reason || "No reason provided"}
+                  </p>
+                </div>
+                {complaint.rejected_at && (
+                  <div>
+                    <label className="block text-md text-gray-600 mb-2">
+                      Rejected On:
+                    </label>
+                    <p className="text-gray-900 font-medium text-base">
+                      {formatDate(complaint.rejected_at)}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* footer */}
-        <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8 mt-6">
+        <div className="bg-white rounded-lg shadow-lg border border-[#B5B5B5] p-8">
           <div className="flex items-start gap-3">
             <i className="bi bi-megaphone-fill text-2xl text-red-600"></i>
             <div>
@@ -334,7 +441,9 @@ const CU_TrackComplaintDetailsPage = () => {
                 Need Help?
               </h3>
               <p className="text-gray-600 text-base">
-                For questions about your complaint, please don't hesitate to contact your barangay office or the assigned official, or reach us through our official email:
+                For questions about your complaint, please don't hesitate to
+                contact your barangay office or the assigned official, or reach
+                us through our official email:
                 <span className="text-blue-600"> IliganReklamo@email.com</span>
               </p>
             </div>
