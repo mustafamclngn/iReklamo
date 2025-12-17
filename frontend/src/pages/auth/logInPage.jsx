@@ -12,7 +12,6 @@ import IliganLogo from "../../components/navheaders/iliganLogo.jsx";
 import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 import "./auth.css";
-import useUsersApi from '../../api/usersApi.js'
 import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
@@ -50,8 +49,6 @@ const LogInPage = () => {
     // Password states
     const [pwd, setPwd] = useState('');
     const [showPwd, setShowPwd] = useState(false);
-    const { forgotPassword } = useUsersApi();
-    const [forgotCooldown, setForgotCooldown] = useState(0);
 
     // =============
     // Error and Success messages 
@@ -73,35 +70,6 @@ const LogInPage = () => {
         setPersist(persistChecked);
         localStorage.setItem("persist", JSON.stringify(persistChecked));
     }, [persistChecked, setPersist]);
-
-    useEffect(() => {
-        const stored = localStorage.getItem("forgotCooldown");
-        if (stored) {
-            const expiresAt = Number(stored);
-            const now = Date.now();
-
-            if (expiresAt > now) {
-                setForgotCooldown(Math.floor((expiresAt - now) / 1000));
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        if (forgotCooldown <= 0) return;
-
-        const interval = setInterval(() => {
-            setForgotCooldown(prev => {
-                if (prev <= 1) {
-                    localStorage.removeItem("forgotCooldown");
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [forgotCooldown]);
-
 
     // user reference state
     useEffect(() => {
@@ -161,17 +129,8 @@ const LogInPage = () => {
                 console.log(err?.response?.data)
                 setErrMsg(err?.response?.data?.error);
                 setIsErrorOpen(true);
-                setIsErrorOpen(true)
-            } else if (err.response?.status) {
-                if(err?.response?.data?.error === "Incorrect password") {
-                    console.log("Password error")
-                }
-                console.log(err?.response?.data)
-                setErrMsg(err?.response?.data?.error);
-                setIsErrorOpen(true);
             } else {
                 setErrMsg('Login Failed');
-                setIsErrorOpen(true)
                 setIsErrorOpen(true)
             }
             errRef.current.focus();
@@ -184,34 +143,7 @@ const LogInPage = () => {
     // Forgot Password handler
     const handleForgot = async (e) => {
         e.preventDefault();
-
-        if (forgotCooldown > 0) return;
-
-        setLoading(true)
-        try{
-            const response = await forgotPassword(identity)
-            setSuccessMessage(response?.data?.message)
-            setIsSuccessOpen(true)
-            
-            const expiresAt = Date.now() + 15 * 60 * 1000; 
-            localStorage.setItem("forgotCooldown", expiresAt);
-            setForgotCooldown(15 * 60);
-
-        } catch (err) {
-            if (!err?.response) {
-                console.log(err)
-                setErrMsg('No Server Response');
-                setIsErrorOpen(true)
-            }
-            else if (err.response?.status) {
-                console.log(err?.response?.data)
-                setErrMsg(err?.response?.data?.error);
-                setIsErrorOpen(true);
-            } 
-        } finally {
-            setLoading(false);
-        }
-        
+        navigate("/auth/reset-password")        
     }
       
     const anyModalOpen = isSuccessOpen || isErrorOpen;
@@ -255,7 +187,7 @@ const LogInPage = () => {
                             onChange={(e) => setIdentity(e.target.value)}
                             value={identity}
                             required
-                            placeholder="Email"
+                            placeholder="Username or Email"
                             className="auth-input"
                         />
                         <i className="bi bi-envelope-fill input-icon"></i>
@@ -307,16 +239,12 @@ const LogInPage = () => {
                     
                     {/* ========== */}
                     {/* Forgot Password */}
-                    {(forgotCooldown <= 0) ? 
-                        (<button 
+                        <button 
                             type="button"
                             className="forget_password" 
-                            onClick={handleForgot} 
-                            disabled={!identity || forgotCooldown > 0}>
+                            onClick={handleForgot}>
                             Forgot Password?
-                        </button>)
-                            :
-                        <p className="forgot_pressed">Request to reset password has already been sent to your email.</p>}
+                        </button>
                     {/* ========== */}           
                 </form>
             </div>

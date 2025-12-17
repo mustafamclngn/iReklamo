@@ -7,7 +7,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import ConfirmEditModal from "../../components/modals/confirmEditAccountModal.jsx";
 import { calculateProfileCompletion } from "../../utils/profileHelpers";
 import { toTitleCase } from "../../utils/stringHelpers";
-import useLogOut from '../../hooks/useLogout';
+import useLogOut from "../../hooks/useLogOut.jsx";
 import { useNavigate, Link } from 'react-router-dom';
 import LogOutModal from '../../components/modals/ConfirmLogOut';
 import { getImageURL } from "../../utils/imageHelpers";

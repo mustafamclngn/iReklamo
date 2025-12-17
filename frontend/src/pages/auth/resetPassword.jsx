@@ -1,36 +1,44 @@
-import { useLocation, useNavigate } from "react-router-dom";
+// ==================
+// IMPORTS
+// ==========
+
+// =============
+// Hooks and context
 import { useRef, useState, useEffect } from "react";
-
-import IliganLogo from "../../components/navheaders/iliganLogo.jsx";
-import { faCheck, faTimes, faInfoCircle } from "@fortawesome/free-solid-svg-icons"; 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import "./auth.css";
-
+import { useNavigate } from "react-router-dom";
 import useUsersApi from "../../api/usersApi.js";
-
-import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
+import IliganLogo from "../../components/navheaders/iliganLogo.jsx";
 import SuccessModal from '../../components/modals/SuccessModal';
 import ErrorModal from '../../components/modals/ErrorModal';
+import "./auth.css";
+import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,24}$/;
+// ==========
+// IMPORTS
+// ==================
 
 const ResetPassword = () => {
- 
-    // =============
-    // Auth states
-    const query = new URLSearchParams(useLocation().search);
-    const token = query.get("token");
-    const { resetPassword } = useUsersApi();
+    
+// ==================
+// SETUP
+// ==========
 
     // =============
-    // Password states
-    const [pwd, setPwd] = useState('');
-    const [validPwd, setValidPwd] = useState(false);
-    const [pwdFocus, setPwdFocus] = useState(false);
+    // Navigation
+    const navigate = useNavigate();
 
-    const [showPwd, setShowPwd] = useState(false);
-    const [showMatchPwd, setShowMatchPwd] = useState(false);
+    // =============
+    // Users API
+    const { forgotPassword } = useUsersApi();
+
+    // =============
+    // References
+    const userRef = useRef();
+
+    // =============
+    // Identification states
+    const [identity, setIdentity] = useState('');
 
     // =============
     // Error and Success messages 
@@ -39,34 +47,31 @@ const ResetPassword = () => {
     const [isSuccessOpen, setIsSuccessOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] =useState(false)
-    const navigate = useNavigate();
 
     // =============
-    // Confirm password (match) states
-    const [matchPwd, setMatchPwd] = useState('');
-    const [validMatch, setValidMatch] = useState(false);
-    const [matchFocus, setMatchFocus] = useState(false);
-    
-    // password validation
+    // State update
+
+    // user reference state
     useEffect(() => {
-        const result = PWD_REGEX.test(pwd);
-        setValidPwd(result);
+        userRef.current.focus();
+    }, [])
 
-        const match = (pwd === matchPwd) && pwd && matchPwd;
-        setValidMatch(match);
-    }, [pwd, matchPwd])
+    // error message state
+    useEffect(() => {
+        setErrMsg('');
+    }, [identity])
 
+    // =============
+    // Sumission handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
 
+        setLoading(true)
         try{
-            const response = await resetPassword(token, pwd)
-            console.log(response)
-            if (response?.data?.success) {
-                setSuccessMessage(response?.data?.message)
-                setIsSuccessOpen(true)
-            }
+            const response = await forgotPassword(identity)
+            setSuccessMessage(response?.data?.message)
+            setIsSuccessOpen(true)
+
         } catch (err) {
             if (!err?.response) {
                 console.log(err)
@@ -80,106 +85,84 @@ const ResetPassword = () => {
             } 
         } finally {
             setLoading(false);
-        }
-    };
-
+        }  
+    }
+      
     const anyModalOpen = isSuccessOpen || isErrorOpen;
     useLockBodyScroll(anyModalOpen);
 
+// ==========
+// SETUP
+// ==================
+
+
+// ==================
+// COMPONENT
+// ==========
   return (
     <>
-        <div className="auth-page-background">
-            <div className="auth-wrapper">
-                <div className="auth-logo-wrapper">
-                    <IliganLogo scale={1.65} mode="login"/>
-                </div>
+    <div className="auth-page-background">
+        <div className="auth-wrapper">
+            {/* Lgawas sa container */}
+            <div className="auth-logo-wrapper">
+                <IliganLogo scale={1.65} mode="login"/>
+            </div>
 
-                {/* container*/}
-                <div className="auth-container">
-                    <p className="sessionmessage">Enter your new password</p>
-                    <form className="auth-form" onSubmit={handleSubmit}>
+            {/* container*/}
+            <div className="auth-container">
+                <p className="sessionmessage">Enter email or username to reset your password.</p>
+
+                {/* ========== */}
+                {/* FORM */}
+                {/* === */}
+                <form className="auth-form" onSubmit={handleSubmit}>
+            
                     {/* ========== */}
-                    {/* New Password */}
+                    {/* Username or Email */}
                     {/* input field */}
-                    <div className="input-row">
-                        <div className="input-wrapper" style={{marginBottom: 0}}>
-                            <input
-                                type={showPwd ? "text" : "password"}
-                                id="pwd"
-                                autoComplete="off"
-                                onChange={(e) => setPwd(e.target.value)}
-                                required
-                                aria-invalid={validPwd ? "false" : "true"}
-                                aria-describedby="pwdnote"
-                                onFocus={() => setPwdFocus(true)}
-                                onBlur={() => setPwdFocus(false)}
-                                placeholder="New Password"
-                                className="auth-input"
-                            />
-                        </div>
-                        <i
-                            className={`bi ${showPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
-                            onClick={() => setShowPwd((prev) => !prev)}
+                    <div className="input-wrapper">
+                        <input
+                            type="text"
+                            id="identity"
+                            ref={userRef}
+                            autoComplete="off"
+                            onChange={(e) => setIdentity(e.target.value)}
+                            value={identity}
+                            required
+                            placeholder="Username or Email"
+                            className="auth-input"
                         />
+                        <i className="bi bi-envelope-fill input-icon"></i>
                     </div>
-                    {/* instructions note */}
-                    <p
-                        id="pwdnote"
-                        className={pwdFocus && pwd && !validPwd ? "instructions" : "offscreen"}>
-                        <FontAwesomeIcon icon={faInfoCircle} />
-                            Password must be 8 to 24 characters,
-                            contain uppercase and lowercase letters, 
-                            and includes atleast one number. 
-                    </p>
-                    {/* ========== */}
-                    {/* Confirm New Password */}
-                    {/* input field */}
-                    <div className="input-row">
-                        <div className="input-wrapper" style={{marginBottom: 0}}>
-                            <input
-                                type={showMatchPwd ? "text" : "password"}
-                                id="matchPwd"
-                                autoComplete="off"
-                                onChange={(e) => setMatchPwd(e.target.value)}
-                                required
-                                aria-invalid={validPwd ? "false" : "true"}
-                                aria-describedby="pwdnote"
-                                onFocus={() => setMatchFocus(true)}
-                                onBlur={() => setMatchFocus(false)}
-                                placeholder="Confirm Password"
-                                className="auth-input"
-                            />
-                        </div>
-                        <i
-                            className={`bi ${showMatchPwd ? "bi-eye-fill" : "bi-eye-slash-fill"} pwd-toggle`}
-                            onClick={() => setShowMatchPwd((prev) => !prev)}
-                        />
-                    </div>
-                    {/* instructions note */}
-                    <p
-                        id="matchpwdnote"
-                        className={matchFocus && matchPwd && !validMatch ? "instructions" : "offscreen"}>
-                        <FontAwesomeIcon icon={faInfoCircle} />
-                            Password fields must match.
-                    </p>
+                    
                     {/* Button */}
                     <button
                         className="auth-button"
-                        disabled={!pwd || !matchPwd || !validMatch || !validPwd}>
+                        disabled={!identity}>
                         {loading ? 
                             (<LoadingSpinner message="" scale={0.45}/>)
-                                : (<span>Confirm</span>)}
+                                    : (<span>Confirm</span>)}
                     </button>
+                    
                     {/* ========== */}
-                    </form>
-                </div>
+                    {/* Cancel Password */}
+                    <button 
+                            type="button"
+                            className="forget_password" 
+                            onClick={() => navigate("/auth/login")}>
+                            Back to Log In
+                        </button>
+                    {/* ========== */}           
+                </form>
             </div>
         </div>
+    </div>
 
         <SuccessModal
             isOpen={isSuccessOpen}
             onClose={() => setIsSuccessOpen(false)}
-            onConfirm={() => navigate('/auth/login')}
+            onConfirm={() => {setIsSuccessOpen(false); 
+                                        navigate("/auth/login", { replace: true });}}
             message={successMessage}
         />
         
@@ -193,3 +176,7 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+
+// ==========
+// COMPONENT
+// ==================

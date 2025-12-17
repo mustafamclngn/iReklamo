@@ -326,7 +326,7 @@ const ComplaintDetailsPage = () => {
                     disabled={complaint.status === "Resolved"}
                   >
                     <i className="bi bi-person-check"></i>
-                    {complaint.assignedOfficial ? "Reassign" : "Assign"}
+                    (complaint.assignedOfficial !== "Unassigned") ? "Reassign" : "Assign"
                   </button>
                 </div>
               )}
