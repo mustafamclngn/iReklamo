@@ -28,14 +28,6 @@ const ComplainantNavBar = ({ onLogOut }) => {
               </NavLink>
             </li>
           ))}
-          <li>
-            <button
-              onClick={onLogOut}
-              className="text-base uppercase tracking-wide text-red-600 hover:text-red-800 transition"
-            >
-              Log Out
-            </button>
-          </li>
         </ul>
       </div>
     </nav>
