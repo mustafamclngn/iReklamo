@@ -16,7 +16,7 @@ const CreateAdmin = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null
 
-  const { getBarangays, getRoles } = useUserInfoApi();
+  const { getBarangays, getRoles, getPositions } = useUserInfoApi();
   const userRef = useRef();
   const errRef = useRef();
 
@@ -43,16 +43,19 @@ const CreateAdmin = ({ isOpen, onClose }) => {
 
   const [barangays, setBarangays] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [positions, setPositions] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [barangayRes, rolesRes] = await Promise.all([
+        const [barangayRes, rolesRes, positionsRes] = await Promise.all([
           getBarangays(),
-          getRoles()
+          getRoles(),
+          getPositions()
         ]);
         setBarangays(barangayRes.data || []);
         setRoles(rolesRes.data || []);
+        setPositions(positionsRes.data || [])
       } catch (err) {
         console.error("Error fetching:", err);
       }
@@ -93,6 +96,13 @@ const CreateAdmin = ({ isOpen, onClose }) => {
           ...prev,
           role: value,
           role_display_name: selectedRole ? selectedRole.name : ""
+        })) 
+      } else if (name === "position") {
+        const selectedPosition = positions.find((p) => p.id == value);
+        setFormData((prev) => ({
+          ...prev,
+          position: value,
+          position_display_name: selectedPosition ? selectedPosition.name : ""
         }))
       } else {
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -213,13 +223,17 @@ const CreateAdmin = ({ isOpen, onClose }) => {
 
             <div className="form-group">
               <label>Position</label>
-              <input 
+              <select
                 name="position"
                 value={formData.position}
                 onChange={handleChange}
-                placeholder="e.g. Barangay Secretary"
-                required 
-              />
+                required
+              >
+                <option value="">Select Position</option>
+                {positions.map((p) => (
+                  <option key={p.id} value={p.id}>{p.position_name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
@@ -232,7 +246,7 @@ const CreateAdmin = ({ isOpen, onClose }) => {
               >
                 <option value="">Select Role</option>
                 {roles.map((r) => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
+                  <option key={r.id} value={r.id}>{r.description}</option>
                 ))}
               </select>
             </div>

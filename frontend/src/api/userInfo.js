@@ -22,7 +22,7 @@ const useUserInfoApi = () => {
       console.error('Error fetching barangay:', error);
       throw error;
     }
-  }
+  ;}
 
   const getRoles = async () => {
     try {
@@ -34,7 +34,17 @@ const useUserInfoApi = () => {
     }
   };
 
-  return { getBarangays, getBarangayById, getRoles };
+  const getPositions = async () => {
+    try {
+      const response = await axiosPrivate.get(`/api/user_info/positions`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching positions list:', error);
+      throw error;
+    }
+  };
+
+  return { getBarangays, getBarangayById, getRoles, getPositions };
 };
 
 export default useUserInfoApi;
