@@ -24,6 +24,7 @@ import DashboardPage from "./pages/superAdmin/dashboardpage.jsx";
 import ComplaintsPage from "./pages/superAdmin/complaintspage.jsx";
 import OfficialsPage from "./pages/superAdmin/officialspage.jsx";
 import ReportsPage from "./pages/superAdmin/reportspage.jsx";
+import AnalyticsPage from "./pages/superAdmin/analyticspage.jsx";
 
 // Import city admin pages
 import CA_DashboardPage from "./pages/cityAdmin/dashboardpage.jsx";
@@ -119,6 +120,7 @@ function App() {
                 element={<OfficialDetailsPage />}
               />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
               {/* invalid routes */}
               <Route
                 path="*"
