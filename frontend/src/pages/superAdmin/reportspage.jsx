@@ -1,11 +1,13 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Search, ChevronsUpDown, ChevronDown, Download } from 'lucide-react';
 import { faSliders } from '@fortawesome/free-solid-svg-icons';
 import useUserInfoApi from '../../api/userInfo';
 import useComplaintsApi from '../../api/complaintsAPI';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 
 const CASE_TYPES = [
@@ -27,6 +29,7 @@ export default function Reports() {
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchField, setSearchField] = useState('all');
+    const tableRef = useRef(null);
 
     const { getBarangays } = useUserInfoApi();
     const { getAllComplaints } = useComplaintsApi();
@@ -140,7 +143,14 @@ export default function Reports() {
                             className={`absolute right-0 top-full mt-2 z-50 transform origin-top transition-all duration-200 ease-out
                                 ${showDownloadReport ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}
                         >
-                            <DownloadReport />
+                            <DownloadReport
+                                onDownloadPdf={() => {
+                                    if (tableRef.current?.exportCurrentPageToPdf) {
+                                        tableRef.current.exportCurrentPageToPdf();
+                                    }
+                                    setShowDownloadReport(false);
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
@@ -157,6 +167,7 @@ export default function Reports() {
 
                 <div>
                     <DataTable
+                        ref={tableRef}
                         rows={reports}
                         loading={loading}
                         error={error}
@@ -400,7 +411,7 @@ function AdvancedSearch({ barangays = [], initialFilters, onApply }) {
     )
 }
 
-function DataTable({ rows = [], loading = false, error = null, searchQuery = '', searchField = 'all', activeFilters = {} }){
+const DataTable = forwardRef(function DataTable({ rows = [], loading = false, error = null, searchQuery = '', searchField = 'all', activeFilters = {} }, ref){
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -602,6 +613,73 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
         setCurrentPage((prev) => Math.min(totalPages, prev + 1));
     };
 
+    useImperativeHandle(ref, () => ({
+        exportCurrentPageToPdf() {
+            try {
+                const doc = new jsPDF({ orientation: 'landscape' });
+                doc.setFontSize(12);
+                doc.text('Complaints Report', 14, 10);
+
+                const head = [[
+                    '#',
+                    'Tracking ID',
+                    'Date Filed',
+                    'Barangay',
+                    'Case Type',
+                    'Priority',
+                    'Status',
+                    'Assigned Official',
+                    'Date Resolved',
+                    'Days'
+                ]];
+
+                const body = pageRows.map((row, idx) => {
+                    const index = startIndex + idx + 1;
+                    const tracking = row.complaint_code || row.tracking_id || row.complaint_id || '-';
+                    const dateFiled = row.created_at ? new Date(row.created_at).toLocaleDateString() : '-';
+                    const barangay = row.barangay || '-';
+                    const caseType = row.case_type || '-';
+                    const priority = row.priority || '-';
+                    const status = row.status || '-';
+                    const assigned = row.assigned_office || row.assignedOfficial || '-';
+
+                    let resolvedDate = '-';
+                    if (row.status === 'Resolved') {
+                        const resolutionDate = row.resolved_at || row.updated_at;
+                        resolvedDate = resolutionDate ? new Date(resolutionDate).toLocaleDateString() : '-';
+                    }
+
+                    const days = getDurationDays(row);
+                    const daysStr = days != null ? String(days) : '-';
+
+                    return [
+                        index,
+                        tracking,
+                        dateFiled,
+                        barangay,
+                        caseType,
+                        priority,
+                        status,
+                        assigned,
+                        resolvedDate,
+                        daysStr
+                    ];
+                });
+
+                autoTable(doc, {
+                    head,
+                    body,
+                    startY: 16,
+                    styles: { fontSize: 8 }
+                });
+
+                doc.save('complaints_report.pdf');
+            } catch (e) {
+                console.error('Failed to export complaints report PDF', e);
+            }
+        }
+    }));
+
     return (
         <div className='border border-gray-200 rounded-lg shadow-sm overflow-hidden bg-white'>
             <div className='overflow-x-auto'>
@@ -792,8 +870,9 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
             </div>
         </div>
     );
-}
-function DownloadReport() {
+});
+
+function DownloadReport({ onDownloadPdf }) {
     return (
         <div className='bg-white border-[1px] border-gray-200 w-[180px] text-[13px] p-4 rounded-lg shadow-md flex flex-col gap-2'>
             <p className='font-semibold'>Choose file format: </p>
@@ -809,7 +888,12 @@ function DownloadReport() {
                 <input type='radio' name='fileFormat' className='mr-2'/>
                 <span>Image (.png)</span>
             </label>
-            <button className='mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300 ease-in-out'>Download File</button>
+            <button
+                className='mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300 ease-in-out'
+                onClick={onDownloadPdf}
+            >
+                Download Report
+            </button>
         </div>
     )
 }
