@@ -144,10 +144,15 @@ export default function Reports() {
                                 ${showDownloadReport ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}
                         >
                             <DownloadReport
-                                onDownloadPdf={() => {
-                                    if (tableRef.current?.exportCurrentPageToPdf) {
+                                onDownload={(format) => {
+                                    if (!tableRef.current) return;
+
+                                    if (format === 'pdf' && tableRef.current.exportCurrentPageToPdf) {
                                         tableRef.current.exportCurrentPageToPdf();
+                                    } else if (format === 'csv' && tableRef.current.exportCurrentPageToCsv) {
+                                        tableRef.current.exportCurrentPageToCsv();
                                     }
+
                                     setShowDownloadReport(false);
                                 }}
                             />
@@ -613,6 +618,15 @@ const DataTable = forwardRef(function DataTable({ rows = [], loading = false, er
         setCurrentPage((prev) => Math.min(totalPages, prev + 1));
     };
 
+    const escapeCsvValue = (value) => {
+        if (value === null || value === undefined) return '';
+        const str = String(value);
+        if (/[",\r\n]/.test(str)) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    };
+
     useImperativeHandle(ref, () => ({
         exportCurrentPageToPdf() {
             try {
@@ -676,6 +690,73 @@ const DataTable = forwardRef(function DataTable({ rows = [], loading = false, er
                 doc.save('complaints_report.pdf');
             } catch (e) {
                 console.error('Failed to export complaints report PDF', e);
+            }
+        },
+        exportCurrentPageToCsv() {
+            try {
+                const headers = [
+                    '#',
+                    'Tracking ID',
+                    'Date Filed',
+                    'Barangay',
+                    'Case Type',
+                    'Priority',
+                    'Status',
+                    'Assigned Official',
+                    'Date Resolved',
+                    'Days'
+                ];
+
+                const rows = pageRows.map((row, idx) => {
+                    const index = startIndex + idx + 1;
+                    const tracking = row.complaint_code || row.tracking_id || row.complaint_id || '-';
+                    const dateFiled = row.created_at ? new Date(row.created_at).toLocaleDateString() : '-';
+                    const barangay = row.barangay || '-';
+                    const caseType = row.case_type || '-';
+                    const priority = row.priority || '-';
+                    const status = row.status || '-';
+                    const assigned = row.assigned_office || row.assignedOfficial || '-';
+
+                    let resolvedDate = '-';
+                    if (row.status === 'Resolved') {
+                        const resolutionDate = row.resolved_at || row.updated_at;
+                        resolvedDate = resolutionDate ? new Date(resolutionDate).toLocaleDateString() : '-';
+                    }
+
+                    const days = getDurationDays(row);
+                    const daysStr = days != null ? String(days) : '-';
+
+                    return [
+                        index,
+                        tracking,
+                        dateFiled,
+                        barangay,
+                        caseType,
+                        priority,
+                        status,
+                        assigned,
+                        resolvedDate,
+                        daysStr
+                    ];
+                });
+
+                const csvLines = [
+                    headers.map(escapeCsvValue).join(','),
+                    ...rows.map((r) => r.map(escapeCsvValue).join(','))
+                ];
+
+                const csvContent = csvLines.join('\r\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'complaints_report.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error('Failed to export complaints report CSV', e);
             }
         }
     }));
@@ -872,25 +953,39 @@ const DataTable = forwardRef(function DataTable({ rows = [], loading = false, er
     );
 });
 
-function DownloadReport({ onDownloadPdf }) {
+function DownloadReport({ onDownload }) {
+    const [format, setFormat] = useState('pdf');
     return (
-        <div className='bg-white border-[1px] border-gray-200 w-[180px] text-[13px] p-4 rounded-lg shadow-md flex flex-col gap-2'>
-            <p className='font-semibold'>Choose file format: </p>
-            <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer'>
-                <input type='radio' name='fileFormat' className='mr-2'/>
-                <span>PDF</span>
+        <div className='bg-white border-[1px] border-gray-200 w-[200px] text-[13px] p-4 rounded-lg shadow-md flex flex-col gap-2'>
+            <div>
+                <p className='font-semibold'>Choose file format: </p>
+                <p className='italic text-xs leading-none text-gray-500'>The current displayed table will be downloaded.</p>
+            </div> 
+            <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer mt-1'>
+                <input
+                    type='radio'
+                    name='fileFormat'
+                    value='pdf'
+                    className='mr-2'
+                    checked={format === 'pdf'}
+                    onChange={(e) => setFormat(e.target.value)}
+                />
+                <span>as PDF</span>
             </label>
             <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer'>
-                <input type='radio' name='fileFormat' className='mr-2'/>
-                <span>CSV</span>
-            </label>
-            <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer'>
-                <input type='radio' name='fileFormat' className='mr-2'/>
-                <span>Image (.png)</span>
+                <input
+                    type='radio'
+                    name='fileFormat'
+                    value='csv'
+                    className='mr-2'
+                    checked={format === 'csv'}
+                    onChange={(e) => setFormat(e.target.value)}
+                />
+                <span>as CSV</span>
             </label>
             <button
                 className='mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300 ease-in-out'
-                onClick={onDownloadPdf}
+                onClick={() => onDownload?.(format)}
             >
                 Download Report
             </button>
