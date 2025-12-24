@@ -41,7 +41,7 @@ const ReportsPage = () => {
         <div className='flex w-full justify-center'>
             <div className='flex flex-row w-[1591px] h-full p-4 gap-4'>
                 {/* Left area */}
-                <div className=''>
+                <div className='w-3/4'>
                     {/* TOP ANALYTICS */}
                     <div className='flex flex-row gap-3'>
                         <div className='w-1/3 border-[1px] border-gray-200 p-4 rounded-2xl shadow-md bg-white'>
@@ -74,11 +74,11 @@ const ReportsPage = () => {
                     </div>
                 </div>
                 {/* Right area */}
-                {/* <div className='w-1/4'>
+                <div className='w-1/4'>
                     <div className='-mt-2'>
                         <BasicDateCalendar />
                     </div>
-                    Announcements
+                    {/* Announcements */}
                     <div className='mt-4 border border-gray-200 shadow-md rounded-2xl px-5 py-4'>
                         <div className='flex flex-row justify-between'>
                             <h1 className='text-xl font-semibold'>
@@ -113,7 +113,7 @@ const ReportsPage = () => {
                             />
                         </div>
                     </div>
-                </div> */}
+                </div>
             </div>
         </div>
     );

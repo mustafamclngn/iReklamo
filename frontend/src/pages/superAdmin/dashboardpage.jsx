@@ -110,7 +110,7 @@ function ComplaintCountCards() {
             {cards.map(card => (
                 <button
                     key={card.key}
-                    className='flex flex-col text-left max-w-1/4'
+                    className='flex flex-col text-left w-1/4 p-1'
                     onClick={() => navigate('/superadmin/complaints', {
                         state: { 
                             defaultStatus: card.key === 'Total' ? 'all' : card.key 

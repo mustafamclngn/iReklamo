@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Search, ChevronsUpDown } from 'lucide-react';
+import { X, Search, ChevronsUpDown, ChevronDown, Download } from 'lucide-react';
 import { faSliders } from '@fortawesome/free-solid-svg-icons';
 import useUserInfoApi from '../../api/userInfo';
 import useComplaintsApi from '../../api/complaintsAPI';
@@ -20,6 +20,7 @@ const CASE_TYPES = [
 
 export default function Reports() {
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+    const [showDownloadReport, setShowDownloadReport] = useState(false);
     const [barangays, setBarangays] = useState([]);
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -122,19 +123,28 @@ export default function Reports() {
                             className='flex bg-[#fca31c] rounded-lg h-8 text-[13px] items-center text-white px-3 hover:bg-[#e89419] transition-colors'
                         >
                             <FontAwesomeIcon icon={faSliders} size='lg' color='white' className='mr-2 scale-80'/>
-                            Show Advanced Search
+                            Advanced Search
                         </button>
                     </div>
                     
-                    <div className='flex border-[1px] text-[13px] border-gray-400 rounded-lg items-center'>
-                        <button className='font-semibold px-2'>Download Report</button>
-                        <select className='bg-gray-200 rounded px-1 py-1 mr-1'>
-                            <option>Export as PDF</option>
-                            <option>Export as CSV</option>
-                            <option>Export as Image</option>
-                        </select>
+                    <div className='flex border-[1px] text-[13px] border-gray-400 rounded-lg items-center hover:bg-gray-100 cursor-pointer relative transition duration-200 ease-in-out'>
+                        <button 
+                            className='font-semibold px-2 '
+                            onClick={() => setShowDownloadReport(!showDownloadReport)}
+                        >
+                            Download Report
+                            <ChevronDown className='inline-block ml-1 cursor-pointer -mt-[1px]' size={"15px"} strokeWidth={"2px"} />
+                        </button>
+
+                        <div
+                            className={`absolute right-0 top-full mt-2 z-50 transform origin-top transition-all duration-200 ease-out
+                                ${showDownloadReport ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}
+                        >
+                            <DownloadReport />
+                        </div>
                     </div>
                 </div>
+
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out 
                     ${showAdvancedSearch ? 'max-h-96 opacity-100 mb-2' : 'max-h-0 opacity-0'}
                 `}>
@@ -167,6 +177,8 @@ function AdvancedSearch({ barangays = [], initialFilters, onApply }) {
     const [status, setStatus] = useState(initialFilters?.status || '');
     const [startDate, setStartDate] = useState(initialFilters?.startDate || '');
     const [endDate, setEndDate] = useState(initialFilters?.endDate || '');
+    const [year, setYear] = useState(initialFilters?.year || '');
+    const [month, setMonth] = useState(initialFilters?.month || '');
 
     useEffect(() => {
         setSelectedBarangay(initialFilters?.barangay || '');
@@ -175,7 +187,12 @@ function AdvancedSearch({ barangays = [], initialFilters, onApply }) {
         setStatus(initialFilters?.status || '');
         setStartDate(initialFilters?.startDate || '');
         setEndDate(initialFilters?.endDate || '');
+        setYear(initialFilters?.year || '');
+        setMonth(initialFilters?.month || '');
     }, [initialFilters]);
+
+    const isTimeframeActive = !!(startDate || endDate);
+    const isYearMonthActive = !!(year || month);
     
     return (
         <div>
@@ -236,22 +253,98 @@ function AdvancedSearch({ barangays = [], initialFilters, onApply }) {
                         </select>
                     </div>
                 </div>
-                <div className='border border-gray-300 p-3 w-1/2 rounded-lg'>
-                    <p className='text-xs font-semibold mb-2'>Select Timeframe</p>
-                    <div className='flex gap-2 h-6 text-xs items-center h-6'>
-                        <input 
-                            type='date' 
-                            className='bg-gray-100 h-6 px-2 w-1/3 rounded'
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                        -
-                        <input 
-                            type='date' 
-                            className='bg-gray-100 h-6 px-2 w-1/3 rounded'
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
+                <div className='flex flex-row b w-1/2 rounded-lg'>
+                    <div className={`relative border-[1px] w-1/2 border-gray-300 rounded-l-lg p-3 ${isYearMonthActive ? 'bg-gray-100' : 'bg-white'}`}>
+                        <p className='text-xs font-semibold mb-2'>Select Timeframe</p>
+                        <div className='flex gap-2 h-6 text-xs items-center h-6'>
+                            <input
+                                type='date'
+                                className='bg-gray-100 h-6 px-2 rounded w-1/2'
+                                value={startDate}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setStartDate(value);
+                                    if (value) {
+                                        setYear('');
+                                        setMonth('');
+                                    }
+                                }}
+                                disabled={isYearMonthActive}
+                            />
+                            -
+                            <input
+                                type='date'
+                                className='bg-gray-100 h-6 px-2 rounded w-1/2'
+                                value={endDate}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setEndDate(value);
+                                    if (value) {
+                                        setYear('');
+                                        setMonth('');
+                                    }
+                                }}
+                                disabled={isYearMonthActive}
+                            />
+                        </div>
+                        {isYearMonthActive && (
+                            <div className='absolute inset-0 bg-black/10 rounded-l-lg pointer-events-none' />
+                        )}
+                    </div>
+                    <div className={`relative border-[1px] w-1/2 border-gray-300 rounded-r-lg p-3 ${isTimeframeActive ? 'bg-gray-100' : 'bg-white'}`}>
+                        <p className='text-xs font-semibold mb-2'>Select Year/Month</p>
+                        <div className='flex gap-2'>
+                            <select
+                                className='bg-gray-100 h-6 px-2 rounded text-[13px] w-1/2'
+                                value={year}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setYear(value);
+                                    if (value) {
+                                        setStartDate('');
+                                        setEndDate('');
+                                    }
+                                }}
+                                disabled={isTimeframeActive}
+                            >
+                                <option value=''>All Years</option>
+                                <option value='2021'>2021</option>
+                                <option value='2022'>2022</option>
+                                <option value='2023'>2023</option>
+                                <option value='2024'>2024</option>
+                                <option value='2025'>2025</option>
+                            </select>
+                            <select
+                                className='bg-gray-100 h-6 px-2 rounded text-[13px] w-1/2'
+                                value={month}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setMonth(value);
+                                    if (value) {
+                                        setStartDate('');
+                                        setEndDate('');
+                                    }
+                                }}
+                                disabled={isTimeframeActive}
+                            >
+                                <option value=''>All Months</option>
+                                <option value='1'>January</option>
+                                <option value='2'>February</option>
+                                <option value='3'>March</option>
+                                <option value='4'>April</option>
+                                <option value='5'>May</option>
+                                <option value='6'>June</option>
+                                <option value='7'>July</option>
+                                <option value='8'>August</option>
+                                <option value='9'>September</option>
+                                <option value='10'>October</option>
+                                <option value='11'>November</option>
+                                <option value='12'>December</option>
+                            </select>
+                        </div>
+                        {isTimeframeActive && (
+                            <div className='absolute inset-0 bg-black/10 rounded-r-lg pointer-events-none' />
+                        )}
                     </div>
                 </div>
             </div>
@@ -267,6 +360,8 @@ function AdvancedSearch({ barangays = [], initialFilters, onApply }) {
                         setStatus('');
                         setStartDate('');
                         setEndDate('');
+                        setYear('');
+                        setMonth('');
                         onApply?.({
                             barangay: '',
                             caseType: '',
@@ -291,8 +386,8 @@ function AdvancedSearch({ barangays = [], initialFilters, onApply }) {
                             caseType,
                             priority,
                             status,
-                            year: '',
-                            month: '',
+                            year,
+                            month,
                             startDate,
                             endDate,
                         });
@@ -311,6 +406,27 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
     const rowsPerPage = 20;
 
+    const getDurationDays = (row) => {
+        if (!row.created_at) return null;
+
+        const start = new Date(row.created_at);
+        if (Number.isNaN(start.getTime())) return null;
+
+        let end;
+        if (row.status === 'Resolved') {
+            const resolvedAt = row.resolved_at || row.updated_at;
+            end = resolvedAt ? new Date(resolvedAt) : new Date();
+        } else {
+            end = new Date();
+        }
+
+        if (Number.isNaN(end.getTime())) return null;
+
+        const diffMs = end.getTime() - start.getTime();
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        return days < 0 ? 0 : days;
+    };
+
     const getSortValue = (row, key) => {
         switch (key) {
             case 'tracking':
@@ -328,7 +444,13 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
             case 'assigned':
                 return row.assigned_office || row.assignedOfficial || '';
             case 'resolutionDate':
-                return row.resolved_at || '';
+                // Only use a resolution date for resolved complaints
+                if (row.status === 'Resolved') {
+                    return row.resolved_at || row.updated_at || '';
+                }
+                return '';
+            case 'duration':
+                return getDurationDays(row) ?? 0;
             default:
                 return '';
         }
@@ -391,6 +513,25 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
             }
         }
 
+        if (activeFilters.year || activeFilters.month) {
+            const filedVal = getSortValue(row, 'dateFiled');
+            if (!filedVal) return false;
+
+            const dateObj = new Date(filedVal);
+            if (Number.isNaN(dateObj.getTime())) return false;
+
+            if (activeFilters.year && String(dateObj.getFullYear()) !== String(activeFilters.year)) {
+                return false;
+            }
+
+            if (activeFilters.month) {
+                const monthIndex = dateObj.getMonth() + 1; // 1-12
+                if (String(monthIndex) !== String(activeFilters.month)) {
+                    return false;
+                }
+            }
+        }
+
         const trimmedQuery = searchQuery.trim();
         if (!trimmedQuery) return true;
 
@@ -420,6 +561,12 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
                   const aTime = aVal ? new Date(aVal).getTime() : 0;
                   const bTime = bVal ? new Date(bVal).getTime() : 0;
                   return sortConfig.direction === 'asc' ? aTime - bTime : bTime - aTime;
+              }
+
+              if (sortConfig.key === 'duration') {
+                  const aNum = typeof aVal === 'number' ? aVal : Number(aVal) || 0;
+                  const bNum = typeof bVal === 'number' ? bVal : Number(bVal) || 0;
+                  return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
               }
 
               const aStr = String(aVal).toLocaleLowerCase();
@@ -461,6 +608,7 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
                 <table className='min-w-full text-sm table-fixed'>
                     <thead>
                         <tr className='bg-gray-100 text-xs tracking-wide text-gray-600'>
+                            <th className='px-2 py-2 text-left w-6'>#</th>
                             <th className='px-4 py-2 text-left w-48'>
                                 <button
                                     className='flex items-center uppercase'
@@ -537,29 +685,39 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
                                     type='button'
                                     onClick={() => handleSort('resolutionDate')}
                                 >
-                                    Resolution Date
+                                    Date Resolved
                                     <ChevronsUpDown className='inline-block ml-1 text-gray-600 cursor-pointer -mt-[1px]' size={"15px"} strokeWidth={"1.5px"} />
                                 </button>
                             </th>
-                            <th className='px-4 py-2 text-left w-28 text-gray-100 uppercase'>Actions</th>
+                            <th className='px-4 py-2 text-left w-32'>
+                                <button
+                                    className='flex items-center uppercase'
+                                    type='button'
+                                    onClick={() => handleSort('duration')}
+                                >
+                                    Days
+                                    <ChevronsUpDown className='inline-block ml-1 text-gray-600 cursor-pointer -mt-[1px]' size={"15px"} strokeWidth={"1.5px"} />
+                                </button>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan={9} className='px-4 py-4 text-center text-gray-500 text-sm'>
+                                <td colSpan={11} className='px-4 py-4 text-center text-gray-500 text-sm'>
                                     Loading complaints...
                                 </td>
                             </tr>
                         ) : error ? (
                             <tr>
-                                <td colSpan={9} className='px-4 py-4 text-center text-red-500 text-sm'>
+                                <td colSpan={11} className='px-4 py-4 text-center text-red-500 text-sm'>
                                     {error}
                                 </td>
                             </tr>
                         ) : pageRows.length > 0 ? (
                             pageRows.map((row, idx) => (
                                 <tr key={row.id || row.tracking_id || idx} className='border-t hover:bg-gray-50'>
+                                    <td className='px-2 py-1 text-xs text-gray-500'>{startIndex + idx + 1}</td>
                                     <td className='px-4 py-1'>{row.complaint_code || row.tracking_id || row.complaint_id || '-'}</td>
                                     <td className='px-4 py-1'>{row.created_at ? new Date(row.created_at).toLocaleDateString() : '-'}</td>
                                     <td className='px-4 py-1'>{row.barangay || '-'}</td>
@@ -567,8 +725,23 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
                                     <td className='px-4 py-1'>{row.priority || '-'}</td>
                                     <td className='px-4 py-1'>{row.status || '-'}</td>
                                     <td className='px-4 py-1'>{row.assigned_office || row.assignedOfficial || '-'}</td>
-                                    <td className='px-4 py-1'>{row.resolved_at ? new Date(row.resolved_at).toLocaleDateString() : '-'}</td>
                                     <td className='px-4 py-1'>
+                                        {row.status === 'Resolved'
+                                            ? (() => {
+                                                const resolutionDate = row.resolved_at || row.updated_at;
+                                                return resolutionDate
+                                                    ? new Date(resolutionDate).toLocaleDateString()
+                                                    : '-';
+                                            })()
+                                            : '-'}
+                                    </td>
+                                    <td className='px-4 py-1'>
+                                        {(() => {
+                                            const days = getDurationDays(row);
+                                            return days != null ? days : '-';
+                                        })()}
+                                    </td>
+                                    {/* <td className='px-4 py-1'>
                                         <button
                                             className='text-blue-600 hover:underline text-xs'
                                             onClick={() => {
@@ -579,12 +752,12 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
                                         >
                                             View Details
                                         </button>
-                                    </td>
+                                    </td> */}
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={9} className='px-4 py-4 text-center text-gray-500 text-sm'>
+                                <td colSpan={11} className='px-4 py-4 text-center text-gray-500 text-sm'>
                                     No reports found.
                                 </td>
                             </tr>
@@ -620,7 +793,24 @@ function DataTable({ rows = [], loading = false, error = null, searchQuery = '',
         </div>
     );
 }
-
-
-
+function DownloadReport() {
+    return (
+        <div className='bg-white border-[1px] border-gray-200 w-[180px] text-[13px] p-4 rounded-lg shadow-md flex flex-col gap-2'>
+            <p className='font-semibold'>Choose file format: </p>
+            <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer'>
+                <input type='radio' name='fileFormat' className='mr-2'/>
+                <span>PDF</span>
+            </label>
+            <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer'>
+                <input type='radio' name='fileFormat' className='mr-2'/>
+                <span>CSV</span>
+            </label>
+            <label className='flex items-center px-2 hover:bg-gray-200 rounded-lg p-1 cursor-pointer'>
+                <input type='radio' name='fileFormat' className='mr-2'/>
+                <span>Image (.png)</span>
+            </label>
+            <button className='mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300 ease-in-out'>Download File</button>
+        </div>
+    )
+}
 
