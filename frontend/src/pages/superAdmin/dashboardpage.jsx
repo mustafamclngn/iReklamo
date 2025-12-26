@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, TrendingUpIcon, NotebookPen, PencilLine, Eye, ScrollText, Megaphone } from 'lucide-react';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { ArrowUpRight, TrendingUpIcon, NotebookPen, PencilLine, Eye, ScrollText, Megaphone, Calendar } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Footer from '../../components/navheaders/footer.jsx';
 import useAuth from "../../hooks/useAuth.jsx";
@@ -17,10 +20,10 @@ const CASE_TYPE_COLORS = {
 };
 
 const COLORS_PRIORITY = {
-    'Urgent': '#FF0000',     // Red
-    'Moderate': '#FFA500', // Orange
-    'Low': '#0066FF',      // Blue
-    'default': '#8884d8'   // default
+    'Urgent': '#FF0000',    
+    'Moderate': '#FFA500', 
+    'Low': '#0066FF',      
+    'default': '#8884d8'   
 };
 
 
@@ -31,13 +34,14 @@ const BC_DashboardPage = () => {
                 <div className="relative w-[1591px] mx-10 flex justify-between gap-5">
                     <div className='flex flex-col w-3/4'>
                         <ComplaintCountCards/>
-                        <div className='flex flex-row mt-5 gap-5'>
+                        <div className='flex flex-row mt-3 gap-3'>
                             <ComplaintCountByCaseType/>
                             <ComplaintPieChart />
                         </div>
                     </div>
                     <div className='w-1/4'>
                         <QuickActions /> 
+                        <BasicDateCalendar />
                     </div>
                 </div>
             </div>
@@ -47,10 +51,9 @@ const BC_DashboardPage = () => {
 }
 
 
-function ComplaintCountCards({ role, barangayId, userId }) { 
+function ComplaintCountCards() { 
     const [loading, setLoading] = useState(true);
     const { auth } = useAuth();
-    const user = auth?.user; 
 
     const navigate = useNavigate();
 
@@ -60,7 +63,6 @@ function ComplaintCountCards({ role, barangayId, userId }) {
     });
 
     useEffect(() => {
-
         console.log("Auth data is ready. auth.user is:", auth.user);
         
         const fetchCounts = async () => {
@@ -88,7 +90,6 @@ function ComplaintCountCards({ role, barangayId, userId }) {
         };
 
         fetchCounts();
-        
     }, [auth.user, auth.role]); 
 
     const cards = [
@@ -105,11 +106,11 @@ function ComplaintCountCards({ role, barangayId, userId }) {
     };
 
     return (
-        <div className='flex flex-row flex-wrap gap-3 justify-between'>
+        <div className='flex flex-row flex-wrap justify-between'>
             {cards.map(card => (
                 <button
                     key={card.key}
-                    className='text-left'
+                    className='flex flex-col text-left w-1/4 p-1'
                     onClick={() => navigate('/superadmin/complaints', {
                         state: { 
                             defaultStatus: card.key === 'Total' ? 'all' : card.key 
@@ -117,7 +118,7 @@ function ComplaintCountCards({ role, barangayId, userId }) {
                     })
                   }
                 >
-                    <div className={`flex flex-col justify-between bg-gray-100 h-40 w-64 rounded-2xl p-5 hover:bg-gradient-to-br ${card.gradient} hover:text-white transition duration-300 ease-in-out`}>
+                    <div className={`flex flex-col justify-between bg-gray-100 h-40 rounded-2xl p-5 hover:bg-gradient-to-br ${card.gradient} hover:text-white transition duration-300 ease-in-out`}>
                         <div className='flex flex-row justify-between items-center'>
                             <p className='font-semibold text-base'>{card.label}</p>
                             <div className='rounded-xl hover:shadow-[0_0_10px_1px_rgba(255,255,255,0.5)] transition duration-200 ease-in-out'>
@@ -146,9 +147,6 @@ function ComplaintCountByCaseType() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // if (!auth?.user || !auth?.roles) {
-        //     return;
-        // }
 
         const fetchBreakdown = async () => {
             try {
@@ -223,10 +221,6 @@ const ComplaintPieChart = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // if (!auth?.user || !auth?.role) {
-        //     return; // Wait for auth
-        // }
-
         const fetchPriorityData = async () => {
             try {
                 setLoading(true);
@@ -369,7 +363,15 @@ function QuickActions() {
 }
 
 
-
+function BasicDateCalendar() {
+    return (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className='flex flex-row border border-gray-200 shadow-md rounded-2xl mt-2 px-5 py-3 text-sm gap-5 justify-center items-center'>
+                    <DateCalendar showDaysOutsideCurrentMonth fixedWeekNumber={6} />
+                </div>
+            </LocalizationProvider>
+    );
+}
 
 
 

@@ -219,15 +219,8 @@ def get_all_complaints():
             conditions.append("complaints.assigned_official_id = %s")
             params.append(assigned_filter)
 
-        # If no explicit status filter provided, exclude rejected complaints from default view
-        if not status_filter:
-            conditions.append("complaints.status != %s")
-            params.append("Rejected")
-
-        # If no explicit status filter provided, exclude rejected complaints from default view
-        if not status_filter:
-            conditions.append("complaints.status != %s")
-            params.append("Rejected")
+        # Note: we no longer exclude rejected complaints by default here.
+        # If a status filter is provided above, it will still be applied normally.
 
         if conditions:
             query += " WHERE " + " AND ".join(conditions)

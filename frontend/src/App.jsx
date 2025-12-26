@@ -24,12 +24,14 @@ import DashboardPage from "./pages/superAdmin/dashboardpage.jsx";
 import ComplaintsPage from "./pages/superAdmin/complaintspage.jsx";
 import OfficialsPage from "./pages/superAdmin/officialspage.jsx";
 import ReportsPage from "./pages/superAdmin/reportspage.jsx";
+import AnalyticsPage from "./pages/superAdmin/analyticspage.jsx";
 
 // Import city admin pages
 import CA_DashboardPage from "./pages/cityAdmin/dashboardpage.jsx";
 import CA_ComplaintsPage from "./pages/cityAdmin/complaintspage.jsx";
 import CA_OfficialsPage from "./pages/cityAdmin/officialspage.jsx";
 import CA_ReportsPage from "./pages/cityAdmin/reportspage.jsx";
+import CA_AnalyticsPage from "./pages/cityAdmin/analyticspage.jsx";
 
 // Import barangay captain pages
 import BC_DashboardPage from "./pages/brgyCap/dashboardpage.jsx";
@@ -119,6 +121,7 @@ function App() {
                 element={<OfficialDetailsPage />}
               />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
               {/* invalid routes */}
               <Route
                 path="*"
@@ -147,6 +150,7 @@ function App() {
                 element={<OfficialDetailsPage />}
               />
               <Route path="reports" element={<CA_ReportsPage />} />
+              <Route path="analytics" element={<CA_AnalyticsPage />} />
               {/* invalid routes */}
               <Route
                 path="*"

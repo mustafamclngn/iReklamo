@@ -4,7 +4,15 @@ import IliganLogo from "./iliganLogo";
 
 // SuperAdminNavbar Component
 const SuperAdminNavbar = ({ onLogOut }) => {
-  const links = ["Dashboard", "Complaints", "Barangays", "Officials", "Reports", "Account"];
+  const links = [
+    "Dashboard",
+    "Complaints",
+    "Barangays",
+    "Officials",
+    "Analytics",
+    "Reports",
+    "Account",
+  ];
 
   return (
     <nav className="bg-white py-6 font-[Inter] font-black">
