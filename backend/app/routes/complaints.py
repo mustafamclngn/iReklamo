@@ -116,6 +116,7 @@ def create_complaint():
                     "complaint_submitted.html",
                     greeting_name=greeting_name,
                     complaint_id=complaint_id_str,
+                    header_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjW6pVUr11OhfYa_pKjC2GEzO3wK4az40l5g&s",
                     year=datetime.now().year
                 )
 
@@ -586,7 +587,7 @@ def get_complaint(complaint_id):
 def update_complaint(complaint_id):
     """
     Update a complaint
-    """
+    """ 
     try:
         data = request.get_json()
 
@@ -879,8 +880,6 @@ def update_complaint_status(complaint_id):
                 'message': 'Status and remarks are required'
             }), 400
 
-
-
         # Validate status values
         valid_statuses = ['Pending', 'In-Progress', 'Resolved', 'Rejected']
         if new_status not in valid_statuses:
@@ -957,6 +956,43 @@ def update_complaint_status(complaint_id):
         conn.commit()
         cursor.close()
         conn.close()
+
+        # Email update to complainant
+        complaint_data = Select().table("complaints").search('id', complaint_id).execute().retDict()
+        complainant_id = complaint_data['complainant_id']
+        complainant_data = Select().table("complainants").search("id", complainant_id).execute().retDict()
+
+        if complainant_data:
+            mail = current_app.extensions.get('mail')
+            # Build greeting
+            first = complainant_data.get("first_name")
+            last = complainant_data.get("last_name")
+            is_anonymous = complainant_data.get("is_anonymous")
+
+            if is_anonymous or (not first and not last):
+                greeting_name = "anonymous"
+            else:
+                greeting_name = " ".join(p for p in [first, last] if p)
+
+            # Render HTML email
+            html_body = render_template(
+                "complaint_status_update.html",
+                greeting_name=greeting_name,
+                status = new_status,
+                remarks = remarks,
+                complaint_id=complaint_data['complaint_code'],
+                header_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjW6pVUr11OhfYa_pKjC2GEzO3wK4az40l5g&s",
+                year=datetime.now().year
+            )
+
+            # Create the message
+            message = Message(
+                subject='Complaint Submitted Successfully',
+                recipients=[complainant_data['email']],
+                html=html_body
+            )
+            mail.send(message)
+            print(f"Email sent successfully to {complainant_data['email']}")
 
         return jsonify({
             'success': True,
