@@ -1,6 +1,6 @@
 <div align="center">
 
-# iReklamo
+# iReklamo - Iligan Reklamo Management System
 
 ![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor)
 ![Flask](https://img.shields.io/badge/Flask-3.1.2-5DADE2?logo=flask&logoColor)
