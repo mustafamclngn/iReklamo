@@ -12,7 +12,9 @@
 
 </div>
 
-iReklamo is a full-stack complaint management web application built with React.js for the frontend, Flask for the backend API, Supabase Bucket for image storage, and PostgreSQL for authentication and data storage. The project aims to provide a centralized platform for filing, tracking, and managing complaints efficiently for all barangays across Iligan City.
+  iReklamo is a full-stack complaint management web application built with React.js for the frontend, Flask for the backend API, Supabase Bucket for image storage, and PostgreSQL for authentication and data storage. 
+
+The project aims to provide a centralized platform for filing, tracking, and managing complaints efficiently for all barangays across Iligan City.
 
 The frontend interface is designed to closely match the original [iligan.gov.ph](https://iligan.gov.ph) website's design language, ensuring familiarity and ease of use for local residents.
 
