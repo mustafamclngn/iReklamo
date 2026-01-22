@@ -4,7 +4,7 @@
 
 ![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor)
 ![Flask](https://img.shields.io/badge/Flask-3.1.2-5DADE2?logo=flask&logoColor)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?logo=postgresql&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Image%20Storage-3ECF8E?logo=supabase&logoColor)
 ![Mailtrap](https://img.shields.io/badge/Mailtrap-Email%20Testing-22D172?logo=mailtrap&logoColor)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor)
@@ -17,6 +17,8 @@
 The project aims to provide a centralized platform for filing, tracking, and managing complaints efficiently for all barangays across Iligan City.
 
 The frontend interface is designed to closely match the original [iligan.gov.ph](https://iligan.gov.ph) website's design language, ensuring familiarity and ease of use for local residents.
+
+- [View Project Documentation](https://github.com/mustafamclngn/iReklamo/releases/tag/docs-v1.0)
 
 ---
 
