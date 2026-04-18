@@ -49,6 +49,10 @@ The frontend interface is designed to closely match the original [iligan.gov.ph]
 - PostgreSQL - Relational database for authentication and data storage
 - Supabase Bucket - Cloud-based image storage
 
+## Screenshots
+
+![Dashboard](screenshots/home.png)
+
 ##  Primary Contributors
 
 - [@mustafamclngn](https://github.com/mustafamclngn)
