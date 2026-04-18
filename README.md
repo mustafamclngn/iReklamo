@@ -51,7 +51,7 @@ The frontend interface is designed to closely match the original [iligan.gov.ph]
 
 ## Screenshots
 
-![Dashboard](screenshots/home.png)
+![Dashboard](screenshots/Home.png)
 
 ##  Primary Contributors
 
