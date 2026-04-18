@@ -51,7 +51,21 @@ The frontend interface is designed to closely match the original [iligan.gov.ph]
 
 ## Screenshots
 
+<div align="center">
+
+### Dashboard preview
 ![Dashboard](screenshots/Home.png)
+
+### Filing a complaint
+![File Complaint](screenshots/complaint.png)
+
+### Admin Log-in Routes
+![Personel Route](screenshots/login.png)
+
+### Barangay Personel Account
+![Official Account](screenshots/official2.png)
+
+</div>
 
 ##  Primary Contributors
 
